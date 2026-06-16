@@ -1,0 +1,38 @@
+# EduWeb Booking — déploiement avec PostgreSQL (production)
+# Usage : docker compose up --build
+#   Le développement local par défaut utilise SQLite (aucun service requis).
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: eduweb_booking
+    ports:
+      - "5432:5432"
+    volumes:
+      - eduweb_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Pour PostgreSQL, adapter aussi prisma/schema.prisma (provider = "postgresql").
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/eduweb_booking?schema=public"
+      AUTH_SECRET: "change-me-in-production"
+      APP_URL: "http://localhost:3000"
+      SMTP_FROM: "EduWeb Booking <no-reply@eduweb.ci>"
+    ports:
+      - "3000:3000"
+
+volumes:
+  eduweb_pgdata:

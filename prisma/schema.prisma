@@ -1,0 +1,645 @@
+// EduWeb Booking — Schéma Prisma
+// Base de données : PostgreSQL (Neon) en production.
+//   -> DATABASE_URL = connexion « pooled » (pgbouncer), utilisée par l'application à l'exécution.
+//   -> DIRECT_URL   = connexion directe, utilisée par Prisma pour les migrations / db push.
+// Les "enums" restent des String validés côté applicatif (lib/enums.ts + Zod) et les
+// champs "Json" des String sérialisés (lib/json.ts) — portable et inchangé sur Postgres.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Organization {
+  id           String   @id @default(cuid())
+  name         String
+  acronym      String?
+  slug         String?  @unique
+  isPlatform   Boolean  @default(false) // true = espace plateforme EduWeb (super admin), exclu du sélecteur d'institutions
+  country      String   @default("Côte d'Ivoire")
+  city         String?
+  address      String?
+  logoUrl      String?
+  primaryColor String?  @default("#064B3A")
+  status       String   @default("ACTIVE")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  users       User[]
+  sites       Site[]
+  departments Department[]
+  categories  ResourceCategory[]
+  resources   Resource[]
+  bookings    Booking[]
+  roles       Role[]
+  settings    OrganizationSetting?
+  subscription Subscription?
+}
+
+model Subscription {
+  id             String   @id @default(cuid())
+  organizationId String   @unique
+  plan           String   @default("PILOTE") // PILOTE | STANDARD | PREMIUM | NATIONAL
+  status         String   @default("ACTIVE")
+  seats          Int      @default(50)
+  renewsAt       DateTime?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model OrganizationSetting {
+  id                  String  @id @default(cuid())
+  organizationId      String  @unique
+  language            String  @default("fr")
+  timezone            String  @default("Africa/Abidjan")
+  allowAutoValidation Boolean @default(false)
+  workingDays         String? // JSON: ["MON","TUE",...]
+  openingHours        String? // JSON: { "start": "07:30", "end": "19:00" }
+  holidays            String? // JSON: ["2026-08-07", ...]
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model Site {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  code           String?
+  city           String?
+  address        String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  departments  Department[]
+  resources    Resource[]
+}
+
+model Department {
+  id             String  @id @default(cuid())
+  organizationId String
+  siteId         String?
+  parentId       String? // null = Niveau (Direction/Sous-Direction) ; renseigné = Service rattaché à un niveau
+  name           String
+  code           String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  site         Site?        @relation(fields: [siteId], references: [id])
+  parent       Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
+  children     Department[] @relation("DeptHierarchy")
+  users        User[]
+  resources    Resource[]
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String?
+  departmentId   String?
+  email          String   @unique
+  passwordHash   String?
+  firstName      String
+  lastName       String
+  phone          String?
+  functionTitle  String?
+  matricule      String? // matricule étudiant (ENS d'Abidjan) — sert de paramètre de vérification
+  status         String   @default("ACTIVE") // ACTIVE | INACTIVE | SUSPENDED | INVITED
+  imageUrl       String?
+  lastLoginAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization     Organization?       @relation(fields: [organizationId], references: [id])
+  department       Department?         @relation(fields: [departmentId], references: [id])
+  roles            UserRole[]
+  managedResources Resource[]          @relation("ResourceManager")
+  bookings         Booking[]           @relation("BookingRequester")
+  validations      BookingValidation[]
+  notifications    Notification[]
+  incidents        Incident[]
+}
+
+model Role {
+  id             String  @id @default(cuid())
+  organizationId String?
+  key            String  // SUPER_ADMIN | ORG_ADMIN | RESOURCE_MANAGER | VALIDATOR | REQUESTER | TECHNICIAN | VISITOR
+  name           String
+  description    String?
+  color          String?
+  isSystem       Boolean @default(false)
+
+  organization Organization?    @relation(fields: [organizationId], references: [id])
+  users        UserRole[]
+  permissions  RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  description String?
+  roles       RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model ResourceCategory {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  code           String?
+  description    String?
+  icon           String?
+  color          String?
+  validationMode String   @default("SIMPLE") // AUTO | SIMPLE | HIERARCHICAL | MULTI_LEVEL | CONDITIONAL
+  dynamicFields  String?  // JSON: [{ key, label, type, required, options }]
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  resources    Resource[]
+}
+
+model Resource {
+  id                String   @id @default(cuid())
+  organizationId    String
+  categoryId        String
+  siteId            String?
+  departmentId      String?
+  managerId         String?
+  name              String
+  code              String
+  description       String?
+  imageUrl          String?
+  status            String   @default("AVAILABLE") // AVAILABLE | PARTIALLY_AVAILABLE | RESERVED | UNAVAILABLE | MAINTENANCE | OUT_OF_SERVICE | ARCHIVED
+  capacity          Int?
+  quantityTotal     Int?
+  quantityAvailable Int?
+  location          String?
+  equipment         String?  // JSON: ["Vidéoprojecteur", "30 postes", ...]
+  customFields      String?  // JSON: { key: value }
+  rules             String?  // JSON: { bookingMode, maxDurationMinutes, minNoticeHours, requiresValidation }
+  qrCodeUrl         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  category     ResourceCategory @relation(fields: [categoryId], references: [id])
+  site         Site?            @relation(fields: [siteId], references: [id])
+  department   Department?      @relation(fields: [departmentId], references: [id])
+  manager      User?            @relation("ResourceManager", fields: [managerId], references: [id])
+  bookings     Booking[]
+  incidents    Incident[]
+  maintenances Maintenance[]
+}
+
+model Booking {
+  id                String   @id @default(cuid())
+  organizationId    String
+  resourceId        String
+  requesterId       String
+  code              String   @unique
+  title             String?
+  purpose           String
+  usageType         String   @default("INDIVIDUAL")
+  participantCount  Int?
+  quantityRequested Int?
+  seatNumbers       String?  // JSON: numéros de postes réservés (salles à postes)
+  startAt           DateTime
+  endAt             DateTime
+  status            String   @default("SUBMITTED")
+  needsSupport      Boolean  @default(false)
+  specialNeeds      String?
+  attachments       String?  // JSON
+  internalNote      String?
+  requesterNote     String?
+  rejectionReason   String?
+  checkedInAt       DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  organization  Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  resource      Resource               @relation(fields: [resourceId], references: [id])
+  requester     User                   @relation("BookingRequester", fields: [requesterId], references: [id])
+  validations   BookingValidation[]
+  history       BookingStatusHistory[]
+  participants  BookingParticipant[]
+  notifications Notification[]
+  review        BookingReview?
+}
+
+model BookingValidation {
+  id          String    @id @default(cuid())
+  bookingId   String
+  validatorId String
+  status      String // APPROVED | REJECTED | INFO_REQUESTED | RESCHEDULE_PROPOSED
+  comment     String?
+  validatedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  validator User    @relation(fields: [validatorId], references: [id])
+}
+
+model BookingStatusHistory {
+  id        String   @id @default(cuid())
+  bookingId String
+  status    String
+  comment   String?
+  changedBy String?
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model BookingParticipant {
+  id        String  @id @default(cuid())
+  bookingId String
+  name      String?
+  email     String?
+  phone     String?
+  checkedIn Boolean @default(false)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model BookingReview {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  rating      Int      @default(5)
+  onTime      Boolean  @default(true)
+  goodCondition Boolean @default(true)
+  comment     String?
+  createdAt   DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  bookingId String?
+  userId    String?
+  channel   String    @default("EMAIL") // EMAIL | WHATSAPP | SMS | INTERNAL
+  type      String    @default("INFO")
+  subject   String?
+  content   String
+  status    String    @default("PENDING") // PENDING | SENT | FAILED | READ
+  readAt    DateTime?
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  booking Booking? @relation(fields: [bookingId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
+}
+
+model Incident {
+  id          String    @id @default(cuid())
+  resourceId  String
+  reporterId  String
+  title       String
+  description String
+  urgency     String    @default("NORMAL") // LOW | NORMAL | HIGH | CRITICAL
+  status      String    @default("OPEN") // OPEN | IN_PROGRESS | RESOLVED | CLOSED
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  resource Resource @relation(fields: [resourceId], references: [id])
+  reporter User     @relation(fields: [reporterId], references: [id])
+}
+
+model Maintenance {
+  id          String   @id @default(cuid())
+  resourceId  String
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime
+  status      String   @default("PLANNED") // PLANNED | IN_PROGRESS | DONE | CANCELLED
+  createdAt   DateTime @default(now())
+
+  resource Resource @relation(fields: [resourceId], references: [id])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?
+  userId         String?
+  action         String
+  entityType     String
+  entityId       String?
+  oldValue       String?
+  newValue       String?
+  ipAddress      String?
+  createdAt      DateTime @default(now())
+}
+
+// ==================================================================
+// EduWeb Booking Library — module documentaire
+// Liens vers Organization/User/Department = String simples (découplé).
+// ==================================================================
+
+model DigitalLibrary {
+  id             String   @id @default(cuid())
+  organizationId String
+  departmentId   String?
+  name           String
+  code           String
+  description    String?
+  createdAt      DateTime @default(now())
+
+  documents DocumentResource[]
+}
+
+model DocumentCollection {
+  id             String   @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  description    String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  documents DocumentResource[]
+}
+
+model DocumentDomain {
+  id             String   @id @default(cuid())
+  organizationId String
+  code           String
+  name           String
+  description    String?
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  documents DocumentResource[]
+}
+
+model DocumentResource {
+  id             String  @id @default(cuid())
+  organizationId String
+  libraryId      String
+  collectionId   String
+  domainId       String
+  departmentId   String?
+
+  codeLong      String? @unique
+  codeShort     String?
+  temporaryCode String? @unique
+
+  title       String
+  slug        String
+  abstract    String?
+  documentType String // DocumentType
+  discipline  String?
+  year        Int?
+  publicationDate DateTime?
+  defenseDate     DateTime?
+  language    String  @default("Français")
+
+  mainAuthorName String
+  supervisorName String?
+  jury           String?
+  level          String? // Master, Licence, Doctorat…
+  fieldOfStudy   String?
+  promotion      String?
+  pageCount      Int?
+  keywords       String? // JSON string[]
+
+  status      String @default("DRAFT") // DocumentStatus
+  accessLevel String @default("INTERNAL") // AccessLevel
+
+  downloadAllowed        Boolean @default(true)
+  downloadPrice          Int     @default(0) // FCFA ; 0 = téléchargement gratuit, > 0 = payant
+  consultationAllowed    Boolean @default(true)
+  physicalCopyAvailable  Boolean @default(false)
+  physicalCopyCount      Int?    @default(0)
+  availablePhysicalCopyCount Int? @default(0)
+  embargoUntil DateTime?
+
+  doi        String?
+  issn       String?
+  isbn       String?
+  journalName String?
+  volume     String?
+  issue      String?
+  pages      String?
+  externalUrl String?
+
+  // Fichier principal (stockage local sécurisé en dev)
+  fileName String?
+  fileKey  String? // chemin relatif dans storage/
+  fileMime String?
+  fileSize Int?
+  fileHash String?
+
+  qrCodeUrl String?
+
+  createdById   String?
+  validatedById String?
+  validatedAt   DateTime?
+  publishedAt   DateTime?
+  rejectedReason String?
+
+  consultationCount Int @default(0)
+  downloadCount     Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  library    DigitalLibrary     @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  collection DocumentCollection @relation(fields: [collectionId], references: [id])
+  domain     DocumentDomain     @relation(fields: [domainId], references: [id])
+
+  authors          DocumentAuthor[]
+  reviews          DocumentReview[]
+  consultations    DocumentConsultation[]
+  downloads        DocumentDownload[]
+  purchases        DocumentPurchase[]
+  reservations     DocumentReservation[]
+  loans            DocumentLoan[]
+  duplicateWarnings DocumentDuplicateWarning[]
+
+  @@unique([organizationId, slug])
+}
+
+model DocumentAuthor {
+  id          String  @id @default(cuid())
+  documentId  String
+  name        String
+  role        String  @default("CO_AUTHOR") // AUTHOR | CO_AUTHOR | SUPERVISOR | CONTRIBUTOR
+  affiliation String?
+  order       Int     @default(0)
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model DocumentReview {
+  id         String   @id @default(cuid())
+  documentId String
+  reviewerId String
+  decision   String // VALIDATED | NEEDS_CORRECTION | REJECTED | PUBLISHED | SCIENCE_FAVORABLE | SCIENCE_RESERVED
+  comment    String?
+  scientific Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model DocumentConsultation {
+  id         String   @id @default(cuid())
+  documentId String
+  userId     String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model DocumentDownload {
+  id         String   @id @default(cuid())
+  documentId String
+  userId     String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+// Droit de téléchargement acquis (paiement simulé) : un utilisateur ayant « payé » un document.
+model DocumentPurchase {
+  id         String   @id @default(cuid())
+  documentId String
+  userId     String
+  amount     Int      @default(0) // montant payé (FCFA)
+  method     String   @default("SIMULATED") // moyen de paiement (à brancher : MOBILE_MONEY, CARD…)
+  reference  String? // référence de transaction (prestataire réel à venir)
+  createdAt  DateTime @default(now())
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, userId])
+}
+
+model DocumentReservation {
+  id          String    @id @default(cuid())
+  documentId  String
+  requesterId String
+  type        String // ReservationType
+  status      String    @default("PENDING") // ReservationStatus
+  slotStart   DateTime?
+  slotEnd     DateTime?
+  note        String?
+  decisionComment String?
+  createdAt   DateTime  @default(now())
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model DocumentLoan {
+  id          String    @id @default(cuid())
+  documentId  String
+  userId      String
+  status      String    @default("BORROWED") // LoanStatus
+  borrowedAt  DateTime  @default(now())
+  dueDate     DateTime
+  returnedAt  DateTime?
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model DocumentDuplicateWarning {
+  id              String   @id @default(cuid())
+  documentId      String
+  similarDocumentId String?
+  similarTitle    String?
+  similarCode     String?
+  reason          String
+  score           Int      @default(0)
+  resolved        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  document DocumentResource @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+// Compteurs séquentiels pour la codification (unicité + concurrence).
+model DocumentCodeCounter {
+  id    String @id @default(cuid())
+  key   String @unique // combinaison normalisée + année + kind
+  count Int    @default(0)
+}
+
+// ===================== Sport cérébral =====================
+// Une tentative = une partie terminée par un utilisateur connecté.
+// Scores / progression / statistiques / défi du jour sont calculés à partir de ces lignes.
+model BrainSportAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  gameSlug    String // référence le catalogue (lib/games/catalog.ts)
+  level       String // facile | moyen | difficile
+  success     Boolean  @default(false)
+  score       Int      @default(0)
+  durationSec Int      @default(0)
+  errors      Int      @default(0) // erreurs (Sudoku) ou coups (Mémoire)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, gameSlug])
+  @@index([userId, createdAt])
+}
+
+// Badge obtenu par un utilisateur (définitions des badges en code : lib/games/badges.ts).
+model BrainSportBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String
+  awardedAt DateTime @default(now())
+
+  @@unique([userId, code])
+}
+
+// Configuration éditable d'un jeu (le moteur reste en code, identifié par `slug`).
+model BrainSportGameConfig {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  published Boolean  @default(true)
+  sortOrder Int      @default(0)
+  consigne  String? // surcharge la consigne par défaut (code) si défini
+  audioPath String? // fichier audio de consigne déposé (storage/brain-audio/)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Banque de questions (QCM) — contenu géré par le super administrateur (ex. Culture générale).
+model BrainSportQuestion {
+  id          String   @id @default(cuid())
+  gameSlug    String   @default("culture-generale")
+  level       String // facile | moyen | difficile
+  prompt      String
+  choices     String // JSON string[]
+  answerIndex Int      @default(0)
+  explanation String?
+  active      Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  @@index([gameSlug, level, active])
+}
