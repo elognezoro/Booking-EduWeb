@@ -133,6 +133,21 @@ export async function toggleUserStatus(formData: FormData) {
   redirect("/dashboard/admin/users");
 }
 
+/** Réinitialise le mot de passe d'un utilisateur au mot de passe par défaut (password123). */
+export async function resetUserPassword(formData: FormData) {
+  const me = await requirePermission("users.manage");
+  const id = String(formData.get("id"));
+  const u = await prisma.user.findUnique({ where: { id } });
+  // Périmètre : même organisation, et pas son propre compte (qui passe par « Mon compte »).
+  if (u && u.organizationId === me.organizationId && u.id !== me.id) {
+    await prisma.user.update({ where: { id }, data: { passwordHash: await hashPassword("password123") } });
+    revalidatePath("/dashboard/admin/users");
+    redirect(`/dashboard/admin/users?reset=${encodeURIComponent(u.email)}`);
+  }
+  revalidatePath("/dashboard/admin/users");
+  redirect("/dashboard/admin/users");
+}
+
 /* ----------------------------- Import de comptes par CSV (cohorte) ----------------------------- */
 export interface ImportState {
   error?: string;

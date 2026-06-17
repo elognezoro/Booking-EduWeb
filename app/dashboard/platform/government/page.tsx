@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { FileDropzone } from "@/components/ui/file-dropzone";
+import { ministriesForCountry } from "@/lib/ministries-by-country";
 import { GovernmentFields } from "@/components/platform/government-fields";
 import { saveGovernment, createMinistry, updateMinistry, deleteMinistry, seedCiMinistries, importMinistriesCsv } from "@/app/actions/platform";
 
@@ -120,7 +121,7 @@ export default async function GovernmentPage({ searchParams }: { searchParams: {
                   <FileDropzone name="file" accept=".csv,text/csv" required className="gap-1 rounded-xl px-3 py-4" title="Glissez-déposez un CSV" hint="Colonnes : nom, sigle" />
                   <Button type="submit" size="sm" variant="outline" className="w-full"><Upload className="size-4" /> Importer les ministères</Button>
                 </form>
-                <a href="/api/platform/ministries/template" className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"><Download className="size-4" /> Modèle CSV</a>
+                <a href={`/api/platform/ministries/template?country=${encodeURIComponent(government.country)}`} className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"><Download className="size-4" /> Modèle CSV{ministriesForCountry(government.country) ? ` (pré-rempli — ${government.country})` : ""}</a>
               </div>
             </CardContent>
           </Card>

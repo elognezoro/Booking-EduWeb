@@ -1,4 +1,4 @@
-import { Users, UserPlus, CheckCircle2, Power, Mail } from "lucide-react";
+import { Users, UserPlus, CheckCircle2, Power, Mail, KeyRound } from "lucide-react";
 import { requirePermission, getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/misc";
 import { RoleBadge } from "@/components/status-badges";
-import { createUser, toggleUserStatus } from "@/app/actions/admin";
+import { createUser, toggleUserStatus, resetUserPassword } from "@/app/actions/admin";
 import { CsvImport } from "@/components/admin/csv-import";
 import { StudentMatriculeField } from "@/components/admin/student-matricule-field";
 import { ROLES, ROLE_META, USER_STATUS_META, type UserStatus } from "@/lib/enums";
@@ -18,7 +18,7 @@ import { ENS_MATRICULE_EXAMPLE } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function UsersAdminPage({ searchParams }: { searchParams: { created?: string; error?: string } }) {
+export default async function UsersAdminPage({ searchParams }: { searchParams: { created?: string; error?: string; reset?: string } }) {
   await requirePermission("users.manage");
   const me = await getCurrentUser();
   const organizationId = me!.organizationId ?? "";
@@ -41,6 +41,11 @@ export default async function UsersAdminPage({ searchParams }: { searchParams: {
       {searchParams.created && (
         <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">
           <CheckCircle2 className="size-5" /> Utilisateur créé (mot de passe par défaut : password123).
+        </div>
+      )}
+      {searchParams.reset && (
+        <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">
+          <KeyRound className="size-5" /> Mot de passe de {searchParams.reset} réinitialisé à <code>password123</code> (à changer à la première connexion).
         </div>
       )}
       {searchParams.error === "exists" && (
@@ -88,14 +93,22 @@ export default async function UsersAdminPage({ searchParams }: { searchParams: {
                         </div>
                       </td>
                       <td className="px-4 py-3"><Badge tone={status.tone} dot>{status.label}</Badge></td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3">
                         {u.id !== me!.id && (
-                          <form action={toggleUserStatus}>
-                            <input type="hidden" name="id" value={u.id} />
-                            <Button type="submit" variant="ghost" size="icon-sm" title={u.status === "ACTIVE" ? "Suspendre" : "Réactiver"}>
-                              <Power className={u.status === "ACTIVE" ? "size-4 text-available" : "size-4 text-muted-foreground"} />
-                            </Button>
-                          </form>
+                          <div className="flex items-center justify-end gap-1">
+                            <form action={resetUserPassword}>
+                              <input type="hidden" name="id" value={u.id} />
+                              <Button type="submit" variant="ghost" size="icon-sm" title="Réinitialiser le mot de passe (password123)">
+                                <KeyRound className="size-4 text-muted-foreground" />
+                              </Button>
+                            </form>
+                            <form action={toggleUserStatus}>
+                              <input type="hidden" name="id" value={u.id} />
+                              <Button type="submit" variant="ghost" size="icon-sm" title={u.status === "ACTIVE" ? "Suspendre" : "Réactiver"}>
+                                <Power className={u.status === "ACTIVE" ? "size-4 text-available" : "size-4 text-muted-foreground"} />
+                              </Button>
+                            </form>
+                          </div>
                         )}
                       </td>
                     </tr>

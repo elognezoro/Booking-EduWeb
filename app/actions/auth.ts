@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { verifyPassword, createUserSession, destroyUserSession, hashPassword } from "@/lib/auth";
+import { verifyPassword, createUserSession, destroyUserSession, hashPassword, requireUser } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
 import { formatGivenName, formatFamilyName, isEnsMatricule, ENS_MATRICULE_EXAMPLE } from "@/lib/utils";
@@ -76,6 +76,34 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
 export async function logoutAction() {
   await destroyUserSession();
   redirect("/login");
+}
+
+/* ----------------------------- Changer son propre mot de passe (self-service) ----------------------------- */
+const ACCOUNT_PATH = "/dashboard/account";
+const changePasswordSchema = z.object({
+  current: z.string().min(1, "Le mot de passe actuel est requis."),
+  password: z.string().min(8, "Le nouveau mot de passe doit comporter au moins 8 caractères."),
+  confirm: z.string().min(1, "Confirmez le nouveau mot de passe."),
+});
+
+export async function changeOwnPassword(formData: FormData) {
+  const me = await requireUser();
+  const parsed = changePasswordSchema.safeParse({
+    current: formData.get("current"),
+    password: formData.get("password"),
+    confirm: formData.get("confirm"),
+  });
+  if (!parsed.success) redirect(`${ACCOUNT_PATH}?error=${encodeURIComponent(parsed.error.errors[0]?.message ?? "Données invalides.")}`);
+  const d = parsed.data;
+  if (d.password !== d.confirm) redirect(`${ACCOUNT_PATH}?error=${encodeURIComponent("Les deux mots de passe ne correspondent pas.")}`);
+
+  const user = await prisma.user.findUnique({ where: { id: me.id } });
+  if (!user || !(await verifyPassword(d.current, user.passwordHash))) {
+    redirect(`${ACCOUNT_PATH}?error=${encodeURIComponent("Mot de passe actuel incorrect.")}`);
+  }
+  await prisma.user.update({ where: { id: me.id }, data: { passwordHash: await hashPassword(d.password) } });
+  await audit({ organizationId: user.organizationId, userId: user.id, action: "auth.password_change", entityType: "User", entityId: user.id });
+  redirect(`${ACCOUNT_PATH}?changed=1`);
 }
 
 /* ----------------------------- Auto-inscription (avec validation) ----------------------------- */

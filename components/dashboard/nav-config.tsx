@@ -31,6 +31,7 @@ import {
   MonitorPlay,
   UserCheck,
   Brain,
+  UserCog,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -61,6 +62,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Salles multimédias", href: "/dashboard/rooms", icon: MonitorPlay, permission: "resources.read" },
       { label: "Mes réservations", href: "/dashboard/bookings/my", icon: CalendarCheck2, permission: "bookings.read_own" },
       { label: "Sport cérébral", href: "/dashboard/sport-cerebral", icon: Brain },
+      { label: "Mon compte", href: "/dashboard/account", icon: UserCog },
     ],
   },
   {
