@@ -25,7 +25,11 @@ export function CreateInstitutionForm({ ministries }: { ministries: MinistryOpt[
   const [name, setName] = React.useState("");
   const [acronym, setAcronym] = React.useState("");
   const [slug, setSlug] = React.useState("");
-  const previewSlug = slugify(slug || acronym || name);
+  const [slugEdited, setSlugEdited] = React.useState(false);
+  // Identifiant généré automatiquement depuis le sigle (ou le nom), tant qu'il n'est pas édité à la main.
+  const autoSlug = slugify(acronym || name);
+  const slugValue = slugEdited ? slug : autoSlug;
+  const previewSlug = slugify(slugValue);
 
   return (
     <form action={action} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -38,9 +42,25 @@ export function CreateInstitutionForm({ ministries }: { ministries: MinistryOpt[
       <div><Label htmlFor="acronym" required>Sigle</Label><Input id="acronym" name="acronym" required placeholder="UFHB" value={acronym} onChange={(e) => setAcronym(e.target.value)} /></div>
       <div>
         <Label htmlFor="slug">Identifiant</Label>
-        <Input id="slug" name="slug" placeholder="auto depuis le sigle / le nom" value={slug} onChange={(e) => setSlug(e.target.value)} />
+        <Input
+          id="slug"
+          name="slug"
+          placeholder="auto depuis le sigle / le nom"
+          value={slugValue}
+          onChange={(e) => {
+            setSlug(e.target.value);
+            setSlugEdited(e.target.value.trim() !== "");
+          }}
+        />
         <p className="mt-1 text-xs text-muted-foreground">
-          {previewSlug ? <>Adresse : <span className="font-mono font-semibold text-foreground">/{previewSlug}</span></> : "Généré automatiquement depuis le sigle ou le nom."}
+          {previewSlug ? (
+            <>
+              Adresse : <span className="font-mono font-semibold text-foreground">/{previewSlug}</span>
+              {!slugEdited && <span> · généré automatiquement</span>}
+            </>
+          ) : (
+            "Généré automatiquement depuis le sigle ou le nom."
+          )}
         </p>
       </div>
       <div><Label htmlFor="city">Ville</Label><Input id="city" name="city" placeholder="Abidjan" /></div>
