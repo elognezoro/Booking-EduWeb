@@ -135,6 +135,60 @@ export async function updateSubscription(formData: FormData) {
   redirect(`${ORG_PATH}?saved=1`);
 }
 
+/**
+ * Supprime DÉFINITIVEMENT un établissement et toutes ses données dépendantes
+ * (utilisateurs, rôles, sites/services, ressources, réservations, bibliothèque, jeux…).
+ * Opération transactionnelle (tout ou rien). Réservée au super admin ; l'espace plateforme est protégé.
+ */
+export async function deleteOrganization(formData: FormData) {
+  await requirePermission("platform.manage");
+  const organizationId = String(formData.get("organizationId") || "");
+  const org = await prisma.organization.findUnique({ where: { id: organizationId } });
+  if (!org || org.isPlatform) {
+    revalidatePath(ORG_PATH);
+    redirect(ORG_PATH);
+  }
+  const oid = org.id;
+
+  const [users, resources, bookings] = await Promise.all([
+    prisma.user.findMany({ where: { organizationId: oid }, select: { id: true } }),
+    prisma.resource.findMany({ where: { organizationId: oid }, select: { id: true } }),
+    prisma.booking.findMany({ where: { organizationId: oid }, select: { id: true } }),
+  ]);
+  const uids = users.map((u) => u.id);
+  const rids = resources.map((r) => r.id);
+  const bids = bookings.map((b) => b.id);
+
+  try {
+    await prisma.$transaction([
+      prisma.notification.deleteMany({ where: { OR: [{ userId: { in: uids } }, { bookingId: { in: bids } }] } }),
+      prisma.booking.deleteMany({ where: { organizationId: oid } }), // cascade : validations, historiques, participants, avis
+      prisma.incident.deleteMany({ where: { resourceId: { in: rids } } }),
+      prisma.maintenance.deleteMany({ where: { resourceId: { in: rids } } }),
+      prisma.brainSportAttempt.deleteMany({ where: { userId: { in: uids } } }),
+      prisma.brainSportBadge.deleteMany({ where: { userId: { in: uids } } }),
+      prisma.documentResource.deleteMany({ where: { organizationId: oid } }), // cascade : auteurs, avis, consultations, téléchargements, achats, réservations, prêts, doublons
+      prisma.documentDomain.deleteMany({ where: { organizationId: oid } }),
+      prisma.documentCollection.deleteMany({ where: { organizationId: oid } }),
+      prisma.digitalLibrary.deleteMany({ where: { organizationId: oid } }),
+      prisma.competition.deleteMany({ where: { organizationId: oid } }), // cascade : participants
+      prisma.auditLog.deleteMany({ where: { organizationId: oid } }),
+      prisma.resource.deleteMany({ where: { organizationId: oid } }),
+      prisma.resourceCategory.deleteMany({ where: { organizationId: oid } }),
+      prisma.department.deleteMany({ where: { organizationId: oid, NOT: { parentId: null } } }),
+      prisma.department.deleteMany({ where: { organizationId: oid } }),
+      prisma.site.deleteMany({ where: { organizationId: oid } }),
+      prisma.user.deleteMany({ where: { organizationId: oid } }), // cascade : UserRole
+      prisma.role.deleteMany({ where: { organizationId: oid } }), // cascade : RolePermission
+      prisma.organization.delete({ where: { id: oid } }), // cascade : abonnement, paramètres
+    ]);
+  } catch {
+    redirect(`${ORG_PATH}?error=delete`);
+  }
+  revalidatePath(ORG_PATH);
+  redirect(`${ORG_PATH}?deleted=${encodeURIComponent(org.name)}`);
+}
+
 /** Active ou suspend un établissement (les utilisateurs d'un établissement suspendu ne peuvent plus accéder). */
 export async function setOrganizationStatus(formData: FormData) {
   await requirePermission("platform.manage");

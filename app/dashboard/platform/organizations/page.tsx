@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, Plus, CheckCircle2, AlertTriangle, Users, Boxes, CalendarDays, Power, Save, ArrowLeft, Upload, Download } from "lucide-react";
+import { Building2, Plus, CheckCircle2, AlertTriangle, Users, Boxes, CalendarDays, Power, Save, ArrowLeft, Upload, Download, Trash2 } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -9,9 +9,11 @@ import { Input, Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { FileDropzone } from "@/components/ui/file-dropzone";
+import { ConfirmActionButton } from "@/components/confirm-action";
+import { MinistrySelect } from "@/components/platform/ministry-select";
 import { PLAN_LABELS, type Plan } from "@/lib/enums";
 import { fmtDate } from "@/lib/dates";
-import { createInstitution, updateSubscription, setOrganizationStatus, importInstitutionsCsv } from "@/app/actions/platform";
+import { createInstitution, updateSubscription, setOrganizationStatus, importInstitutionsCsv, deleteOrganization } from "@/app/actions/platform";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +25,7 @@ const SUB_STATUS: { key: string; label: string }[] = [
 ];
 const isoDate = (d: Date | null | undefined) => (d ? d.toISOString().slice(0, 10) : "");
 
-export default async function PlatformOrganizationsPage({ searchParams }: { searchParams: { created?: string; saved?: string; error?: string; imported?: string; skipped?: string } }) {
+export default async function PlatformOrganizationsPage({ searchParams }: { searchParams: { created?: string; saved?: string; error?: string; imported?: string; skipped?: string; deleted?: string } }) {
   await requirePermission("platform.manage");
   const [orgs, ministries] = await Promise.all([
     prisma.organization.findMany({
@@ -39,6 +41,7 @@ export default async function PlatformOrganizationsPage({ searchParams }: { sear
     slug: "Un établissement avec ce nom ou cet identifiant existe déjà.",
     email: "Cet e-mail d'administrateur est déjà utilisé.",
     csv: "Fichier CSV illisible ou vide.",
+    delete: "La suppression de l'établissement a échoué. Réessayez.",
   };
 
   return (
@@ -67,6 +70,11 @@ export default async function PlatformOrganizationsPage({ searchParams }: { sear
           <CheckCircle2 className="size-5" /> {searchParams.imported} établissement(s) importé(s){searchParams.skipped && Number(searchParams.skipped) > 0 ? `, ${searchParams.skipped} ignoré(s) (doublon ou champ manquant)` : ""}.
         </div>
       )}
+      {searchParams.deleted && (
+        <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">
+          <Trash2 className="size-5" /> Établissement « {searchParams.deleted} » supprimé définitivement.
+        </div>
+      )}
       {searchParams.error && (
         <div className="flex items-center gap-2 rounded-xl border border-unavailable/30 bg-unavailable-soft px-4 py-3 text-sm font-semibold text-unavailable-fg">
           <AlertTriangle className="size-5" /> {errorMsg[searchParams.error] ?? "Une erreur est survenue."}
@@ -84,10 +92,7 @@ export default async function PlatformOrganizationsPage({ searchParams }: { sear
             <div><Label htmlFor="city">Ville</Label><Input id="city" name="city" placeholder="Abidjan" /></div>
             <div>
               <Label htmlFor="ministryId">Ministère de tutelle</Label>
-              <Select id="ministryId" name="ministryId" defaultValue="">
-                <option value="">— Aucun —</option>
-                {ministries.map((m) => <option key={m.id} value={m.id}>{m.acronym ? `${m.acronym} — ${m.name}` : m.name}</option>)}
-              </Select>
+              <MinistrySelect id="ministryId" name="ministryId" ministries={ministries} />
               {ministries.length === 0 && (
                 <p className="mt-1 text-xs text-muted-foreground">Aucun ministère enregistré. <Link href="/dashboard/platform/government" className="font-semibold text-primary hover:underline">Gérer les ministères</Link>.</p>
               )}
@@ -157,6 +162,18 @@ export default async function PlatformOrganizationsPage({ searchParams }: { sear
                         <Power className="size-4" /> {suspended ? "Réactiver" : "Suspendre"}
                       </Button>
                     </form>
+                    <ConfirmActionButton
+                      action={deleteOrganization}
+                      hidden={{ organizationId: o.id }}
+                      triggerLabel="Supprimer"
+                      triggerIcon={<Trash2 className="size-4" />}
+                      triggerVariant="ghost"
+                      triggerSize="sm"
+                      title={`Supprimer « ${o.name} » ?`}
+                      description="Action irréversible : tous les utilisateurs, rôles, ressources, réservations, documents et données de cet établissement seront définitivement supprimés."
+                      confirmLabel="Supprimer définitivement"
+                      confirmVariant="destructive"
+                    />
                   </div>
                 </div>
 
@@ -165,10 +182,7 @@ export default async function PlatformOrganizationsPage({ searchParams }: { sear
                   <input type="hidden" name="organizationId" value={o.id} />
                   <div className="sm:col-span-2 lg:col-span-3">
                     <Label htmlFor={`min-${o.id}`}>Ministère de tutelle</Label>
-                    <Select id={`min-${o.id}`} name="ministryId" defaultValue={o.ministryId ?? ""}>
-                      <option value="">— Aucun —</option>
-                      {ministries.map((m) => <option key={m.id} value={m.id}>{m.acronym ? `${m.acronym} — ${m.name}` : m.name}</option>)}
-                    </Select>
+                    <MinistrySelect id={`min-${o.id}`} name="ministryId" ministries={ministries} defaultValue={o.ministryId} />
                   </div>
                   <div>
                     <Label htmlFor={`plan-${o.id}`}>Formule</Label>
