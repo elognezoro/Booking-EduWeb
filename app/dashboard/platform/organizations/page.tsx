@@ -11,9 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import { ConfirmActionButton } from "@/components/confirm-action";
 import { MinistrySelect } from "@/components/platform/ministry-select";
+import { CreateInstitutionForm } from "@/components/platform/create-institution-form";
 import { PLAN_LABELS, type Plan } from "@/lib/enums";
 import { fmtDate } from "@/lib/dates";
-import { createInstitution, updateSubscription, setOrganizationStatus, importInstitutionsCsv, deleteOrganization } from "@/app/actions/platform";
+import { updateSubscription, setOrganizationStatus, importInstitutionsCsv, deleteOrganization } from "@/app/actions/platform";
 
 export const dynamic = "force-dynamic";
 
@@ -85,31 +86,7 @@ export default async function PlatformOrganizationsPage({ searchParams }: { sear
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Plus className="size-4" /> Inscrire un établissement</CardTitle></CardHeader>
         <CardContent>
-          <form action={createInstitution} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div><Label htmlFor="name" required>Nom de l'établissement</Label><Input id="name" name="name" required placeholder="Université…" /></div>
-            <div><Label htmlFor="acronym" required>Sigle</Label><Input id="acronym" name="acronym" required placeholder="UFHB" /></div>
-            <div><Label htmlFor="slug">Identifiant (URL)</Label><Input id="slug" name="slug" placeholder="auto depuis le sigle" /></div>
-            <div><Label htmlFor="city">Ville</Label><Input id="city" name="city" placeholder="Abidjan" /></div>
-            <div>
-              <Label htmlFor="ministryId">Ministère de tutelle</Label>
-              <MinistrySelect id="ministryId" name="ministryId" ministries={ministries} />
-              {ministries.length === 0 && (
-                <p className="mt-1 text-xs text-muted-foreground">Aucun ministère enregistré. <Link href="/dashboard/platform/government" className="font-semibold text-primary hover:underline">Gérer les ministères</Link>.</p>
-              )}
-            </div>
-            <div>
-              <Label htmlFor="plan">Formule</Label>
-              <Select id="plan" name="plan" defaultValue="STANDARD">{PLANS.map((p) => <option key={p} value={p}>{PLAN_LABELS[p]}</option>)}</Select>
-            </div>
-            <div><Label htmlFor="seats">Comptes autorisés</Label><Input id="seats" name="seats" type="number" min={1} defaultValue={100} /></div>
-            <div><Label htmlFor="adminFirst" required>Prénom de l'admin</Label><Input id="adminFirst" name="adminFirst" required /></div>
-            <div><Label htmlFor="adminLast" required>Nom de l'admin</Label><Input id="adminLast" name="adminLast" required /></div>
-            <div><Label htmlFor="adminEmail" required>E-mail de l'admin</Label><Input id="adminEmail" name="adminEmail" type="email" required placeholder="admin@etablissement.ci" /></div>
-            <div className="sm:col-span-2 lg:col-span-3">
-              <Button type="submit"><Building2 className="size-4" /> Créer l'établissement</Button>
-              <p className="mt-2 text-xs text-muted-foreground">Crée l'organisation, ses rôles, son espace bibliothèque et un compte administrateur (mot de passe initial : <code>password123</code>, à changer).</p>
-            </div>
-          </form>
+          <CreateInstitutionForm ministries={ministries} />
         </CardContent>
       </Card>
 

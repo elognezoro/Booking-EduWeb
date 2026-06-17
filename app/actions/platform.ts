@@ -15,8 +15,12 @@ const GAMES_PATH = "/dashboard/platform/jeux";
 const PLANS = ["PILOTE", "STANDARD", "PREMIUM", "NATIONAL"];
 const SUB_STATUS = ["ACTIVE", "SUSPENDED", "CANCELLED"];
 
-/** Crée (provisionne) un nouvel établissement avec son administrateur. */
-export async function createInstitution(formData: FormData) {
+export interface CreateOrgState {
+  error?: string;
+}
+
+/** Crée (provisionne) un nouvel établissement avec son administrateur. Renvoie une erreur inline (useFormState). */
+export async function createInstitution(_prev: CreateOrgState, formData: FormData): Promise<CreateOrgState> {
   await requirePermission("platform.manage");
   const name = String(formData.get("name") || "").trim();
   const acronym = String(formData.get("acronym") || "").trim().toUpperCase();
@@ -29,14 +33,15 @@ export async function createInstitution(formData: FormData) {
   const slug = String(formData.get("slug") || "").trim() || slugify(acronym || name);
   const ministryId = String(formData.get("ministryId") || "").trim() || undefined;
 
-  if (!name || !acronym || !adminFirst || !adminLast || !adminEmail) redirect(`${ORG_PATH}?error=champs`);
-
+  if (!name || !acronym || !adminFirst || !adminLast || !adminEmail) {
+    return { error: "Veuillez remplir tous les champs obligatoires (nom, sigle, prénom, nom et e-mail de l'admin)." };
+  }
   const [orgExists, emailExists] = await Promise.all([
     prisma.organization.findFirst({ where: { OR: [{ slug }, { name }] } }),
     prisma.user.findFirst({ where: { email: adminEmail } }),
   ]);
-  if (orgExists) redirect(`${ORG_PATH}?error=slug`);
-  if (emailExists) redirect(`${ORG_PATH}?error=email`);
+  if (orgExists) return { error: "Un établissement avec ce nom ou cet identifiant existe déjà." };
+  if (emailExists) return { error: "Cet e-mail d'administrateur est déjà utilisé. Saisissez une autre adresse (différente du super administrateur)." };
 
   await provisionInstitution({ name, acronym, slug, city, plan, seats, adminEmail, adminFirst, adminLast, ministryId });
   revalidatePath(ORG_PATH);
