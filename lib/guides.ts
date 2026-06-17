@@ -333,20 +333,85 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
     ],
   },
   SUPER_ADMIN: {
-    title: "Guide du super administrateur EduWeb",
-    intro: "Supervisez la plateforme et les institutions abonnées.",
+    title: "Guide de l'Administrateur Système (super administrateur EduWeb)",
+    intro:
+      "Vous administrez toute la plateforme EduWeb Booking : gouvernement et ministères, établissements et abonnements, espace Sport cérébral et compétitions. Votre compte « Administrateur Système » dispose de toutes les permissions ; il n'y a pas de bouton « Modifier » séparé, les formulaires sont directement modifiables et l'on enregistre avec « Enregistrer ».",
     can: [
       "Superviser l'ensemble des institutions, utilisateurs, ressources et réservations.",
-      "Vérifier l'isolement des données entre institutions.",
-      "Accompagner les administrateurs d'institution.",
+      "Enregistrer le gouvernement (l'État) et ses ministères de tutelle, ou les pré-charger pour la Côte d'Ivoire.",
+      "Inscrire des établissements un par un ou en masse par fichier CSV, et les rattacher à un ministère.",
+      "Gérer l'abonnement de chaque établissement (formule, statut, comptes autorisés, renouvellement) et l'activer ou le suspendre.",
+      "Basculer dans le contexte d'un établissement pour y agir comme administrateur (sélecteur d'institution).",
+      "Configurer l'espace Sport cérébral : verrouillage par abonnement, banque de questions, publication des jeux.",
+      "Organiser des compétitions sur un jeu choisi et suivre les performances en direct (arbitrage).",
     ],
     sections: [
       {
-        title: "Superviser la plateforme",
+        title: "Vue d'ensemble — superviser la plateforme",
         steps: [
-          "Ouvrez « Supervision EduWeb » pour la vue globale : institutions, utilisateurs, ressources, réservations.",
+          "Dans la barre latérale, ouvrez « Plateforme » → « Supervision EduWeb » : vue globale (institutions, utilisateurs, ressources, réservations).",
           "Chaque institution gère son propre espace, ses rôles et sa hiérarchie de manière isolée.",
-          "Appuyez les administrateurs d'institution dans leur configuration et leurs accès.",
+          "Les boutons en haut de cette page mènent directement à la gestion des établissements, au gouvernement et aux réglages des jeux.",
+        ],
+      },
+      {
+        title: "1. Enregistrer le gouvernement et les ministères",
+        steps: [
+          "Ouvrez « Plateforme » → « Gouvernement & ministères ».",
+          "Renseignez le nom de l'État et choisissez le pays dans la liste déroulante (recherche rapide + drapeaux) ; le nom officiel se remplit automatiquement. Cliquez « Enregistrer ».",
+          "Ajoutez les ministères un par un, ou cliquez « Ministères de Côte d'Ivoire » pour pré-charger ceux du gouvernement actuel.",
+          "Chaque ministère peut être renommé, doté d'un sigle ou supprimé.",
+        ],
+      },
+      {
+        title: "2. Inscrire et gérer les établissements",
+        steps: [
+          "Ouvrez « Plateforme » → « Établissements ».",
+          "Un établissement : remplissez « Inscrire un établissement » (nom, sigle, ministère de tutelle, formule, administrateur) puis « Créer ». Un compte administrateur est créé (mot de passe initial : password123, à changer).",
+          "Une cohorte : glissez-déposez un fichier CSV dans « Import par CSV » (téléchargez d'abord le modèle). Chaque ligne crée un établissement complet ; les doublons sont ignorés.",
+          "Sur la fiche d'un établissement : ajustez le ministère de tutelle, la formule, le statut, les comptes autorisés et le renouvellement, puis « Enregistrer ».",
+          "Utilisez « Suspendre » / « Réactiver » pour couper ou rétablir l'accès de tout un établissement.",
+        ],
+      },
+      {
+        title: "3. Gérer les abonnements (l'accès en dépend)",
+        steps: [
+          "L'accès complet (notamment à tous les jeux) est réservé aux établissements dont l'abonnement est « Actif ».",
+          "Choisissez la formule (Pilote / Standard / Premium / National) et le statut, puis « Enregistrer ».",
+          "« Comptes autorisés » = nombre de comptes utilisateurs permis par l'abonnement.",
+        ],
+      },
+      {
+        title: "4. Travailler dans une institution (sélecteur d'institution)",
+        steps: [
+          "En haut de l'écran, le menu déroulant des institutions fait basculer tout votre contexte de travail vers l'établissement choisi.",
+          "Vous agissez alors comme son administrateur : utilisateurs, ressources, bibliothèque…",
+          "Pour créer des comptes : « Administration » → « Utilisateurs » (création manuelle ou import CSV avec modèle).",
+          "Revenez à « EduWeb · plateforme » dans le sélecteur pour retrouver le contexte plateforme.",
+        ],
+      },
+      {
+        title: "5. Configurer l'espace Sport cérébral",
+        steps: [
+          "« Plateforme » → « Réglages des jeux » : activez/désactivez le verrouillage par abonnement, fixez le nombre de jeux gratuits ou choisissez les jeux offerts aux visiteurs non abonnés.",
+          "« Sport cérébral » (menu Principal) → bouton « Banque de questions » : créez ou importez les questions du quiz.",
+          "Depuis la banque de questions, « Gestion des jeux » : publiez/masquez un jeu, changez l'ordre, modifiez la consigne, déposez un audio.",
+        ],
+      },
+      {
+        title: "6. Organiser une compétition",
+        steps: [
+          "« Gestion » → « Compétitions » → créez une compétition (intitulé, jeu, niveau).",
+          "Partagez le code de session (ou le lien) : chaque compétiteur le saisit depuis l'accueil du Sport cérébral et joue sur son appareil.",
+          "Sur la vue arbitre, suivez le classement en direct (mise à jour automatique) ; ouvrez, démarrez puis clôturez la compétition pour délibérer.",
+        ],
+      },
+      {
+        title: "Compte, droits et dépannage",
+        steps: [
+          "Votre compte possède toutes les permissions de la plateforme.",
+          "Si une page affiche « Une erreur est survenue » ou qu'un « Enregistrer » semble sans effet, il s'agit le plus souvent de la base de données (Neon) momentanément en veille : rechargez la page.",
+          "Téléchargez ce guide via « Télécharger en PDF » dans le Centre d'aide.",
         ],
       },
     ],
