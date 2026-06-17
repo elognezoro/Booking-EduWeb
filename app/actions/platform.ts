@@ -205,6 +205,50 @@ export async function deleteMinistry(formData: FormData) {
   redirect(`${GOV_PATH}?saved=1`);
 }
 
+/** Import en lot de ministères depuis un CSV (colonnes : nom, sigle), pour le gouvernement courant. */
+export async function importMinistriesCsv(formData: FormData) {
+  await requirePermission("platform.manage");
+  const governmentId = String(formData.get("governmentId") || "");
+  const gov = governmentId ? await prisma.government.findUnique({ where: { id: governmentId } }) : await prisma.government.findFirst();
+  if (!gov) redirect(`${GOV_PATH}?error=champs`);
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) redirect(`${GOV_PATH}?error=csv`);
+  let rows: string[][];
+  try {
+    rows = parseCsv(await (file as File).text());
+  } catch {
+    redirect(`${GOV_PATH}?error=csv`);
+  }
+  rows = rows!;
+  if (rows.length < 2) redirect(`${GOV_PATH}?error=csv`);
+  const header = rows[0];
+  const col = {
+    nom: findColumn(header, ["nom", "name", "ministere", "ministère", "intitule", "intitulé"]),
+    sigle: findColumn(header, ["sigle", "acronym", "acronyme", "abreviation"]),
+  };
+  const existing = await prisma.ministry.findMany({ where: { governmentId: gov.id }, select: { name: true } });
+  const have = new Set(existing.map((m) => normalizeKey(m.name)));
+  let created = 0;
+  let skipped = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const get = (idx: number) => (idx >= 0 ? (rows[i][idx] ?? "").trim() : "");
+    const name = get(col.nom);
+    if (name.length < 2) {
+      skipped++;
+      continue;
+    }
+    if (have.has(normalizeKey(name))) {
+      skipped++;
+      continue;
+    }
+    have.add(normalizeKey(name));
+    await prisma.ministry.create({ data: { governmentId: gov.id, name, acronym: get(col.sigle).toUpperCase() || null } });
+    created++;
+  }
+  revalidatePath(GOV_PATH);
+  redirect(`${GOV_PATH}?imported=${created}&skipped=${skipped}`);
+}
+
 /** Pré-remplit les ministères du gouvernement actuel de Côte d'Ivoire (idempotent, ignore les doublons). */
 export async function seedCiMinistries(formData: FormData) {
   await requirePermission("platform.manage");

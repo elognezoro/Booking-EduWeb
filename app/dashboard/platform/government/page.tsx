@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Landmark, Plus, Save, Trash2, CheckCircle2, AlertTriangle, ArrowLeft, Building2 } from "lucide-react";
+import { Landmark, Plus, Save, Trash2, CheckCircle2, AlertTriangle, ArrowLeft, Building2, Upload, Download } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { FileDropzone } from "@/components/ui/file-dropzone";
 import { GovernmentFields } from "@/components/platform/government-fields";
-import { saveGovernment, createMinistry, updateMinistry, deleteMinistry, seedCiMinistries } from "@/app/actions/platform";
+import { saveGovernment, createMinistry, updateMinistry, deleteMinistry, seedCiMinistries, importMinistriesCsv } from "@/app/actions/platform";
 
 export const dynamic = "force-dynamic";
 
-export default async function GovernmentPage({ searchParams }: { searchParams: { saved?: string; error?: string; seeded?: string } }) {
+export default async function GovernmentPage({ searchParams }: { searchParams: { saved?: string; error?: string; seeded?: string; imported?: string; skipped?: string } }) {
   await requirePermission("platform.manage");
   const government = await prisma.government.findFirst();
   const ministries = government
@@ -38,7 +39,12 @@ export default async function GovernmentPage({ searchParams }: { searchParams: {
       )}
       {searchParams.error && (
         <div className="flex items-center gap-2 rounded-xl border border-unavailable/30 bg-unavailable-soft px-4 py-3 text-sm font-semibold text-unavailable-fg">
-          <AlertTriangle className="size-5" /> Le nom est obligatoire.
+          <AlertTriangle className="size-5" /> {searchParams.error === "csv" ? "Fichier CSV illisible ou vide." : "Le nom est obligatoire."}
+        </div>
+      )}
+      {searchParams.imported && (
+        <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">
+          <CheckCircle2 className="size-5" /> {searchParams.imported} ministère(s) importé(s){searchParams.skipped && Number(searchParams.skipped) > 0 ? `, ${searchParams.skipped} ignoré(s) (doublon ou vide)` : ""}.
         </div>
       )}
       {searchParams.seeded && (
@@ -106,6 +112,15 @@ export default async function GovernmentPage({ searchParams }: { searchParams: {
                   <input type="hidden" name="governmentId" value={government.id} />
                   <Button type="submit" variant="outline" className="w-full"><Landmark className="size-4" /> Ministères de Côte d'Ivoire</Button>
                 </form>
+              </div>
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="mb-2 text-xs text-muted-foreground">Importer une liste (CSV) — pour tout pays :</p>
+                <form action={importMinistriesCsv} className="space-y-2">
+                  <input type="hidden" name="governmentId" value={government.id} />
+                  <FileDropzone name="file" accept=".csv,text/csv" required className="gap-1 rounded-xl px-3 py-4" title="Glissez-déposez un CSV" hint="Colonnes : nom, sigle" />
+                  <Button type="submit" size="sm" variant="outline" className="w-full"><Upload className="size-4" /> Importer les ministères</Button>
+                </form>
+                <a href="/api/platform/ministries/template" className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"><Download className="size-4" /> Modèle CSV</a>
               </div>
             </CardContent>
           </Card>
