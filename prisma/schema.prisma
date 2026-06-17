@@ -27,6 +27,7 @@ model Organization {
   logoUrl      String?
   primaryColor String?  @default("#064B3A")
   status       String   @default("ACTIVE")
+  ministryId   String? // ministère de tutelle
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -39,6 +40,30 @@ model Organization {
   roles       Role[]
   settings    OrganizationSetting?
   subscription Subscription?
+  ministry    Ministry? @relation(fields: [ministryId], references: [id])
+}
+
+// Gouvernement (État) et ses ministères techniques / de tutelle, gérés par le super admin.
+model Government {
+  id        String   @id @default(cuid())
+  name      String // ex. « République de Côte d'Ivoire »
+  country   String   @default("Côte d'Ivoire")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ministries Ministry[]
+}
+
+model Ministry {
+  id           String   @id @default(cuid())
+  governmentId String
+  name         String
+  acronym      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  government     Government     @relation(fields: [governmentId], references: [id], onDelete: Cascade)
+  organizations  Organization[]
 }
 
 model Subscription {
@@ -64,6 +89,47 @@ model OrganizationSetting {
   holidays            String? // JSON: ["2026-08-07", ...]
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+// Réglages globaux de la plateforme (clé/valeur), administrés par le super admin EduWeb.
+model PlatformSetting {
+  key       String   @id
+  value     String // JSON sérialisé
+  updatedAt DateTime @updatedAt
+}
+
+// Compétition « Sport cérébral » : une session sur un jeu, rejointe par code, suivie en direct par l'arbitre.
+model Competition {
+  id             String   @id @default(cuid())
+  organizationId String? // établissement organisateur (null = plateforme / super admin)
+  code           String   @unique // code de session partageable
+  title          String
+  gameSlug       String
+  level          String   @default("facile")
+  status         String   @default("OPEN") // OPEN | RUNNING | CLOSED
+  createdById    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  participants CompetitionParticipant[]
+}
+
+model CompetitionParticipant {
+  id            String   @id @default(cuid())
+  competitionId String
+  userId        String? // si compétiteur connecté
+  displayName   String
+  bestScore     Int      @default(0)
+  bestDuration  Int      @default(0)
+  errors        Int      @default(0)
+  attempts      Int      @default(0)
+  finished      Boolean  @default(false)
+  joinedAt      DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+
+  @@index([competitionId])
 }
 
 model Site {

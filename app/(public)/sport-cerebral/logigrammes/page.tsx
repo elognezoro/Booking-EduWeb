@@ -2,21 +2,21 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Consigne } from "@/components/games/consigne";
-import { MemoryGame } from "@/components/games/memory-game";
+import { Logigramme } from "@/components/games/logigramme";
 import { GameLocked } from "@/components/games/game-locked";
 import { getEffectiveGame } from "@/lib/games/config";
 import { getGameAccess } from "@/lib/games/access";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Mémoire — Sport cérébral" };
+export const metadata = { title: "Logigrammes — Sport cérébral" };
 
 type Level = "facile" | "moyen" | "difficile";
 const VALID: Level[] = ["facile", "moyen", "difficile"];
 
-export default async function MemoirePage({ searchParams }: { searchParams: { niveau?: string } }) {
+export default async function LogigrammesPage({ searchParams }: { searchParams: { niveau?: string } }) {
   const niveau = (VALID.includes(searchParams.niveau as Level) ? searchParams.niveau : "facile") as Level;
-  const game = (await getEffectiveGame("memoire"))!;
-  const { allowed, access } = await getGameAccess("memoire");
+  const game = (await getEffectiveGame("logigrammes"))!;
+  const { allowed, access } = await getGameAccess("logigrammes");
 
   return (
     <section className="section py-10">
@@ -29,8 +29,8 @@ export default async function MemoirePage({ searchParams }: { searchParams: { ni
       <div className="mt-5 max-w-3xl"><Consigne text={game.consigne} audioUrl={game.audioUrl} /></div>
 
       {allowed ? (
-        <Card className="mt-5 p-5 sm:p-6">
-          <MemoryGame initialLevel={niveau} />
+        <Card className="mt-5 p-5 sm:p-8">
+          <Logigramme initialLevel={niveau} />
         </Card>
       ) : (
         <GameLocked title={game.title} access={access} />

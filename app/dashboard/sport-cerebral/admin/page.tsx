@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { FileDropzone } from "@/components/ui/file-dropzone";
 import { createBrainQuestion, toggleBrainQuestion, deleteBrainQuestion, importBrainQuestionsCsv } from "@/app/actions/brain-sport";
 
 export const dynamic = "force-dynamic";
@@ -126,10 +127,16 @@ export default async function BrainAdminPage({ searchParams }: { searchParams: {
           <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Upload className="size-4" /> Import CSV</CardTitle></CardHeader>
           <CardContent>
             <form action={importBrainQuestionsCsv} className="space-y-2.5">
-              <input type="file" name="file" accept=".csv,text/csv" required className="block w-full text-xs file:mr-2 file:rounded-lg file:border-0 file:bg-primary-50 file:px-2 file:py-1 file:text-xs file:font-semibold file:text-primary" />
+              <FileDropzone
+                name="file"
+                accept=".csv,text/csv"
+                required
+                className="gap-1 rounded-xl px-3 py-5"
+                title="Glissez-déposez ou choisissez un CSV"
+                hint="niveau, question, choix1-4, bonne (1-4), explication"
+              />
               <Button type="submit" size="sm" className="w-full"><Upload className="size-4" /> Importer les questions</Button>
             </form>
-            <p className="mt-2 text-[11px] text-muted-foreground">Colonnes : niveau, question, choix1, choix2, choix3, choix4, bonne (1-4), explication.</p>
           </CardContent>
         </Card>
         </div>

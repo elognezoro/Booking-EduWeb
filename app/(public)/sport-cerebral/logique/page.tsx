@@ -3,7 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Consigne } from "@/components/games/consigne";
 import { SuitesLogiques } from "@/components/games/suites-logiques";
+import { GameLocked } from "@/components/games/game-locked";
 import { getEffectiveGame } from "@/lib/games/config";
+import { getGameAccess } from "@/lib/games/access";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Jeux de logique — Sport cérébral" };
@@ -14,6 +16,7 @@ const VALID: Level[] = ["facile", "moyen", "difficile"];
 export default async function LogiquePage({ searchParams }: { searchParams: { niveau?: string } }) {
   const niveau = (VALID.includes(searchParams.niveau as Level) ? searchParams.niveau : "facile") as Level;
   const game = (await getEffectiveGame("logique"))!;
+  const { allowed, access } = await getGameAccess("logique");
 
   return (
     <section className="section py-10">
@@ -25,9 +28,13 @@ export default async function LogiquePage({ searchParams }: { searchParams: { ni
 
       <div className="mt-5 max-w-3xl"><Consigne text={game.consigne} audioUrl={game.audioUrl} /></div>
 
-      <Card className="mt-5 p-5 sm:p-8">
-        <SuitesLogiques initialLevel={niveau} />
-      </Card>
+      {allowed ? (
+        <Card className="mt-5 p-5 sm:p-8">
+          <SuitesLogiques initialLevel={niveau} />
+        </Card>
+      ) : (
+        <GameLocked title={game.title} access={access} />
+      )}
     </section>
   );
 }

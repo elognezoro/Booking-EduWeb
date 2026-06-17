@@ -38,7 +38,7 @@ export default async function SubscriptionPage() {
           <div>
             <Badge className="mb-2 bg-white/15 text-white ring-0">Formule actuelle</Badge>
             <h2 className="text-3xl font-extrabold">Plan {PLAN_LABELS[plan]}</h2>
-            <p className="text-primary-foreground/80">{subscription?.seats ?? 0} sièges · statut {subscription?.status ?? "ACTIVE"}</p>
+            <p className="text-primary-foreground/80">{subscription?.seats ?? 0} comptes autorisés · statut {subscription?.status ?? "ACTIVE"}</p>
             {subscription?.renewsAt && <p className="mt-1 text-sm text-primary-foreground/70">Renouvellement le {fmtDate(subscription.renewsAt)}</p>}
           </div>
           <Button asChild variant="white"><Link href="/pricing">Changer de formule</Link></Button>

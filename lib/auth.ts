@@ -69,6 +69,9 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   const roles = user.roles.map((r) => r.role.key) as RoleKey[];
 
+  // Établissement suspendu par le super admin → accès coupé (sauf super admin, qui est global).
+  if (user.organization?.status === "SUSPENDED" && !roles.includes("SUPER_ADMIN")) return null;
+
   let organizationId = user.organizationId;
   let organizationName = user.organization?.name ?? null;
   let departmentName = user.department?.name ?? null;

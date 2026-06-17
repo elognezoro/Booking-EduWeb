@@ -91,6 +91,8 @@ export function CalculMental({ initialLevel = "facile", slug = "calcul-mental" }
     setTimeout(() => setFlash(null), 250);
     setProblem(genProblem(level));
     setValue("");
+    // Replace le curseur dans le champ pour enchaîner sans cliquer (notamment après « Valider »).
+    inputRef.current?.focus();
   };
 
   if (phase === "ready") {

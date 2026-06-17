@@ -16,6 +16,8 @@ import {
   Settings,
   CreditCard,
   Globe2,
+  Landmark,
+  Swords,
   LifeBuoy,
   HelpCircle,
   Library,
@@ -71,6 +73,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "À valider", href: "/dashboard/bookings/pending", icon: ClipboardCheck, permission: "bookings.validate", badge: "pending" },
       { label: "Statistiques", href: "/dashboard/statistics", icon: BarChart3, permission: "statistics.read" },
       { label: "Rapports", href: "/dashboard/reports", icon: FileDown, permission: "reports.export" },
+      { label: "Compétitions", href: "/dashboard/competitions", icon: Swords, permission: ["platform.manage", "organization.manage"] },
     ],
   },
   {
@@ -106,7 +109,10 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Plateforme",
     icon: Globe2,
     items: [
-      { label: "Supervision EduWeb", href: "/dashboard/platform", icon: Globe2, permission: "platform.manage" },
+      { label: "Supervision EduWeb", href: "/dashboard/platform", icon: Globe2, permission: "platform.manage", exact: true },
+      { label: "Gouvernement & ministères", href: "/dashboard/platform/government", icon: Landmark, permission: "platform.manage" },
+      { label: "Établissements", href: "/dashboard/platform/organizations", icon: Building2, permission: "platform.manage" },
+      { label: "Réglages des jeux", href: "/dashboard/platform/jeux", icon: Brain, permission: "platform.manage" },
     ],
   },
   {

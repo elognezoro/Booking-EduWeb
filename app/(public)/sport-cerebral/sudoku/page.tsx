@@ -3,7 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Consigne } from "@/components/games/consigne";
 import { SudokuBoard } from "@/components/games/sudoku-board";
+import { GameLocked } from "@/components/games/game-locked";
 import { getEffectiveGame } from "@/lib/games/config";
+import { getGameAccess } from "@/lib/games/access";
 import type { SudokuLevel } from "@/lib/games/sudoku";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +16,7 @@ const VALID: SudokuLevel[] = ["facile", "moyen", "difficile"];
 export default async function SudokuPage({ searchParams }: { searchParams: { niveau?: string } }) {
   const niveau = (VALID.includes(searchParams.niveau as SudokuLevel) ? searchParams.niveau : "facile") as SudokuLevel;
   const game = (await getEffectiveGame("sudoku"))!;
+  const { allowed, access } = await getGameAccess("sudoku");
 
   return (
     <section className="section py-10">
@@ -25,9 +28,13 @@ export default async function SudokuPage({ searchParams }: { searchParams: { niv
 
       <div className="mt-5 max-w-3xl"><Consigne text={game.consigne} audioUrl={game.audioUrl} /></div>
 
-      <Card className="mt-5 p-5 sm:p-6">
-        <SudokuBoard initialLevel={niveau} />
-      </Card>
+      {allowed ? (
+        <Card className="mt-5 p-5 sm:p-6">
+          <SudokuBoard initialLevel={niveau} />
+        </Card>
+      ) : (
+        <GameLocked title={game.title} access={access} />
+      )}
     </section>
   );
 }

@@ -1,9 +1,11 @@
-import { Globe2, Building2, Users, Boxes, CalendarDays } from "lucide-react";
+import Link from "next/link";
+import { Globe2, Building2, Users, Boxes, CalendarDays, Settings2, Landmark } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { KpiCard } from "@/components/dashboard/kpi-card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PLAN_LABELS, type Plan } from "@/lib/enums";
 
@@ -29,6 +31,13 @@ export default async function PlatformPage() {
         title="Supervision EduWeb"
         description="Vue globale de la plateforme et des organisations abonnées."
         icon={<span className="inline-flex size-11 items-center justify-center rounded-2xl bg-advanced-soft text-advanced-fg"><Globe2 className="size-6" /></span>}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline"><Link href="/dashboard/platform/jeux"><Settings2 className="size-4" /> Réglages des jeux</Link></Button>
+            <Button asChild variant="outline"><Link href="/dashboard/platform/government"><Landmark className="size-4" /> Gouvernement</Link></Button>
+            <Button asChild><Link href="/dashboard/platform/organizations"><Building2 className="size-4" /> Gérer les établissements</Link></Button>
+          </div>
+        }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

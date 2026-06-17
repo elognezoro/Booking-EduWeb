@@ -49,7 +49,8 @@ export const GAMES: GameDef[] = [
     duree: "10–20 min",
     consigne:
       "À partir d'une série d'indices, déduisez les associations correctes entre les éléments. Cochez les cases certaines et éliminez les impossibles, jusqu'à obtenir l'unique solution.",
-    playable: false,
+    href: "/sport-cerebral/logigrammes",
+    playable: true,
   },
   {
     slug: "mots-croises",
@@ -62,7 +63,8 @@ export const GAMES: GameDef[] = [
     duree: "10–20 min",
     consigne:
       "À partir des définitions proposées, trouvez les mots et placez-les dans la grille, horizontalement et verticalement. Les lettres communes aux mots qui se croisent doivent correspondre.",
-    playable: false,
+    href: "/sport-cerebral/mots-croises",
+    playable: true,
   },
   {
     slug: "logique",
@@ -103,7 +105,8 @@ export const GAMES: GameDef[] = [
     duree: "3–8 min",
     consigne:
       "Observez attentivement les éléments affichés et repérez l'intrus, les différences ou la cible demandée, le plus rapidement et le plus précisément possible.",
-    playable: false,
+    href: "/sport-cerebral/attention",
+    playable: true,
   },
   {
     slug: "calcul-mental",
@@ -139,12 +142,13 @@ export const GAMES: GameDef[] = [
     category: "Défi",
     icon: "Bot",
     color: "#172554",
-    short: "Résolvez avant l'aide de l'IA, ou comparez votre raisonnement.",
-    skills: ["Raisonnement", "Stratégie", "Persévérance"],
-    duree: "5–15 min",
+    short: "Affrontez l'IA au Morpion : à vous de jouer en premier et de ne pas perdre.",
+    skills: ["Raisonnement", "Stratégie", "Anticipation"],
+    duree: "2–5 min",
     consigne:
-      "Tentez de résoudre le défi par vous-même avant de demander l'aide de l'intelligence artificielle. Comparez ensuite votre démarche à l'explication guidée proposée.",
-    playable: false,
+      "Affrontez l'intelligence artificielle au Morpion (tic-tac-toe). Vous jouez les X et commencez : alignez trois symboles avant l'IA. Plus le niveau est élevé, plus l'IA joue juste — au niveau Avancé, elle est imbattable : visez alors le match nul.",
+    href: "/sport-cerebral/defis-ia",
+    playable: true,
   },
 ];
 

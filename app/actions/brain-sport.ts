@@ -8,6 +8,7 @@ import { computeScore } from "@/lib/games/scoring";
 import { earnedBadgeCodes } from "@/lib/games/badges";
 import { getUserAttempts, badgeStatsFrom } from "@/lib/games/stats";
 import { getEffectiveGames } from "@/lib/games/config";
+import { recordCompetitionResult } from "@/lib/games/competition";
 import { saveGameAudio, deleteGameAudio } from "@/lib/games/audio-storage";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import type { Level } from "@/lib/games/catalog";
@@ -16,6 +17,7 @@ export interface RecordResult {
   recorded: boolean;
   score?: number;
   newBadges?: string[];
+  competition?: { recorded: boolean; competitionId: string };
 }
 
 const LEVELS: Level[] = ["facile", "moyen", "difficile"];
@@ -32,9 +34,6 @@ export async function recordBrainAttempt(input: {
   errors: number;
   points?: number; // score fourni par le jeu (ex. jeux chronométrés) ; sinon calculé côté serveur
 }): Promise<RecordResult> {
-  const user = await getCurrentUser();
-  if (!user) return { recorded: false };
-
   const level = (LEVELS.includes(input.level as Level) ? input.level : "facile") as Level;
   const durationSec = Math.max(0, Math.min(86400, Math.round(input.durationSec) || 0));
   const errors = Math.max(0, Math.min(9999, Math.round(input.errors) || 0));
@@ -43,6 +42,13 @@ export async function recordBrainAttempt(input: {
     typeof input.points === "number"
       ? Math.max(0, Math.min(100000, Math.round(input.points)))
       : computeScore(level, durationSec, errors, success);
+
+  // Compétition : si le joueur a rejoint une session (cookie), enregistre son résultat (même non connecté).
+  const comp = await recordCompetitionResult(String(input.gameSlug), score, durationSec, errors);
+  const competition = comp ?? undefined;
+
+  const user = await getCurrentUser();
+  if (!user) return { recorded: false, score, competition };
 
   await prisma.brainSportAttempt.create({
     data: { userId: user.id, gameSlug: String(input.gameSlug).slice(0, 40), level, success, score, durationSec, errors },
@@ -58,7 +64,7 @@ export async function recordBrainAttempt(input: {
     await prisma.brainSportBadge.create({ data: { userId: user.id, code } }).catch(() => {});
   }
 
-  return { recorded: true, score, newBadges: toAward };
+  return { recorded: true, score, newBadges: toAward, competition };
 }
 
 /* ----------------------------- Admin : banque de questions (super admin) ----------------------------- */

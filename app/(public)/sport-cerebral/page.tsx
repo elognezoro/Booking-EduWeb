@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   Brain, Grid3x3, Type, Network, Puzzle, ScanSearch, Calculator, GraduationCap, Bot,
-  Sparkles, ArrowRight, Gamepad2, Volume2, Clock, Target, Dumbbell, Flame,
+  Sparkles, ArrowRight, Gamepad2, Volume2, Clock, Target, Dumbbell, Flame, Lock, Swords,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,8 @@ import { Consigne } from "@/components/games/consigne";
 import { LEVELS } from "@/lib/games/catalog";
 import { getEffectiveGames } from "@/lib/games/config";
 import { getDailyChallenge } from "@/lib/games/daily";
+import { getGamesGate } from "@/lib/games/access";
+import { JoinByCode } from "@/components/competitions/join-by-code";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,9 @@ const ICONS: Record<string, typeof Brain> = { Grid3x3, Brain, Type, Network, Puz
 export default async function SportCerebralPage() {
   const daily = getDailyChallenge();
   const games = await getEffectiveGames();
+  // Verrouillage par abonnement (réglages plateforme) : sélection limitée pour les non-abonnés.
+  const { openAll, freeSet } = await getGamesGate();
+  const isLocked = (slug: string) => !openAll && !freeSet.has(slug);
   return (
     <>
       {/* ===================== HERO ===================== */}
@@ -78,7 +83,35 @@ export default async function SportCerebralPage() {
           </div>
           <Button asChild><Link href={daily.href}>Relever le défi <ArrowRight className="size-4" /></Link></Button>
         </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-advanced/20 bg-advanced-soft/40 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-advanced text-white"><Swords className="size-6" /></span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-advanced-fg">Compétition</p>
+              <p className="text-sm text-foreground">Vous avez un code de session ? Rejoignez une compétition organisée.</p>
+            </div>
+          </div>
+          <JoinByCode />
+        </div>
       </section>
+
+      {/* ===================== ACCÈS DÉCOUVERTE (sans abonnement) ===================== */}
+      {!openAll && (
+        <section className="section pb-2">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-pending/30 bg-pending-soft/50 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-pending text-white"><Lock className="size-6" /></span>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-pending-fg">Accès découverte</p>
+                <p className="max-w-xl text-sm text-foreground">
+                  Vous accédez à une sélection de jeux. La collection complète et tous les niveaux sont réservés aux établissements abonnés à EduWeb Booking.
+                </p>
+              </div>
+            </div>
+            <Button asChild><Link href="/pricing">Voir les formules <ArrowRight className="size-4" /></Link></Button>
+          </div>
+        </section>
+      )}
 
       {/* ===================== BANQUE DE JEUX ===================== */}
       <section className="section pb-16">
@@ -86,6 +119,8 @@ export default async function SportCerebralPage() {
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {games.map((g) => {
             const Icon = ICONS[g.icon] ?? Gamepad2;
+            const locked = isLocked(g.slug);
+            const open = g.playable && g.href && !locked;
             return (
               <Card key={g.slug} className="flex flex-col gap-4 p-6">
                 <div className="flex items-start justify-between gap-3">
@@ -98,7 +133,9 @@ export default async function SportCerebralPage() {
                       <p className="mt-0.5 text-sm text-muted-foreground">{g.short}</p>
                     </div>
                   </div>
-                  <Badge tone={g.playable ? "info" : "neutral"}>{g.playable ? g.category : "Bientôt"}</Badge>
+                  <Badge tone={locked ? "pending" : g.playable ? "info" : "neutral"}>
+                    {locked ? (<><Lock className="mr-1 inline size-3" />Abonnement</>) : g.playable ? g.category : "Bientôt"}
+                  </Badge>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -114,7 +151,7 @@ export default async function SportCerebralPage() {
                   <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">Niveau de difficulté</p>
                   <div className="flex flex-wrap gap-2">
                     {LEVELS.map((l) =>
-                      g.playable && g.href ? (
+                      open ? (
                         <Button key={l.key} asChild size="sm" variant="outline">
                           <Link href={`${g.href}?niveau=${l.key}`}>{l.label}</Link>
                         </Button>
@@ -125,10 +162,14 @@ export default async function SportCerebralPage() {
                   </div>
                 </div>
 
-                {g.playable && g.href ? (
+                {open ? (
                   <Button asChild className="mt-auto w-full">
-                    <Link href={g.href}>Commencer <ArrowRight className="size-4" /></Link>
+                    <Link href={g.href!}>Commencer <ArrowRight className="size-4" /></Link>
                   </Button>
+                ) : locked ? (
+                  <Link href="/pricing" className="mt-auto flex items-center justify-center gap-1.5 rounded-lg bg-pending-soft px-3 py-2 text-center text-xs font-semibold text-pending-fg transition-colors hover:bg-pending-soft/70">
+                    <Lock className="size-3.5" /> Disponible avec l'abonnement EduWeb Booking
+                  </Link>
                 ) : (
                   <p className="mt-auto rounded-lg bg-secondary/60 px-3 py-2 text-center text-xs font-medium text-muted-foreground">
                     Bientôt disponible — consigne déjà accessible (texte &amp; audio).
