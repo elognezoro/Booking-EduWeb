@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useFormState } from "react-dom";
 import Link from "next/link";
 import { Building2, AlertTriangle } from "lucide-react";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { MinistrySelect } from "@/components/platform/ministry-select";
 import { PLAN_LABELS, type Plan } from "@/lib/enums";
+import { slugify } from "@/lib/utils";
 
 const PLANS: Plan[] = ["PILOTE", "STANDARD", "PREMIUM", "NATIONAL"];
 
@@ -20,6 +22,11 @@ interface MinistryOpt {
 
 export function CreateInstitutionForm({ ministries }: { ministries: MinistryOpt[] }) {
   const [state, action] = useFormState<CreateOrgState, FormData>(createInstitution, {});
+  const [name, setName] = React.useState("");
+  const [acronym, setAcronym] = React.useState("");
+  const [slug, setSlug] = React.useState("");
+  const previewSlug = slugify(slug || acronym || name);
+
   return (
     <form action={action} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {state.error && (
@@ -27,9 +34,15 @@ export function CreateInstitutionForm({ ministries }: { ministries: MinistryOpt[
           <AlertTriangle className="size-5 shrink-0" /> {state.error}
         </div>
       )}
-      <div><Label htmlFor="name" required>Nom de l'établissement</Label><Input id="name" name="name" required placeholder="Université…" /></div>
-      <div><Label htmlFor="acronym" required>Sigle</Label><Input id="acronym" name="acronym" required placeholder="UFHB" /></div>
-      <div><Label htmlFor="slug">Identifiant (URL)</Label><Input id="slug" name="slug" placeholder="auto depuis le sigle" /></div>
+      <div><Label htmlFor="name" required>Nom de l'établissement</Label><Input id="name" name="name" required placeholder="Université…" value={name} onChange={(e) => setName(e.target.value)} /></div>
+      <div><Label htmlFor="acronym" required>Sigle</Label><Input id="acronym" name="acronym" required placeholder="UFHB" value={acronym} onChange={(e) => setAcronym(e.target.value)} /></div>
+      <div>
+        <Label htmlFor="slug">Identifiant</Label>
+        <Input id="slug" name="slug" placeholder="auto depuis le sigle / le nom" value={slug} onChange={(e) => setSlug(e.target.value)} />
+        <p className="mt-1 text-xs text-muted-foreground">
+          {previewSlug ? <>Adresse : <span className="font-mono font-semibold text-foreground">/{previewSlug}</span></> : "Généré automatiquement depuis le sigle ou le nom."}
+        </p>
+      </div>
       <div><Label htmlFor="city">Ville</Label><Input id="city" name="city" placeholder="Abidjan" /></div>
       <div>
         <Label htmlFor="ministryId">Ministère de tutelle</Label>

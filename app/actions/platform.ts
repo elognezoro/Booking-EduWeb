@@ -30,7 +30,7 @@ export async function createInstitution(_prev: CreateOrgState, formData: FormDat
   const adminFirst = String(formData.get("adminFirst") || "").trim();
   const adminLast = String(formData.get("adminLast") || "").trim();
   const adminEmail = String(formData.get("adminEmail") || "").trim().toLowerCase();
-  const slug = String(formData.get("slug") || "").trim() || slugify(acronym || name);
+  const slug = slugify(String(formData.get("slug") || "").trim() || acronym || name);
   const ministryId = String(formData.get("ministryId") || "").trim() || undefined;
 
   if (!name || !acronym || !adminFirst || !adminLast || !adminEmail) {
@@ -90,7 +90,7 @@ export async function importInstitutionsCsv(formData: FormData) {
       skipped++;
       continue;
     }
-    const slug = get(col.slug) || slugify(acronym || name);
+    const slug = slugify(get(col.slug) || acronym || name);
     const [orgEx, emailEx] = await Promise.all([
       prisma.organization.findFirst({ where: { OR: [{ slug }, { name }] } }),
       prisma.user.findFirst({ where: { email: adminEmail } }),
