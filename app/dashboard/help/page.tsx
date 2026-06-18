@@ -1,4 +1,4 @@
-import { HelpCircle, BookOpenCheck, LifeBuoy, Download } from "lucide-react";
+import { HelpCircle, BookOpenCheck, LifeBuoy, Download, GraduationCap } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -24,7 +24,10 @@ export default async function HelpPage() {
         actions={
           <div className="flex flex-wrap gap-2">
             <Button asChild>
-              <a href="/guides/print" target="_blank" rel="noopener noreferrer"><Download className="size-4" /> Télécharger en PDF</a>
+              <a href="/guides/print" target="_blank" rel="noopener noreferrer"><Download className="size-4" /> Mon guide (PDF)</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/guides/formation" target="_blank" rel="noopener noreferrer"><GraduationCap className="size-4" /> Manuel de formation</a>
             </Button>
             <Button asChild variant="outline"><Link href="/dashboard/support"><LifeBuoy className="size-4" /> Support</Link></Button>
           </div>
@@ -44,6 +47,22 @@ export default async function HelpPage() {
           )}
         </div>
       </div>
+
+      {/* Support de formation académique complet */}
+      <Card className="border-primary/30 bg-primary-50/40">
+        <CardContent className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground"><GraduationCap className="size-6" /></span>
+            <div>
+              <h3 className="font-bold text-foreground">Support de formation complet</h3>
+              <p className="text-sm text-muted-foreground">Manuel académique : syllabus, modules par rôle, évaluation (QCM), glossaire et annexes — conçu pour la formation et téléchargeable en PDF.</p>
+            </div>
+          </div>
+          <Button asChild className="shrink-0">
+            <a href="/guides/formation" target="_blank" rel="noopener noreferrer"><GraduationCap className="size-4" /> Ouvrir le manuel</a>
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Tous les rôles en bref */}
       <Card>
