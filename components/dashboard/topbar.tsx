@@ -6,6 +6,7 @@ import { Menu, PanelLeftOpen, Bell, ChevronDown, LogOut, User as UserIcon, Setti
 import { Avatar } from "@/components/ui/misc";
 import { RoleBadge } from "@/components/status-badges";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand/logo";
 import { logoutAction } from "@/app/actions/auth";
 import { fromNow } from "@/lib/dates";
 import { cn } from "@/lib/utils";
@@ -66,8 +67,14 @@ export function Topbar({
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl sm:px-6">
+      {/* Marque (mobile) — la navigation se fait par la barre d'onglets du bas */}
+      <Link href="/dashboard" className="lg:hidden" aria-label="Accueil">
+        <BrandLogo />
+      </Link>
+
+      {/* Bascule de la barre latérale (desktop) */}
       <button
-        className="rounded-xl p-2 text-foreground hover:bg-muted"
+        className="hidden rounded-xl p-2 text-foreground hover:bg-muted lg:inline-flex"
         onClick={onMenuClick}
         aria-label={collapsed ? "Déplier le menu" : "Replier le menu"}
         title={collapsed ? "Déplier le menu" : "Replier le menu"}

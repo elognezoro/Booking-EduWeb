@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Eye, EyeOff, LogIn, Loader2, AlertCircle, Zap, Building2, ArrowLeftRight } from "lucide-react";
+import { Eye, EyeOff, LogIn, Loader2, AlertCircle, Zap, Building2, ArrowLeftRight, UserPlus } from "lucide-react";
 import { loginAction, type LoginState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +45,7 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
   }
 
   const color = institution?.primaryColor ?? "#064B3A";
+  const registerHref = institution ? `/register?org=${institution.slug}` : "/register";
 
   return (
     <div>
@@ -100,6 +101,17 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
         </div>
 
         <SubmitButton />
+
+        {/* Création de compte mise en évidence, juste à côté de « Se connecter ». */}
+        <div className="relative py-1 text-center">
+          <span className="absolute inset-x-0 top-1/2 -z-10 h-px bg-border" />
+          <span className="bg-background px-3 text-xs font-medium text-muted-foreground">ou</span>
+        </div>
+        <Button asChild type="button" variant="outline" size="lg" className="w-full border-primary/40 text-primary hover:bg-primary-50">
+          <a href={registerHref}>
+            <UserPlus className="size-4" /> Créer un compte
+          </a>
+        </Button>
       </form>
 
       {institution ? (
@@ -131,12 +143,6 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
         </div>
       )}
 
-      <p className="mt-5 text-center text-sm text-muted-foreground">
-        Pas encore de compte ?{" "}
-        <a href={institution ? `/register?org=${institution.slug}` : "/register"} className="font-semibold text-primary hover:underline">
-          Créer un compte
-        </a>
-      </p>
     </div>
   );
 }

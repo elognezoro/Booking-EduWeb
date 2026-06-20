@@ -87,9 +87,9 @@ async function ManagerDashboard({ organizationId }: { organizationId: string }) 
         <KpiCard label="Taux d'occupation" value={`${overview.occupancyRate}%`} icon={Percent} tone="advanced" hint="Ressources réservées aujourd'hui" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Colonne principale */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           {/* Graphique d'activité */}
           <Card>
             <CardHeader className="flex-row items-center justify-between">
@@ -192,8 +192,8 @@ async function RequesterDashboard({ userId }: { userId: string }) {
         <KpiCard label="Total" value={total} icon={ClipboardList} tone="info" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           {/* Prochaine réservation */}
           <Card className="overflow-hidden">
             <CardHeader><CardTitle>Votre prochaine réservation</CardTitle></CardHeader>

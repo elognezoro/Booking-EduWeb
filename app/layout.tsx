@@ -37,6 +37,7 @@ export const viewport: Viewport = {
   themeColor: "#064B3A",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover", // active env(safe-area-inset-*) sur mobile (encoche / barre gestuelle)
 };
 
 export default function RootLayout({

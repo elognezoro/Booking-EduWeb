@@ -84,6 +84,10 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     text-rendering: optimizeLegibility;
+    /* Confort « app mobile » : pas de surlignage au tap, pas de zoom auto du texte. */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   ::selection {
     @apply bg-primary/15 text-primary-700;
@@ -118,6 +122,44 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  /* Zones sûres (encoche / barre gestuelle iOS & Android) */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  /* Hauteurs dynamiques (barres mobiles qui se rétractent) */
+  .min-h-dvh {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .h-dvh {
+    height: 100vh;
+    height: 100dvh;
+  }
+  /* Décalage de contenu pour ne pas passer sous la barre d'onglets mobile */
+  .pb-bottomnav {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+  }
+}
+
+/* Apparition douce d'une feuille / barre depuis le bas (effet natif) */
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-up {
+  animation: slide-up-fade 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Custom scrollbar */

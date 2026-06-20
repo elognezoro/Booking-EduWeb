@@ -14,7 +14,7 @@ export function MiniBarChart({
   return (
     <div className={cn("flex items-end gap-1.5", className)}>
       {data.map((d, i) => (
-        <div key={i} className="group flex flex-1 flex-col items-center gap-1.5">
+        <div key={i} className="group flex min-w-0 flex-1 flex-col items-center gap-1.5">
           <div className="relative flex h-28 w-full items-end justify-center">
             <div
               className={cn("w-full rounded-t-md transition-all group-hover:opacity-80", barClassName)}
@@ -22,7 +22,7 @@ export function MiniBarChart({
               title={`${d.label} : ${d.value}`}
             />
           </div>
-          <span className="text-[10px] text-muted-foreground">{d.label}</span>
+          <span className="w-full truncate text-center text-[9px] leading-none text-muted-foreground sm:text-[10px]">{d.label}</span>
         </div>
       ))}
     </div>

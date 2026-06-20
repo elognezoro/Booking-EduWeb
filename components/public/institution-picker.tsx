@@ -55,7 +55,7 @@ export function InstitutionPicker({ institutions }: { institutions: InstitutionO
           <p className="text-sm text-muted-foreground">Vérifiez l'orthographe ou contactez EduWeb pour inscrire votre institution.</p>
         </div>
       ) : (
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {filtered.map((i) => {
             const color = i.primaryColor ?? "#064B3A";
             return (

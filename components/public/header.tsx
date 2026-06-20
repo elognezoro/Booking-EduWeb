@@ -29,13 +29,14 @@ export function PublicHeader() {
   }, []);
 
   // En-tête transparent par-dessus le hero foncé de l'accueil → texte en blanc.
-  const overHero = pathname === "/" && !scrolled;
+  const overHero = pathname === "/" && !scrolled && !open;
 
   return (
-    <header
+    <>
+      <header
       className={cn(
-        "sticky top-0 z-40 w-full transition-all",
-        scrolled ? "border-b border-border bg-background/85 backdrop-blur-xl" : "bg-transparent"
+        "sticky top-0 z-50 w-full transition-all",
+        scrolled || open ? "border-b border-border bg-background/95 backdrop-blur-xl" : "bg-transparent"
       )}
     >
       <div className="section flex h-16 items-center justify-between">
@@ -82,27 +83,38 @@ export function PublicHeader() {
           {open ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
       </div>
+      </header>
 
       {open && (
-        <div className="border-t border-border bg-card md:hidden">
-          <div className="section flex flex-col gap-1 py-4">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-muted"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="mt-2 flex flex-col gap-2">
-              <Button asChild variant="outline">
+        <div className="fixed inset-x-0 bottom-0 top-16 z-[60] animate-fade-in bg-background md:hidden">
+          <div className="section flex h-full flex-col py-6 pb-safe">
+            <nav className="flex flex-col">
+              {NAV.map((item, i) => {
+                const isCurrent = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    style={{ animationDelay: `${i * 40}ms` }}
+                    className={cn(
+                      "animate-slide-up flex items-center justify-between border-b border-border/70 py-4 text-lg font-bold",
+                      isCurrent ? "text-primary" : "text-foreground",
+                    )}
+                  >
+                    {item.label}
+                    <span aria-hidden className="text-muted-foreground">›</span>
+                  </Link>
+                );
+              })}
+            </nav>
+            <div className="mt-auto flex flex-col gap-2.5">
+              <Button asChild size="lg" variant="outline">
                 <Link href="/login" onClick={() => setOpen(false)}>
                   <LogIn className="size-4" /> Connexion
                 </Link>
               </Button>
-              <Button asChild>
+              <Button asChild size="lg">
                 <Link href="/demo" onClick={() => setOpen(false)}>
                   Demander une démo
                 </Link>
@@ -111,6 +123,6 @@ export function PublicHeader() {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }

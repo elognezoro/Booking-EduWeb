@@ -4,6 +4,7 @@ import * as React from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./sidebar";
 import { Topbar, type TopbarUser, type TopbarNotif } from "./topbar";
+import { BottomNav } from "./bottom-nav";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "eduweb_sidebar_collapsed";
@@ -70,8 +71,11 @@ export function DashboardShell({
       />
       <div className={cn("transition-[padding] duration-200", collapsed ? "lg:pl-[64px]" : "lg:pl-[270px]")}>
         <Topbar user={user} notifications={notifications} unread={unread} onMenuClick={handleMenuClick} collapsed={collapsed} institutionSwitcher={institutionSwitcher} />
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-7xl px-4 pb-bottomnav pt-5 sm:px-6 lg:px-8 lg:py-6">{children}</main>
       </div>
+
+      {/* Navigation principale mobile (barre d'onglets + action centrale). */}
+      <BottomNav permissions={permissions} counts={counts} onMenuClick={() => setOpen(true)} />
     </div>
   );
 }
