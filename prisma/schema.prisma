@@ -41,6 +41,8 @@ model Organization {
   settings    OrganizationSetting?
   subscription Subscription?
   ministry    Ministry? @relation(fields: [ministryId], references: [id])
+  certificateConfig CertificateConfig?
+  certificates      Certificate[]
 }
 
 // Gouvernement (État) et ses ministères techniques / de tutelle, gérés par le super admin.
@@ -89,6 +91,55 @@ model OrganizationSetting {
   holidays            String? // JSON: ["2026-08-07", ...]
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+// Configuration des certificats par établissement : signataire, cachet et
+// signature scannés (data URL base64), préfixe de numérotation.
+model CertificateConfig {
+  id             String   @id @default(cuid())
+  organizationId String   @unique
+  signatoryName  String?
+  signatoryTitle String?
+  signatureImage String? // data URL base64 (signature scannée)
+  stampImage     String? // data URL base64 (cachet scanné)
+  prefix         String? // préfixe de numérotation (défaut : sigle de l'établissement)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+// Journal des certificats / attestations délivrés (un par bénéficiaire).
+model Certificate {
+  id              String   @id @default(cuid())
+  organizationId  String
+  number          String   @unique // ex. UFHB-FORM-2026-0001
+  seq             Int
+  year            Int
+  title           String
+  mention         String
+  parcours        String? // rôle / parcours suivi
+  hours           String? // durée de la formation (texte libre)
+  recipientName   String
+  recipientUserId String?
+  issuedAt        DateTime @default(now())
+  issuedById      String?
+  issuedByName    String?
+  signatoryName   String? // instantané à l'émission
+  signatoryTitle  String?
+  status          String   @default("ISSUED") // ISSUED | REVOKED
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+// Compteur séquentiel des certificats, par établissement et par année.
+model CertificateCounter {
+  id    String @id @default(cuid())
+  key   String @unique // <organizationId>:<année>
+  count Int    @default(0)
 }
 
 // Réglages globaux de la plateforme (clé/valeur), administrés par le super admin EduWeb.

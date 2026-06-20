@@ -1,4 +1,4 @@
-import { HelpCircle, BookOpenCheck, LifeBuoy, Download, GraduationCap } from "lucide-react";
+import { HelpCircle, BookOpenCheck, LifeBuoy, Download, GraduationCap, FileText } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -25,6 +25,9 @@ export default async function HelpPage() {
           <div className="flex flex-wrap gap-2">
             <Button asChild>
               <a href="/guides/print" target="_blank" rel="noopener noreferrer"><Download className="size-4" /> Mon guide (PDF)</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/api/guides/word"><FileText className="size-4" /> Mon guide (Word)</a>
             </Button>
             <Button asChild variant="outline">
               <a href="/guides/formation" target="_blank" rel="noopener noreferrer"><GraduationCap className="size-4" /> Manuel de formation</a>
@@ -58,9 +61,14 @@ export default async function HelpPage() {
               <p className="text-sm text-muted-foreground">Manuel académique : syllabus, modules par rôle, évaluation (QCM), glossaire et annexes — conçu pour la formation et téléchargeable en PDF.</p>
             </div>
           </div>
-          <Button asChild className="shrink-0">
-            <a href="/guides/formation" target="_blank" rel="noopener noreferrer"><GraduationCap className="size-4" /> Ouvrir le manuel</a>
-          </Button>
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <Button asChild>
+              <a href="/guides/formation" target="_blank" rel="noopener noreferrer"><GraduationCap className="size-4" /> Ouvrir le manuel</a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/api/guides/formation/word"><FileText className="size-4" /> Word</a>
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

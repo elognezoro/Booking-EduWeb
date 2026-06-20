@@ -1,5 +1,7 @@
+import { FileText } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { GuidePrintActions } from "@/components/help/guide-print-actions";
+import { Button } from "@/components/ui/button";
 import { TrainingManual } from "@/components/help/training-manual";
 import { TRAINING_CONTENT } from "@/lib/training-content";
 
@@ -12,7 +14,10 @@ export default async function FormationManualPage() {
 
   return (
     <div className="mx-auto max-w-4xl p-6 sm:p-8">
-      <div className="no-print mb-6 flex items-center justify-end">
+      <div className="no-print mb-6 flex items-center justify-end gap-2">
+        <Button asChild variant="outline">
+          <a href="/api/guides/formation/word"><FileText className="size-4" /> Télécharger en Word</a>
+        </Button>
         <GuidePrintActions auto={false} />
       </div>
       <TrainingManual content={TRAINING_CONTENT} generatedOn={generatedOn} />

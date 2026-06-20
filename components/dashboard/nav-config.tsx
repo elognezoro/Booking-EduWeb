@@ -32,6 +32,7 @@ import {
   UserCheck,
   Brain,
   UserCog,
+  Award,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -103,6 +104,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Utilisateurs", href: "/dashboard/admin/users", icon: Users, permission: "users.manage" },
       { label: "Demandes de comptes", href: "/dashboard/admin/account-requests", icon: UserCheck, permission: "users.manage", badge: "accountRequests" },
       { label: "Rôles & permissions", href: "/dashboard/admin/roles", icon: ShieldCheck, permission: "roles.manage" },
+      { label: "Certificats", href: "/dashboard/admin/certificates", icon: Award, permission: "users.manage" },
       { label: "Paramètres", href: "/dashboard/admin/settings", icon: Settings, permission: "settings.manage" },
       { label: "Abonnement", href: "/dashboard/admin/subscription", icon: CreditCard, permission: "organization.manage" },
     ],
