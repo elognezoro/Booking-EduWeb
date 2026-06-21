@@ -3,8 +3,18 @@ import nodemailer from "nodemailer";
 import { prisma } from "./prisma";
 
 const SMTP_HOST = process.env.SMTP_HOST;
-const SMTP_FROM = process.env.SMTP_FROM || "EduWeb Booking <no-reply@eduweb.ci>";
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
+
+// Tous les e-mails de l'application partent au nom d'expéditeur « EduWeb Booking »,
+// quelle que soit la configuration SMTP. On ne récupère que l'adresse depuis
+// SMTP_FROM (qui peut être « Nom <adresse> » ou « adresse ») ou SMTP_USER.
+const SENDER_NAME = "EduWeb Booking";
+function senderFrom(): { name: string; address: string } {
+  const raw = (process.env.SMTP_FROM || process.env.SMTP_USER || "no-reply@eduweb.ci").trim();
+  const match = raw.match(/<([^>]+)>/);
+  const address = (match ? match[1] : raw).trim();
+  return { name: SENDER_NAME, address };
+}
 
 let transporter: nodemailer.Transporter | null = null;
 function getTransporter() {
@@ -75,7 +85,7 @@ export async function sendNotification(opts: {
   const t = getTransporter();
   try {
     if (t && opts.to) {
-      await t.sendMail({ from: SMTP_FROM, to: opts.to, subject: opts.subject, html: opts.html, text: opts.text });
+      await t.sendMail({ from: senderFrom(), to: opts.to, subject: opts.subject, html: opts.html, text: opts.text });
     } else {
       // Mode dev sans SMTP : on journalise.
       console.info(`📧 [EduWeb Booking] (dev) « ${opts.subject} » → ${opts.to ?? "interne"}`);
