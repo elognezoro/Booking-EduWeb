@@ -76,9 +76,6 @@ export default async function HomePage() {
             <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white">
               <Link href="/register"><UserPlus className="size-4" /> Créer un compte</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white">
-              <Link href="/demo">Demander une démo</Link>
-            </Button>
           </div>
           <div className="animate-fade-in-up mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/85 [animation-delay:240ms]">
             <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="size-4" /> Sans double réservation</span>

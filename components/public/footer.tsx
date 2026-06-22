@@ -23,7 +23,7 @@ export function PublicFooter() {
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li><Link className="hover:text-primary" href="/features">Fonctionnalités</Link></li>
             <li><Link className="hover:text-primary" href="/pricing">Tarifs</Link></li>
-            <li><Link className="hover:text-primary" href="/demo">Demander une démo</Link></li>
+            <li><Link className="hover:text-primary" href="/register">Créer un compte</Link></li>
             <li><Link className="hover:text-primary" href="/login">Connexion</Link></li>
           </ul>
         </div>

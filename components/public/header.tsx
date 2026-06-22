@@ -68,7 +68,7 @@ export function PublicHeader() {
             </Link>
           </Button>
           <Button asChild size="sm" className={cn(overHero && "bg-white text-primary hover:bg-white/90")}>
-            <Link href="/demo">Demander une démo</Link>
+            <Link href="/register">Créer un compte</Link>
           </Button>
         </div>
 
@@ -115,8 +115,8 @@ export function PublicHeader() {
                 </Link>
               </Button>
               <Button asChild size="lg">
-                <Link href="/demo" onClick={() => setOpen(false)}>
-                  Demander une démo
+                <Link href="/register" onClick={() => setOpen(false)}>
+                  Créer un compte
                 </Link>
               </Button>
             </div>
