@@ -79,7 +79,7 @@ export default function PricingPage() {
                 ))}
               </ul>
               <Button asChild className="mt-7" variant={p.highlight ? "default" : "outline"}>
-                <Link href="/demo">{p.cta} <ArrowRight className="size-4" /></Link>
+                <Link href="/contact">{p.cta} <ArrowRight className="size-4" /></Link>
               </Button>
             </Card>
           ))}
