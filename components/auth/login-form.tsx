@@ -2,25 +2,17 @@
 
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Eye, EyeOff, LogIn, Loader2, AlertCircle, Zap, Building2, ArrowLeftRight, UserPlus } from "lucide-react";
+import { Eye, EyeOff, LogIn, Loader2, AlertCircle, Building2, ArrowLeftRight, UserPlus } from "lucide-react";
 import { loginAction, type LoginState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const QUICK = [
-  { label: "Admin", email: "admin.aprid@ens.ci" },
-  { label: "Responsable", email: "responsable.salles@ens.ci" },
-  { label: "Validateur", email: "validateur.aprid@ens.ci" },
-  { label: "Enseignant", email: "enseignant.demo@ens.ci" },
-];
 
 export interface Institution {
   name: string;
   acronym: string | null;
   primaryColor: string | null;
   slug: string;
-  demoEmail: string | null;
 }
 
 function SubmitButton() {
@@ -38,11 +30,6 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
   const [show, setShow] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-
-  function quickFill(value: string) {
-    setEmail(value);
-    setPassword("password123");
-  }
 
   const color = institution?.primaryColor ?? "#064B3A";
   const registerHref = institution ? `/register?org=${institution.slug}` : "/register";
@@ -114,35 +101,11 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
         </Button>
       </form>
 
-      {institution ? (
-        institution.demoEmail && (
-          <div className="mt-7 rounded-2xl border border-dashed border-border bg-secondary/40 p-4">
-            <p className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              <Zap className="size-3.5 text-pending" /> Démo · password123
-            </p>
-            <button type="button" onClick={() => quickFill(institution.demoEmail!)} className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary">
-              Administrateur ({institution.demoEmail})
-            </button>
-          </div>
-        )
-      ) : (
-        <div className="mt-7 rounded-2xl border border-dashed border-border bg-secondary/40 p-4">
-          <p className="mb-2.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-            <Zap className="size-3.5 text-pending" /> Connexion rapide (démo ENS · password123)
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {QUICK.map((q) => (
-              <button key={q.email} type="button" onClick={() => quickFill(q.email)} className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-primary">
-                {q.label}
-              </button>
-            ))}
-          </div>
-          <a href="/institutions" className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
-            <Building2 className="size-3.5" /> Accéder à l'espace d'une autre institution
-          </a>
-        </div>
+      {!institution && (
+        <a href="/institutions" className="mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+          <Building2 className="size-4" /> Accéder à l'espace d'une autre institution
+        </a>
       )}
-
     </div>
   );
 }

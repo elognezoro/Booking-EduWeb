@@ -13,18 +13,14 @@ export default async function LoginPage({ searchParams }: { searchParams: { call
   if (user) redirect(searchParams.callbackUrl?.startsWith("/") ? searchParams.callbackUrl : "/dashboard");
 
   // Connexion ciblée sur l'espace d'une institution (depuis le sélecteur).
-  let institution: { name: string; acronym: string | null; primaryColor: string | null; slug: string; demoEmail: string | null } | null = null;
+  let institution: { name: string; acronym: string | null; primaryColor: string | null; slug: string } | null = null;
   if (searchParams.org) {
     const org = await prisma.organization.findFirst({
       where: { slug: searchParams.org, isPlatform: false, status: "ACTIVE" },
       select: { name: true, acronym: true, primaryColor: true, slug: true },
     });
     if (org?.slug) {
-      const admin = await prisma.user.findFirst({
-        where: { organizationId: { not: null }, organization: { slug: org.slug }, roles: { some: { role: { key: "ORG_ADMIN" } } } },
-        select: { email: true },
-      });
-      institution = { ...org, slug: org.slug, demoEmail: admin?.email ?? null };
+      institution = { ...org, slug: org.slug };
     }
   }
 
