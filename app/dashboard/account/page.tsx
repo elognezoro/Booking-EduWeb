@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { ROLE_META, type RoleKey } from "@/lib/enums";
 import { changeOwnPassword } from "@/app/actions/auth";
@@ -48,9 +48,9 @@ export default async function AccountPage({ searchParams }: { searchParams: { ch
             </div>
           )}
           <form action={changeOwnPassword} className="space-y-3">
-            <div><Label htmlFor="current" required>Mot de passe actuel</Label><Input id="current" name="current" type="password" required autoComplete="current-password" /></div>
-            <div><Label htmlFor="password" required>Nouveau mot de passe</Label><Input id="password" name="password" type="password" required minLength={8} autoComplete="new-password" /></div>
-            <div><Label htmlFor="confirm" required>Confirmer le nouveau mot de passe</Label><Input id="confirm" name="confirm" type="password" required autoComplete="new-password" /></div>
+            <div><Label htmlFor="current" required>Mot de passe actuel</Label><PasswordInput id="current" name="current" required autoComplete="current-password" /></div>
+            <div><Label htmlFor="password" required>Nouveau mot de passe</Label><PasswordInput id="password" name="password" required minLength={8} autoComplete="new-password" /></div>
+            <div><Label htmlFor="confirm" required>Confirmer le nouveau mot de passe</Label><PasswordInput id="confirm" name="confirm" required autoComplete="new-password" /></div>
             <Button type="submit"><Save className="size-4" /> Mettre à jour le mot de passe</Button>
             <p className="text-xs text-muted-foreground">Au moins 8 caractères. Choisissez un mot de passe fort et unique.</p>
           </form>

@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Eye, EyeOff, LogIn, Loader2, AlertCircle, Building2, ArrowLeftRight, UserPlus } from "lucide-react";
+import { LogIn, Loader2, AlertCircle, Building2, ArrowLeftRight, UserPlus } from "lucide-react";
 import { loginAction, type LoginState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 
 export interface Institution {
@@ -27,9 +28,7 @@ function SubmitButton() {
 
 export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; institution?: Institution | null }) {
   const [state, formAction] = useFormState<LoginState, FormData>(loginAction, {});
-  const [show, setShow] = React.useState(false);
   const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
 
   const color = institution?.primaryColor ?? "#064B3A";
   const registerHref = institution ? `/register?org=${institution.slug}` : "/register";
@@ -79,12 +78,7 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
             <Label htmlFor="password" required>Mot de passe</Label>
             <a href="/forgot-password" className="text-xs font-semibold text-primary hover:underline">Mot de passe oublié ?</a>
           </div>
-          <div className="relative">
-            <Input id="password" name="password" type={show ? "text" : "password"} autoComplete="current-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pr-10" required />
-            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:text-foreground" aria-label={show ? "Masquer" : "Afficher"}>
-              {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          </div>
+          <PasswordInput id="password" name="password" autoComplete="current-password" placeholder="••••••••" required />
         </div>
 
         <SubmitButton />

@@ -6,6 +6,7 @@ import { UserPlus, Loader2, AlertCircle, CheckCircle2, Building2, ShieldCheck } 
 import { registerAccount, type RegisterState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { formatGivenName, formatFamilyName, ENS_MATRICULE_EXAMPLE } from "@/lib/utils";
 
@@ -110,8 +111,8 @@ export function RegisterForm({ institutions, defaultOrg, lockedName }: { institu
           </div>
         )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div><Label htmlFor="password" required>Mot de passe</Label><Input id="password" name="password" type="password" placeholder="6 caractères minimum" required /></div>
-          <div><Label htmlFor="confirm" required>Confirmer</Label><Input id="confirm" name="confirm" type="password" required /></div>
+          <div><Label htmlFor="password" required>Mot de passe</Label><PasswordInput id="password" name="password" placeholder="6 caractères minimum" autoComplete="new-password" required /></div>
+          <div><Label htmlFor="confirm" required>Confirmer</Label><PasswordInput id="confirm" name="confirm" autoComplete="new-password" required /></div>
         </div>
 
         <label className="flex items-start gap-2.5 rounded-xl border border-border bg-secondary/40 p-3">
