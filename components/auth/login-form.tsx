@@ -31,7 +31,7 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
   const [email, setEmail] = React.useState("");
 
   const color = institution?.primaryColor ?? "#064B3A";
-  const registerHref = institution ? `/register?org=${institution.slug}` : "/register";
+  const registerHref = "/register";
 
   return (
     <div>

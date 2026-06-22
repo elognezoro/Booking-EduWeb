@@ -263,8 +263,10 @@ export async function approveAccount(formData: FormData) {
 export async function rejectAccount(formData: FormData) {
   const admin = await requirePermission("users.manage");
   const id = String(formData.get("id"));
-  const u = await prisma.user.findFirst({ where: { id, organizationId: admin.organizationId } });
-  if (u && u.status === "PENDING") {
+  const u = await prisma.user.findUnique({ where: { id } });
+  const isSuper = admin.permissions.has("platform.manage");
+  // Périmètre : compte de l'organisation de l'admin, OU compte sans organisation (file du super admin).
+  if (u && u.status === "PENDING" && (u.organizationId === admin.organizationId || (u.organizationId === null && isSuper))) {
     await sendNotification({
       to: u.email, type: "ACCOUNT_REJECTED",
       subject: "Votre demande de compte n'a pas été retenue",
@@ -277,6 +279,44 @@ export async function rejectAccount(formData: FormData) {
   }
   revalidatePath("/dashboard/admin/account-requests");
   redirect("/dashboard/admin/account-requests?rejected=1");
+}
+
+/** Affecte un compte en attente (sans établissement) à un établissement + rôle, puis l'active. Réservé au super admin. */
+export async function assignAndApproveAccount(formData: FormData) {
+  const me = await requirePermission("platform.manage");
+  const id = String(formData.get("id"));
+  const organizationId = String(formData.get("organizationId") || "");
+  const roleKey = String(formData.get("roleKey") || "REQUESTER");
+  // L'accès Super Administrateur n'est jamais attribuable ici (réservé à l'Admin système).
+  if (roleKey === "SUPER_ADMIN") redirect("/dashboard/admin/account-requests?error=role");
+
+  const u = await prisma.user.findUnique({ where: { id } });
+  if (!u || u.status !== "PENDING") redirect("/dashboard/admin/account-requests?error=notfound");
+
+  const org = await prisma.organization.findFirst({
+    where: { id: organizationId, isPlatform: false, status: "ACTIVE" },
+    select: { id: true, name: true },
+  });
+  if (!org) redirect("/dashboard/admin/account-requests?error=org");
+
+  const role = await prisma.role.findFirst({ where: { organizationId: org.id, key: roleKey } });
+  await prisma.user.update({
+    where: { id },
+    data: {
+      organizationId: org.id,
+      status: "ACTIVE",
+      roles: role ? { create: { roleId: role.id } } : undefined,
+    },
+  });
+  await sendNotification({
+    userId: u.id, to: u.email, type: "ACCOUNT_APPROVED",
+    subject: "Votre compte EduWeb Booking a été validé",
+    text: `Votre compte a été validé et rattaché à ${org.name}. Vous pouvez vous connecter.`,
+    html: renderEmail({ title: "Compte validé ✅", intro: `Votre compte a été validé et rattaché à « ${org.name} ». Vous pouvez désormais vous connecter.`, cta: { label: "Se connecter", href: `${APP_URL}/login` } }),
+  });
+  await audit({ organizationId: org.id, userId: me.id, action: "account.assign_approve", entityType: "User", entityId: id, newValue: { organizationId: org.id, roleKey } });
+  revalidatePath("/dashboard/admin/account-requests");
+  redirect("/dashboard/admin/account-requests?approved=1");
 }
 
 /* ----------------------------- Paramètres ----------------------------- */

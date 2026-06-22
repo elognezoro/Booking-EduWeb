@@ -24,6 +24,7 @@ import {
   Type,
   Puzzle,
   Headphones,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -71,6 +72,9 @@ export default async function HomePage() {
           <div className="animate-fade-in-up mt-9 flex flex-wrap items-center justify-center gap-3 [animation-delay:160ms]">
             <Button asChild size="lg" className="bg-white text-primary shadow-soft hover:bg-white/90">
               <Link href="#institutions">Accéder à mon institution <ArrowRight className="size-4" /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white">
+              <Link href="/register"><UserPlus className="size-4" /> Créer un compte</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="border-white/40 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white">
               <Link href="/demo">Demander une démo</Link>

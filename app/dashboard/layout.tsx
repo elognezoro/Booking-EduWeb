@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         })
       : Promise.resolve(0),
     user.permissions.has("users.manage")
-      ? prisma.user.count({ where: { ...orgFilter, status: "PENDING" } })
+      ? prisma.user.count({ where: isSuperAdmin(user) ? { organizationId: null, status: "PENDING" } : { ...orgFilter, status: "PENDING" } })
       : Promise.resolve(0),
     prisma.notification.findMany({
       where: { userId: user.id },

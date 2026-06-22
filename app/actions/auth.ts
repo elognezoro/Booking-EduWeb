@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyPassword, createUserSession, destroyUserSession, hashPassword, requireUser } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
-import { formatGivenName, formatFamilyName, isEnsMatricule, ENS_MATRICULE_EXAMPLE } from "@/lib/utils";
+import { formatGivenName, formatFamilyName } from "@/lib/utils";
 
 const loginSchema = z.object({
   email: z.string().email("Adresse e-mail invalide."),
@@ -112,12 +112,9 @@ const registerSchema = z.object({
   lastName: z.string().min(1, "Le nom est requis."),
   email: z.string().email("Adresse e-mail invalide."),
   functionTitle: z.string().optional(),
-  org: z.string().min(1, "Sélectionnez votre institution."),
   password: z.string().min(6, "Le mot de passe doit comporter au moins 6 caractères."),
   confirm: z.string().min(1, "Confirmez le mot de passe."),
   accept: z.union([z.literal("on"), z.string()]).optional(),
-  isStudent: z.string().optional(),
-  matricule: z.string().optional(),
 });
 
 export interface RegisterState {
@@ -131,12 +128,9 @@ export async function registerAccount(_prev: RegisterState, formData: FormData):
     lastName: formData.get("lastName"),
     email: formData.get("email"),
     functionTitle: formData.get("functionTitle") || undefined,
-    org: formData.get("org"),
     password: formData.get("password"),
     confirm: formData.get("confirm"),
     accept: formData.get("accept") || undefined,
-    isStudent: formData.get("isStudent") || undefined,
-    matricule: formData.get("matricule") || undefined,
   });
   if (!parsed.success) return { error: parsed.error.errors[0]?.message ?? "Données invalides." };
   const d = parsed.data;
@@ -144,23 +138,11 @@ export async function registerAccount(_prev: RegisterState, formData: FormData):
   if (d.password !== d.confirm) return { error: "Les deux mots de passe ne correspondent pas." };
   if (d.accept !== "on") return { error: "Vous devez accepter que votre compte soit soumis à validation." };
 
-  const org = await prisma.organization.findFirst({ where: { slug: d.org, isPlatform: false, status: "ACTIVE" } });
-  if (!org) return { error: "Institution introuvable." };
-
-  // Étudiant de l'ENS d'Abidjan : matricule conservé comme paramètre de vérification.
-  let matricule: string | null = null;
-  if (org.slug === "ens-abidjan" && d.isStudent === "on") {
-    const m = (d.matricule ?? "").trim().toUpperCase();
-    if (!isEnsMatricule(m)) return { error: `Matricule étudiant invalide (format attendu : ${ENS_MATRICULE_EXAMPLE}).` };
-    matricule = m;
-  }
-
   const existing = await prisma.user.findUnique({ where: { email: d.email.toLowerCase().trim() } });
   if (existing) return { error: "Un compte existe déjà avec cette adresse e-mail." };
 
-  const role = await prisma.role.findFirst({ where: { organizationId: org.id, key: "REQUESTER" } });
+  // Compte créé sans établissement : un administrateur l'affectera lors de la validation.
   const passwordHash = await hashPassword(d.password);
-
   const user = await prisma.user.create({
     data: {
       email: d.email.toLowerCase().trim(),
@@ -168,32 +150,30 @@ export async function registerAccount(_prev: RegisterState, formData: FormData):
       firstName: formatGivenName(d.firstName),
       lastName: formatFamilyName(d.lastName),
       functionTitle: d.functionTitle?.trim() || null,
-      matricule,
-      organizationId: org.id,
+      organizationId: null,
       status: "PENDING",
-      roles: role ? { create: { roleId: role.id } } : undefined,
     },
   });
 
-  // Notifie les administrateurs de l'institution
-  const admins = await prisma.user.findMany({
-    where: { organizationId: org.id, status: "ACTIVE", roles: { some: { role: { key: "ORG_ADMIN" } } } },
+  // Notifie le(s) super administrateur(s), chargé(s) d'affecter le compte à un établissement.
+  const supers = await prisma.user.findMany({
+    where: { status: "ACTIVE", roles: { some: { role: { key: "SUPER_ADMIN" } } } },
     select: { id: true, email: true },
   });
-  for (const a of admins) {
+  for (const a of supers) {
     await sendNotification({
       userId: a.id, to: a.email, type: "ACCOUNT_REQUEST",
       subject: `Nouvelle demande de compte — ${d.firstName} ${d.lastName}`,
-      text: `${d.firstName} ${d.lastName} (${d.email}) demande un compte sur ${org.name}.`,
+      text: `${d.firstName} ${d.lastName} (${d.email}) a créé un compte, à affecter à un établissement.`,
       html: renderEmail({
         title: "Nouvelle demande de compte",
-        intro: `${d.firstName} ${d.lastName} souhaite rejoindre « ${org.name} ».`,
+        intro: `${d.firstName} ${d.lastName} a créé un compte et attend son affectation à un établissement.`,
         rows: [["Nom", `${d.firstName} ${d.lastName}`], ["E-mail", d.email], ["Fonction", d.functionTitle || "—"]],
         cta: { label: "Examiner la demande", href: `${APP_URL}/dashboard/admin/account-requests` },
       }),
     });
   }
-  await audit({ organizationId: org.id, userId: user.id, action: "account.request", entityType: "User", entityId: user.id });
+  await audit({ userId: user.id, action: "account.request", entityType: "User", entityId: user.id });
 
   return { success: true };
 }
