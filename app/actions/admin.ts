@@ -87,6 +87,10 @@ export async function createUser(formData: FormData) {
       matricule: formData.get("matricule") || undefined,
     });
 
+  // Accès Super Administrateur réservé à l'Admin système (compte d'amorçage / script).
+  // Jamais attribuable via ce formulaire, quel que soit l'auteur de la requête.
+  if (data.roleKey === "SUPER_ADMIN") redirect("/dashboard/admin/users?error=role");
+
   const existing = await prisma.user.findUnique({ where: { email: data.email.toLowerCase() } });
   if (existing) redirect("/dashboard/admin/users?error=exists");
 

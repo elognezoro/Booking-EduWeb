@@ -9,8 +9,9 @@ import { ContactForm } from "@/components/public/contact-form";
 
 export const metadata: Metadata = { title: "Démo" };
 
+// L'accès Super Administrateur (supervision plateforme) est réservé à l'Admin
+// système et n'est pas proposé en démonstration publique.
 const DEMO_ACCOUNTS = [
-  { role: "SUPER_ADMIN", email: "superadmin@eduweb.ci" },
   { role: "ORG_ADMIN", email: "admin.aprid@ens.ci" },
   { role: "RESOURCE_MANAGER", email: "responsable.salles@ens.ci" },
   { role: "VALIDATOR", email: "validateur.aprid@ens.ci" },

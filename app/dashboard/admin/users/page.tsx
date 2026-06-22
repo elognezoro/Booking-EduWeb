@@ -58,6 +58,11 @@ export default async function UsersAdminPage({ searchParams }: { searchParams: {
           Matricule étudiant invalide (format attendu : {ENS_MATRICULE_EXAMPLE}).
         </div>
       )}
+      {searchParams.error === "role" && (
+        <div className="rounded-xl border border-unavailable/30 bg-unavailable-soft px-4 py-3 text-sm font-semibold text-unavailable-fg">
+          L'accès Super Administrateur est réservé à l'Admin système et ne peut pas être attribué ici.
+        </div>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
         {/* Liste */}
