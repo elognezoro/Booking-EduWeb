@@ -11,20 +11,15 @@ export default async function RegisterPage({ searchParams }: { searchParams: { o
   const user = await getCurrentUser();
   if (user) redirect("/dashboard");
 
-  const institutionsRaw = await prisma.organization.findMany({
-    where: { isPlatform: false, status: "ACTIVE" },
-    orderBy: { name: "asc" },
+  // L'inscription se fait toujours dans l'espace d'une institution choisie au préalable.
+  // Sans institution valide en contexte, on invite d'abord à la sélectionner.
+  if (!searchParams.org) redirect("/institutions");
+
+  const org = await prisma.organization.findFirst({
+    where: { slug: searchParams.org, isPlatform: false, status: "ACTIVE" },
     select: { name: true, slug: true },
   });
-  const institutions = institutionsRaw.filter((i): i is { name: string; slug: string } => !!i.slug);
+  if (!org?.slug) redirect("/institutions");
 
-  const locked = searchParams.org ? institutions.find((i) => i.slug === searchParams.org) : undefined;
-
-  return (
-    <RegisterForm
-      institutions={institutions}
-      defaultOrg={locked?.slug ?? searchParams.org}
-      lockedName={locked?.name}
-    />
-  );
+  return <RegisterForm orgSlug={org.slug} orgName={org.name} />;
 }
