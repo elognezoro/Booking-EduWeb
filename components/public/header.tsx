@@ -108,13 +108,13 @@ export function PublicHeader() {
                 );
               })}
             </nav>
-            <div className="mt-auto flex flex-col gap-2.5">
-              <Button asChild size="lg" variant="outline">
+            <div className="mt-auto grid grid-cols-2 gap-2.5">
+              <Button asChild size="lg" variant="outline" className="w-full">
                 <Link href="/login" onClick={() => setOpen(false)}>
                   <LogIn className="size-4" /> Connexion
                 </Link>
               </Button>
-              <Button asChild size="lg">
+              <Button asChild size="lg" className="w-full">
                 <Link href="/register" onClick={() => setOpen(false)}>
                   Créer un compte
                 </Link>
