@@ -97,7 +97,7 @@ export function CertelDiagnosticForm() {
       {step !== "result" && <Stepper step={step} autoDone={autoDone} qcmDone={qcmDone} />}
 
       {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-xl border border-unavailable/30 bg-unavailable-soft px-4 py-3 text-sm font-semibold text-unavailable-fg">
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-unavailable/30 bg-unavailable-soft px-4 py-3 text-base font-semibold text-unavailable-fg">
           <AlertCircle className="size-5 shrink-0" /> {error}
         </div>
       )}
@@ -105,8 +105,8 @@ export function CertelDiagnosticForm() {
       {/* ÉTAPE PROFIL */}
       {step === "profil" && (
         <div className="space-y-5 rounded-2xl border border-border bg-card p-6">
-          <p className="text-sm text-muted-foreground">Ce test gratuit (~10 min) vous positionne sur l'un des 3 niveaux de la formation certifiante. Renseignez d'abord votre profil.</p>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <p className="text-base text-muted-foreground">Ce test gratuit (~10 min) vous positionne sur l'un des 3 niveaux de la formation certifiante. Renseignez d'abord votre profil.</p>
+          <div className="grid gap-4 sm:grid-cols-2 [&_input]:text-base [&_label]:text-base">
             <div><Label htmlFor="prenoms" required>Prénoms</Label><Input id="prenoms" value={prenoms} onChange={(e) => setPrenoms(toPrenoms(e.target.value))} placeholder="Ex. Jean-Paul Aimé" autoComplete="given-name" /></div>
             <div><Label htmlFor="nom" required>NOM</Label><Input id="nom" className="uppercase" value={nom} onChange={(e) => setNom(toNom(e.target.value))} placeholder="Ex. KOUASSI" autoComplete="family-name" /></div>
             <div><Label htmlFor="functionTitle">Fonction</Label><Input id="functionTitle" value={functionTitle} onChange={(e) => setFunctionTitle(e.target.value)} placeholder="Ex. Enseignant, Étudiant…" /></div>
@@ -125,7 +125,7 @@ export function CertelDiagnosticForm() {
       {/* ÉTAPE AUTO-POSITIONNEMENT */}
       {step === "auto" && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-card p-5 text-base text-muted-foreground">
+          <div className="rounded-2xl border border-border bg-card p-5 text-lg text-muted-foreground">
             <p className="font-semibold text-foreground">Auto-positionnement — évaluez votre aisance pour chaque tâche.</p>
             <p>0 = {SELF_SCALE[0].label} · 1 = {SELF_SCALE[1].label} · 2 = {SELF_SCALE[2].label} · 3 = {SELF_SCALE[3].label}</p>
           </div>
@@ -135,14 +135,14 @@ export function CertelDiagnosticForm() {
               return (
                 <li key={i} ref={(el) => { autoRefs.current[i] = el; }} className={cn("rounded-xl border bg-card px-5 py-4 transition-colors", invalid ? "border-unavailable ring-1 ring-unavailable/50" : "border-border")}>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-base font-medium text-foreground">
-                      <span className={cn("mr-1.5 text-sm font-bold", invalid ? "text-unavailable-fg" : "text-advanced-fg")}>{i + 1}.</span>{item}
+                    <span className="text-lg font-medium text-foreground">
+                      <span className={cn("mr-1.5 text-base font-bold", invalid ? "text-unavailable-fg" : "text-advanced-fg")}>{i + 1}.</span>{item}
                       {invalid && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-unavailable-soft px-2 py-0.5 align-middle text-[11px] font-bold text-unavailable-fg"><AlertCircle className="size-3" /> À répondre</span>}
                     </span>
                     <div className="flex shrink-0 gap-1">
                       {SELF_SCALE.map((s) => (
                         <button key={s.value} type="button" title={s.label} onClick={() => setAutopos((a) => a.map((v, j) => (j === i ? s.value : v)))}
-                          className={cn("size-11 rounded-lg text-base font-bold transition-colors", autopos[i] === s.value ? "bg-advanced text-white" : "bg-secondary text-muted-foreground hover:bg-advanced-soft hover:text-advanced-fg")}>
+                          className={cn("size-12 rounded-lg text-lg font-bold transition-colors", autopos[i] === s.value ? "bg-advanced text-white" : "bg-secondary text-muted-foreground hover:bg-advanced-soft hover:text-advanced-fg")}>
                           {s.value}
                         </button>
                       ))}
@@ -159,7 +159,7 @@ export function CertelDiagnosticForm() {
       {/* ÉTAPE QCM */}
       {step === "qcm" && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-card p-5 text-base text-muted-foreground">
+          <div className="rounded-2xl border border-border bg-card p-5 text-lg text-muted-foreground">
             <p className="font-semibold text-foreground">QCM — 30 questions, une seule bonne réponse par question.</p>
           </div>
           <ol className="space-y-3">
@@ -167,15 +167,15 @@ export function CertelDiagnosticForm() {
               const invalid = qcmInvalid && qcm[i] < 0;
               return (
                 <li key={i} ref={(el) => { qcmRefs.current[i] = el; }} className={cn("rounded-xl border bg-card px-5 py-4 transition-colors", invalid ? "border-unavailable ring-1 ring-unavailable/50" : "border-border")}>
-                  <p className="text-base font-semibold text-foreground">
-                    <span className={cn("mr-1.5 text-sm font-bold", invalid ? "text-unavailable-fg" : "text-advanced-fg")}>{i + 1}.</span>{item.q}
+                  <p className="text-lg font-semibold text-foreground">
+                    <span className={cn("mr-1.5 text-base font-bold", invalid ? "text-unavailable-fg" : "text-advanced-fg")}>{i + 1}.</span>{item.q}
                     {invalid && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-unavailable-soft px-2 py-0.5 align-middle text-[11px] font-bold text-unavailable-fg"><AlertCircle className="size-3" /> À répondre</span>}
                   </p>
                   <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                     {item.options.map((opt, oi) => (
                       <button key={oi} type="button" onClick={() => setQcm((a) => a.map((v, j) => (j === i ? oi : v)))}
-                        className={cn("flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-left text-base transition-colors", qcm[i] === oi ? "border-advanced bg-advanced-soft font-semibold text-advanced-fg" : "border-border hover:border-advanced/40 hover:bg-secondary")}>
-                        <span className={cn("inline-flex size-6 shrink-0 items-center justify-center rounded text-sm font-bold", qcm[i] === oi ? "bg-advanced text-white" : "bg-secondary text-muted-foreground")}>{LETTERS[oi]}</span>
+                        className={cn("flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-left text-lg transition-colors", qcm[i] === oi ? "border-advanced bg-advanced-soft font-semibold text-advanced-fg" : "border-border hover:border-advanced/40 hover:bg-secondary")}>
+                        <span className={cn("inline-flex size-7 shrink-0 items-center justify-center rounded text-base font-bold", qcm[i] === oi ? "bg-advanced text-white" : "bg-secondary text-muted-foreground")}>{LETTERS[oi]}</span>
                         {opt}
                       </button>
                     ))}

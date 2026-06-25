@@ -66,7 +66,7 @@ export function CountryPhoneInput({ iso2, onIso2Change, number, onNumberChange, 
           onClick={() => setOpen((o) => !o)}
           aria-haspopup="listbox"
           aria-expanded={open}
-          className="flex h-10 items-center gap-1.5 rounded-xl border border-input bg-card px-2.5 text-sm shadow-sm transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 items-center gap-1.5 rounded-xl border border-input bg-card px-2.5 text-base shadow-sm transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         >
           <FlagSwatch country={current} />
           <span className="font-semibold text-foreground">{current.dial}</span>
@@ -114,7 +114,7 @@ export function CountryPhoneInput({ iso2, onIso2Change, number, onNumberChange, 
         value={number}
         onChange={(e) => onNumberChange(e.target.value)}
         placeholder="07 00 00 00 00"
-        className="flex h-10 w-full flex-1 rounded-xl border border-input bg-card px-3.5 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex h-10 w-full flex-1 rounded-xl border border-input bg-card px-3.5 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
       />
     </div>
   );
