@@ -2,26 +2,53 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Loader2, ArrowRight, ArrowLeft, GraduationCap, AlertCircle, Sparkles, Trophy, RotateCcw, FileText } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, GraduationCap, AlertCircle, Sparkles, Trophy, RotateCcw, FileText, ClipboardCheck, Wand2 } from "lucide-react";
 import { submitCertelDiagnostic, type CertelSubmitResult } from "@/app/actions/certel";
 import { AUTOPOS, QCM, SELF_SCALE, CERTEL_REFS, levelForScore } from "@/lib/certel/diagnostic";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { CountryPhoneInput } from "@/components/certel/phone-field";
+import { DEFAULT_COUNTRY, findCountry } from "@/lib/certel/countries";
 import { cn } from "@/lib/utils";
 
 const LETTERS = ["A", "B", "C", "D"];
 type Step = "profil" | "auto" | "qcm" | "result";
 
+/** NOM → tout en majuscules. */
+function toNom(s: string) {
+  return s.toLocaleUpperCase("fr-FR");
+}
+/** Prénoms → première lettre de chaque composante en majuscule (gère espaces, traits d'union, apostrophes). */
+function toPrenoms(s: string) {
+  return s.toLocaleLowerCase("fr-FR").replace(/(^|[\s\-'’])(\p{L})/gu, (_m, sep, ch) => sep + ch.toLocaleUpperCase("fr-FR"));
+}
+
 export function CertelDiagnosticForm() {
   const [step, setStep] = React.useState<Step>("profil");
-  const [profile, setProfile] = React.useState({ fullName: "", functionTitle: "", structure: "", contact: "" });
+  const [prenoms, setPrenoms] = React.useState("");
+  const [nom, setNom] = React.useState("");
+  const [functionTitle, setFunctionTitle] = React.useState("");
+  const [structure, setStructure] = React.useState("");
+  const [phoneIso, setPhoneIso] = React.useState(DEFAULT_COUNTRY);
+  const [phone, setPhone] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [autopos, setAutopos] = React.useState<number[]>(() => Array(AUTOPOS.length).fill(-1));
   const [qcm, setQcm] = React.useState<number[]>(() => Array(QCM.length).fill(-1));
   const [submitting, setSubmitting] = React.useState(false);
   const [result, setResult] = React.useState<CertelSubmitResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const topRef = React.useRef<HTMLDivElement>(null);
+  const [autoInvalid, setAutoInvalid] = React.useState(false);
+  const [qcmInvalid, setQcmInvalid] = React.useState(false);
+  const autoRefs = React.useRef<(HTMLLIElement | null)[]>([]);
+  const qcmRefs = React.useRef<(HTMLLIElement | null)[]>([]);
+
+  function scrollToFirstUnanswered(answers: number[], refs: React.MutableRefObject<(HTMLLIElement | null)[]>) {
+    const idx = answers.findIndex((v) => v < 0);
+    if (idx >= 0) refs.current[idx]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    return idx;
+  }
 
   const autoDone = autopos.filter((v) => v >= 0).length;
   const qcmDone = qcm.filter((v) => v >= 0).length;
@@ -29,11 +56,20 @@ export function CertelDiagnosticForm() {
   const goTo = (s: Step) => { setStep(s); setError(null); topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); };
 
   async function submit() {
-    if (autoDone < AUTOPOS.length) { setError("Répondez à toutes les questions d'auto-positionnement."); goTo("auto"); return; }
-    if (qcmDone < QCM.length) { setError("Répondez à toutes les questions du QCM."); return; }
+    if (autoDone < AUTOPOS.length) { setAutoInvalid(true); setError("Veuillez répondre à toutes les questions d'auto-positionnement avant de continuer."); goTo("auto"); return; }
+    if (qcmDone < QCM.length) {
+      setQcmInvalid(true);
+      setError(`Veuillez répondre à toutes les questions : ${QCM.length - qcmDone} sans réponse.`);
+      scrollToFirstUnanswered(qcm, qcmRefs);
+      return;
+    }
     setSubmitting(true);
     setError(null);
-    const res = await submitCertelDiagnostic({ ...profile, autopos, qcm });
+    const fullName = `${prenoms.trim()} ${nom.trim()}`.trim();
+    const dial = findCountry(phoneIso)?.dial ?? "";
+    const phoneFull = phone.trim() ? `${dial} ${phone.trim()}`.trim() : "";
+    const contact = [phoneFull, email.trim()].filter(Boolean).join(" · ");
+    const res = await submitCertelDiagnostic({ fullName, functionTitle: functionTitle.trim(), structure: structure.trim(), contact, autopos, qcm });
     setSubmitting(false);
     if (!res.ok) { setError(res.error ?? "Une erreur est survenue."); return; }
     setResult(res);
@@ -41,7 +77,7 @@ export function CertelDiagnosticForm() {
   }
 
   return (
-    <div ref={topRef} className="mx-auto max-w-3xl">
+    <div ref={topRef} className="mx-auto w-full max-w-6xl">
       {/* En-tête */}
       <div className="mb-6 flex items-center gap-3">
         <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-advanced-soft text-advanced-fg"><GraduationCap className="size-6" /></span>
@@ -71,13 +107,15 @@ export function CertelDiagnosticForm() {
         <div className="space-y-5 rounded-2xl border border-border bg-card p-6">
           <p className="text-sm text-muted-foreground">Ce test gratuit (~10 min) vous positionne sur l'un des 3 niveaux de la formation certifiante. Renseignez d'abord votre profil.</p>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2"><Label htmlFor="fullName" required>Nom et prénom</Label><Input id="fullName" value={profile.fullName} onChange={(e) => setProfile({ ...profile, fullName: e.target.value })} placeholder="Prénom NOM" /></div>
-            <div><Label htmlFor="functionTitle">Fonction</Label><Input id="functionTitle" value={profile.functionTitle} onChange={(e) => setProfile({ ...profile, functionTitle: e.target.value })} placeholder="Ex. Enseignant, Étudiant…" /></div>
-            <div><Label htmlFor="structure">Structure / établissement</Label><Input id="structure" value={profile.structure} onChange={(e) => setProfile({ ...profile, structure: e.target.value })} /></div>
-            <div className="sm:col-span-2"><Label htmlFor="contact">Téléphone / e-mail</Label><Input id="contact" value={profile.contact} onChange={(e) => setProfile({ ...profile, contact: e.target.value })} placeholder="Pour être recontacté(e)" /></div>
+            <div><Label htmlFor="prenoms" required>Prénoms</Label><Input id="prenoms" value={prenoms} onChange={(e) => setPrenoms(toPrenoms(e.target.value))} placeholder="Ex. Jean-Paul Aimé" autoComplete="given-name" /></div>
+            <div><Label htmlFor="nom" required>NOM</Label><Input id="nom" className="uppercase" value={nom} onChange={(e) => setNom(toNom(e.target.value))} placeholder="Ex. KOUASSI" autoComplete="family-name" /></div>
+            <div><Label htmlFor="functionTitle">Fonction</Label><Input id="functionTitle" value={functionTitle} onChange={(e) => setFunctionTitle(e.target.value)} placeholder="Ex. Enseignant, Étudiant…" /></div>
+            <div><Label htmlFor="structure">Structure / établissement</Label><Input id="structure" value={structure} onChange={(e) => setStructure(e.target.value)} /></div>
+            <div><Label htmlFor="phone" required>Téléphone</Label><CountryPhoneInput iso2={phoneIso} onIso2Change={setPhoneIso} number={phone} onNumberChange={setPhone} inputId="phone" /></div>
+            <div><Label htmlFor="email">E-mail</Label><Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@exemple.com" autoComplete="email" /></div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={() => { if (profile.fullName.trim().length < 2) { setError("Veuillez indiquer votre nom et prénom."); return; } goTo("auto"); }}>
+            <Button onClick={() => { if (prenoms.trim().length < 2 || nom.trim().length < 1) { setError("Veuillez indiquer vos prénoms et votre nom."); return; } if (phone.replace(/\D/g, "").length < 6) { setError("Veuillez indiquer un numéro de téléphone valide."); return; } goTo("auto"); }}>
               Commencer <ArrowRight className="size-4" />
             </Button>
           </div>
@@ -87,52 +125,64 @@ export function CertelDiagnosticForm() {
       {/* ÉTAPE AUTO-POSITIONNEMENT */}
       {step === "auto" && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-border bg-card p-5 text-base text-muted-foreground">
             <p className="font-semibold text-foreground">Auto-positionnement — évaluez votre aisance pour chaque tâche.</p>
             <p>0 = {SELF_SCALE[0].label} · 1 = {SELF_SCALE[1].label} · 2 = {SELF_SCALE[2].label} · 3 = {SELF_SCALE[3].label}</p>
           </div>
           <ol className="space-y-2.5">
-            {AUTOPOS.map((item, i) => (
-              <li key={i} className="rounded-xl border border-border bg-card px-4 py-3">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-sm font-medium text-foreground"><span className="mr-1.5 text-xs font-bold text-advanced-fg">{i + 1}.</span>{item}</span>
-                  <div className="flex shrink-0 gap-1">
-                    {SELF_SCALE.map((s) => (
-                      <button key={s.value} type="button" title={s.label} onClick={() => setAutopos((a) => a.map((v, j) => (j === i ? s.value : v)))}
-                        className={cn("size-9 rounded-lg text-sm font-bold transition-colors", autopos[i] === s.value ? "bg-advanced text-white" : "bg-secondary text-muted-foreground hover:bg-advanced-soft hover:text-advanced-fg")}>
-                        {s.value}
-                      </button>
-                    ))}
+            {AUTOPOS.map((item, i) => {
+              const invalid = autoInvalid && autopos[i] < 0;
+              return (
+                <li key={i} ref={(el) => { autoRefs.current[i] = el; }} className={cn("rounded-xl border bg-card px-5 py-4 transition-colors", invalid ? "border-unavailable ring-1 ring-unavailable/50" : "border-border")}>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-base font-medium text-foreground">
+                      <span className={cn("mr-1.5 text-sm font-bold", invalid ? "text-unavailable-fg" : "text-advanced-fg")}>{i + 1}.</span>{item}
+                      {invalid && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-unavailable-soft px-2 py-0.5 align-middle text-[11px] font-bold text-unavailable-fg"><AlertCircle className="size-3" /> À répondre</span>}
+                    </span>
+                    <div className="flex shrink-0 gap-1">
+                      {SELF_SCALE.map((s) => (
+                        <button key={s.value} type="button" title={s.label} onClick={() => setAutopos((a) => a.map((v, j) => (j === i ? s.value : v)))}
+                          className={cn("size-11 rounded-lg text-base font-bold transition-colors", autopos[i] === s.value ? "bg-advanced text-white" : "bg-secondary text-muted-foreground hover:bg-advanced-soft hover:text-advanced-fg")}>
+                          {s.value}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ol>
-          <NavButtons onBack={() => goTo("profil")} onNext={() => { if (autoDone < AUTOPOS.length) { setError(`Encore ${AUTOPOS.length - autoDone} question(s) à compléter.`); return; } goTo("qcm"); }} nextLabel="Continuer vers le QCM" />
+          <NavButtons onBack={() => goTo("profil")} onNext={() => { if (autoDone < AUTOPOS.length) { setAutoInvalid(true); setError(`Veuillez répondre à toutes les questions : ${AUTOPOS.length - autoDone} sans réponse.`); scrollToFirstUnanswered(autopos, autoRefs); return; } goTo("qcm"); }} nextLabel="Continuer vers le QCM" />
         </div>
       )}
 
       {/* ÉTAPE QCM */}
       {step === "qcm" && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-border bg-card p-5 text-base text-muted-foreground">
             <p className="font-semibold text-foreground">QCM — 30 questions, une seule bonne réponse par question.</p>
           </div>
           <ol className="space-y-3">
-            {QCM.map((item, i) => (
-              <li key={i} className="rounded-xl border border-border bg-card px-4 py-3">
-                <p className="text-sm font-semibold text-foreground"><span className="mr-1.5 text-xs font-bold text-advanced-fg">{i + 1}.</span>{item.q}</p>
-                <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
-                  {item.options.map((opt, oi) => (
-                    <button key={oi} type="button" onClick={() => setQcm((a) => a.map((v, j) => (j === i ? oi : v)))}
-                      className={cn("flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors", qcm[i] === oi ? "border-advanced bg-advanced-soft font-semibold text-advanced-fg" : "border-border hover:border-advanced/40 hover:bg-secondary")}>
-                      <span className={cn("inline-flex size-5 shrink-0 items-center justify-center rounded text-xs font-bold", qcm[i] === oi ? "bg-advanced text-white" : "bg-secondary text-muted-foreground")}>{LETTERS[oi]}</span>
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </li>
-            ))}
+            {QCM.map((item, i) => {
+              const invalid = qcmInvalid && qcm[i] < 0;
+              return (
+                <li key={i} ref={(el) => { qcmRefs.current[i] = el; }} className={cn("rounded-xl border bg-card px-5 py-4 transition-colors", invalid ? "border-unavailable ring-1 ring-unavailable/50" : "border-border")}>
+                  <p className="text-base font-semibold text-foreground">
+                    <span className={cn("mr-1.5 text-sm font-bold", invalid ? "text-unavailable-fg" : "text-advanced-fg")}>{i + 1}.</span>{item.q}
+                    {invalid && <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-unavailable-soft px-2 py-0.5 align-middle text-[11px] font-bold text-unavailable-fg"><AlertCircle className="size-3" /> À répondre</span>}
+                  </p>
+                  <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                    {item.options.map((opt, oi) => (
+                      <button key={oi} type="button" onClick={() => setQcm((a) => a.map((v, j) => (j === i ? oi : v)))}
+                        className={cn("flex items-center gap-2.5 rounded-lg border px-3.5 py-2.5 text-left text-base transition-colors", qcm[i] === oi ? "border-advanced bg-advanced-soft font-semibold text-advanced-fg" : "border-border hover:border-advanced/40 hover:bg-secondary")}>
+                        <span className={cn("inline-flex size-6 shrink-0 items-center justify-center rounded text-sm font-bold", qcm[i] === oi ? "bg-advanced text-white" : "bg-secondary text-muted-foreground")}>{LETTERS[oi]}</span>
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
           </ol>
           <NavButtons onBack={() => goTo("auto")} onNext={submit} nextLabel="Voir mon résultat" loading={submitting} icon={<Trophy className="size-4" />} />
         </div>
@@ -208,8 +258,19 @@ function ResultView({ result }: { result: CertelSubmitResult }) {
       </div>
 
       <div className="rounded-xl border border-border bg-secondary/40 px-4 py-3 text-sm text-muted-foreground">
-        Score provisoire calculé sur la partie en ligne (auto-positionnement + QCM). Les <strong className="text-foreground">tâches pratiques (/40)</strong> complètent le diagnostic certifiant lors d'un entretien avec un formateur. {CERTEL_REFS}
+        Score provisoire calculé sur la partie en ligne (auto-positionnement + QCM). Les <strong className="text-foreground">tâches pratiques (/40)</strong> complètent le diagnostic certifiant pour obtenir votre score /100. {CERTEL_REFS}
       </div>
+
+      {/* Évaluation IA des tâches pratiques */}
+      {result.id && (
+        <div className="rounded-2xl border border-advanced/30 bg-advanced-soft/40 p-5">
+          <h3 className="flex items-center gap-1.5 text-sm font-bold text-advanced-fg"><Wand2 className="size-4" /> Évaluez vos tâches pratiques (/40) avec l'IA</h3>
+          <p className="mt-1 text-sm text-foreground">Déposez vos productions (PDF, captures d'écran, texte) pour les 8 tâches pratiques. L'IA les évalue au regard des consignes et consolide votre score certifiant sur 100.</p>
+          <div className="mt-3">
+            <Button asChild className="bg-advanced text-white hover:bg-advanced/90"><Link href={`/certel/evaluation/${result.id}`}><ClipboardCheck className="size-4" /> Évaluer mes tâches pratiques</Link></Button>
+          </div>
+        </div>
+      )}
 
       {/* Suggestion d'inscription selon le niveau diagnostiqué */}
       <div className="rounded-2xl border-l-4 p-5" style={{ borderLeftColor: level.accent, backgroundColor: `${level.accent}12` }}>

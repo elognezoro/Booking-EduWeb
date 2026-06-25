@@ -157,6 +157,12 @@ model CertelDiagnostic {
   answers       String? // JSON (auto-positionnement + QCM) pour traçabilité
   createdAt     DateTime @default(now())
 
+  // Tâches pratiques (/40) évaluées par l'IA (dépôt de fichiers) — complète le /100.
+  practicalScore       Int? // /40 (somme des points obtenus aux tâches évaluées)
+  total100             Int? // /100 consolidé = online60 + practicalScore
+  practicalDetails     String? // JSON : barème + score + appréciation par tâche
+  practicalEvaluatedAt DateTime?
+
   @@index([createdAt])
 }
 

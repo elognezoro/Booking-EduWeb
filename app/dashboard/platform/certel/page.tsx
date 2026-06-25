@@ -69,8 +69,19 @@ export default async function CertelDiagnosticsPage() {
                           {!d.functionTitle && !d.structure && "—"}
                         </td>
                         <td className="py-2 pr-3">
-                          <span className="font-bold text-foreground">{d.score100}</span>
-                          <span className="text-xs text-muted-foreground">/100</span>
+                          {d.total100 != null ? (
+                            <>
+                              <span className="font-bold text-foreground">{d.total100}</span>
+                              <span className="text-xs text-muted-foreground">/100</span>
+                              <span className="block text-[11px] text-advanced-fg">+ pratiques {d.practicalScore}/40</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-bold text-foreground">{d.score100}</span>
+                              <span className="text-xs text-muted-foreground">/100</span>
+                              <span className="block text-[11px] text-muted-foreground">provisoire</span>
+                            </>
+                          )}
                           <span className="block text-[11px] text-muted-foreground">auto {d.autoposScore}/30 · QCM {d.qcmScore}/30</span>
                         </td>
                         <td className="py-2 pr-3">

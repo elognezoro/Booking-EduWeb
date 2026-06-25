@@ -7,6 +7,10 @@ const nextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
+  experimental: {
+    // Dépôt de fichiers CERTEL (PDF/captures) pour l'évaluation IA des tâches pratiques.
+    serverActions: { bodySizeLimit: "12mb" },
+  },
 };
 
 export default nextConfig;
