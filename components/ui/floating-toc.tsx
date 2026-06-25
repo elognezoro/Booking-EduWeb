@@ -53,12 +53,12 @@ export function FloatingToc({ items }: { items: TocItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 print:hidden">
+    <div className="fixed bottom-6 left-6 z-50 print:hidden">
       {open && (
         <>
           {/* clic en dehors pour fermer */}
           <button aria-hidden tabIndex={-1} className="fixed inset-0 -z-10 cursor-default" onClick={() => setOpen(false)} />
-          <div className="absolute bottom-16 right-0 w-64 overflow-hidden rounded-2xl border border-border bg-card shadow-card animate-fade-in-up">
+          <div className="absolute bottom-16 left-0 w-64 overflow-hidden rounded-2xl border border-border bg-card shadow-card animate-fade-in-up">
             <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
               <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Sur cette page</p>
               <button onClick={() => setOpen(false)} className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Fermer">

@@ -33,6 +33,7 @@ import {
   Brain,
   UserCog,
   Award,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -117,6 +118,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Gouvernement & ministères", href: "/dashboard/platform/government", icon: Landmark, permission: "platform.manage" },
       { label: "Établissements", href: "/dashboard/platform/organizations", icon: Building2, permission: "platform.manage" },
       { label: "Réglages des jeux", href: "/dashboard/platform/jeux", icon: Brain, permission: "platform.manage" },
+      { label: "Diagnostics CERTEL", href: "/dashboard/platform/certel", icon: GraduationCap, permission: "platform.manage" },
     ],
   },
   {

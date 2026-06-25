@@ -142,6 +142,24 @@ model CertificateCounter {
   count Int    @default(0)
 }
 
+// CERTEL — soumission d'un diagnostic de niveau (test public depuis l'accueil).
+model CertelDiagnostic {
+  id            String   @id @default(cuid())
+  fullName      String
+  functionTitle String?
+  structure     String?
+  contact       String? // téléphone / e-mail
+  autoposScore  Int // /30
+  qcmScore      Int // /30
+  online60      Int // /60 (partie en ligne)
+  score100      Int // /100 projeté
+  levelKey      String // N1 | N2 | N3
+  answers       String? // JSON (auto-positionnement + QCM) pour traçabilité
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // Réglages globaux de la plateforme (clé/valeur), administrés par le super admin EduWeb.
 model PlatformSetting {
   key       String   @id

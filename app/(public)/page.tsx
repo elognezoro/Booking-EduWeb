@@ -31,6 +31,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { InstitutionPicker } from "@/components/public/institution-picker";
 import { FloatingToc } from "@/components/ui/floating-toc";
+import { CertelFloatingCta } from "@/components/certel/floating-cta";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -321,6 +322,9 @@ export default async function HomePage() {
           { id: "fonctionnalites", label: "Fonctionnalités" },
         ]}
       />
+
+      {/* ===================== BOUTON FLOTTANT — DIAGNOSTIC CERTEL ===================== */}
+      <CertelFloatingCta />
     </>
   );
 }

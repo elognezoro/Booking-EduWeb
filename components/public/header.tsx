@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/features", label: "Fonctionnalités" },
+  { href: "/certel", label: "CERTEL" },
   { href: "/institutions", label: "Institutions" },
   { href: "/sport-cerebral", label: "Sport cérébral" },
   { href: "/pricing", label: "Tarifs" },
