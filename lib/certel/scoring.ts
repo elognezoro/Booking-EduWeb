@@ -31,3 +31,18 @@ export function computeScores(autoposValues: number[], qcmChoices: number[]): Ce
   const score100 = Math.round((online60 / 60) * 100);
   return { autopos, qcm, online60, score100, correctCount };
 }
+
+export interface QcmCorrection {
+  index: number;
+  chosen: number; // -1 si non répondu
+  correct: number;
+  ok: boolean;
+}
+
+/** Restitue, par question, le choix du répondant, la bonne réponse et la justesse. */
+export function correctedQcm(choices: number[]): QcmCorrection[] {
+  return QCM.map((_q, i) => {
+    const chosen = Number.isInteger(choices?.[i]) ? choices[i] : -1;
+    return { index: i, chosen, correct: QCM_ANSWERS[i], ok: chosen === QCM_ANSWERS[i] };
+  });
+}

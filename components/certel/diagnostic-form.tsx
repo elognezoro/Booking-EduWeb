@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Loader2, ArrowRight, ArrowLeft, GraduationCap, AlertCircle, Sparkles, Trophy, RotateCcw } from "lucide-react";
+import { Loader2, ArrowRight, ArrowLeft, GraduationCap, AlertCircle, Sparkles, Trophy, RotateCcw, FileText } from "lucide-react";
 import { submitCertelDiagnostic, type CertelSubmitResult } from "@/app/actions/certel";
 import { AUTOPOS, QCM, SELF_SCALE, CERTEL_REFS, levelForScore } from "@/lib/certel/diagnostic";
 import { Input } from "@/components/ui/input";
@@ -222,6 +222,7 @@ function ResultView({ result }: { result: CertelSubmitResult }) {
       </div>
 
       <div className="flex flex-wrap gap-2">
+        {result.id && <Button asChild variant="outline"><Link href={`/certel/resultats/${result.id}`}><FileText className="size-4" /> Voir / imprimer mes réponses</Link></Button>}
         <Button asChild variant="ghost"><Link href="/certel/diagnostic"><RotateCcw className="size-4" /> Refaire le test</Link></Button>
       </div>
     </div>

@@ -8,6 +8,7 @@ import { stringifyJson } from "@/lib/json";
 export interface CertelSubmitResult {
   ok: boolean;
   error?: string;
+  id?: string; // identifiant de consultation des réponses
   scores?: { autopos: number; qcm: number; online60: number; score100: number };
   levelKey?: LevelKey;
 }
@@ -28,8 +29,9 @@ export async function submitCertelDiagnostic(input: {
   const scores = computeScores(input.autopos, input.qcm);
   const level = levelForScore(scores.score100);
 
+  let id: string | undefined;
   try {
-    await prisma.certelDiagnostic.create({
+    const row = await prisma.certelDiagnostic.create({
       data: {
         fullName,
         functionTitle: input.functionTitle?.trim() || null,
@@ -42,7 +44,9 @@ export async function submitCertelDiagnostic(input: {
         levelKey: level.key,
         answers: stringifyJson({ autopos: input.autopos, qcm: input.qcm }),
       },
+      select: { id: true },
     });
+    id = row.id;
   } catch (e) {
     console.error("CERTEL diagnostic save failed", e);
     // On renvoie quand même le résultat à l'utilisateur même si l'enregistrement échoue.
@@ -50,6 +54,7 @@ export async function submitCertelDiagnostic(input: {
 
   return {
     ok: true,
+    id,
     scores: { autopos: scores.autopos, qcm: scores.qcm, online60: scores.online60, score100: scores.score100 },
     levelKey: level.key,
   };

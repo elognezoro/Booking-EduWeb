@@ -1,8 +1,10 @@
-import { GraduationCap, Mail, Briefcase, Building2 } from "lucide-react";
+import Link from "next/link";
+import { GraduationCap, Mail, Briefcase, Building2, Eye } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CERTEL_LEVELS } from "@/lib/certel/diagnostic";
 import { fromNow } from "@/lib/dates";
@@ -48,7 +50,8 @@ export default async function CertelDiagnosticsPage() {
                     <th className="py-2 pr-3 font-semibold">Profil</th>
                     <th className="py-2 pr-3 font-semibold">Score</th>
                     <th className="py-2 pr-3 font-semibold">Niveau</th>
-                    <th className="py-2 font-semibold">Date</th>
+                    <th className="py-2 pr-3 font-semibold">Date</th>
+                    <th className="py-2 font-semibold text-right">Réponses</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -73,7 +76,10 @@ export default async function CertelDiagnosticsPage() {
                         <td className="py-2 pr-3">
                           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ backgroundColor: m?.accent ?? "#6D5DF5" }}>{d.levelKey}</span>
                         </td>
-                        <td className="py-2 text-muted-foreground">{d.createdAt.toLocaleDateString("fr-FR")} · {fromNow(d.createdAt.toISOString())}</td>
+                        <td className="py-2 pr-3 text-muted-foreground">{d.createdAt.toLocaleDateString("fr-FR")} · {fromNow(d.createdAt.toISOString())}</td>
+                        <td className="py-2 text-right">
+                          <Button asChild size="sm" variant="outline"><Link href={`/certel/resultats/${d.id}`} target="_blank"><Eye className="size-3.5" /> Voir</Link></Button>
+                        </td>
                       </tr>
                     );
                   })}
