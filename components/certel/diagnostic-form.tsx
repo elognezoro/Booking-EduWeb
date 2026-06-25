@@ -51,6 +51,13 @@ export function CertelDiagnosticForm() {
         </div>
       </div>
 
+      {/* Présentation CERTEL */}
+      <div className="mb-6 rounded-2xl border border-advanced/20 bg-advanced-soft/40 p-4">
+        <p className="text-xs font-bold uppercase tracking-wide text-advanced-fg">CERTification E-Learning</p>
+        <p className="mt-1 text-sm font-medium text-foreground">Diagnostiquez votre maturité numérique et en intelligence artificielle en renseignant ce questionnaire.</p>
+        <p className="text-sm text-muted-foreground">Des formations vous seront proposées selon votre niveau de maturité.</p>
+      </div>
+
       {step !== "result" && <Stepper step={step} autoDone={autoDone} qcmDone={qcmDone} />}
 
       {error && (
@@ -189,6 +196,11 @@ function ResultView({ result }: { result: CertelSubmitResult }) {
         <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">{level.description}</p>
       </div>
 
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <h3 className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground"><Sparkles className="size-4 text-advanced-fg" /> Appréciation de votre niveau</h3>
+        <p className="text-sm leading-relaxed text-foreground">{level.appreciation}</p>
+      </div>
+
       <div className="grid grid-cols-3 gap-3">
         <ScorePill label="Auto-positionnement" value={s.autopos} max={30} />
         <ScorePill label="QCM" value={s.qcm} max={30} />
@@ -199,9 +211,17 @@ function ResultView({ result }: { result: CertelSubmitResult }) {
         Score provisoire calculé sur la partie en ligne (auto-positionnement + QCM). Les <strong className="text-foreground">tâches pratiques (/40)</strong> complètent le diagnostic certifiant lors d'un entretien avec un formateur. {CERTEL_REFS}
       </div>
 
+      {/* Suggestion d'inscription selon le niveau diagnostiqué */}
+      <div className="rounded-2xl border-l-4 p-5" style={{ borderLeftColor: level.accent, backgroundColor: `${level.accent}12` }}>
+        <h3 className="flex items-center gap-1.5 text-sm font-bold text-foreground"><GraduationCap className="size-4" style={{ color: level.accent }} /> Notre suggestion</h3>
+        <p className="mt-1 text-sm text-foreground">{level.suggestion}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Button asChild className="text-white hover:opacity-90"><Link href="/contact" style={{ backgroundColor: level.accent }}>M'inscrire à ce niveau</Link></Button>
+          <Button asChild variant="outline"><Link href={`/certel#${level.key}`}><GraduationCap className="size-4" /> Voir le programme du {level.key}</Link></Button>
+        </div>
+      </div>
+
       <div className="flex flex-wrap gap-2">
-        <Button asChild className="bg-advanced text-white hover:bg-advanced/90"><Link href={`/certel#${level.key}`}><GraduationCap className="size-4" /> Voir le programme du {level.key}</Link></Button>
-        <Button asChild variant="outline"><Link href="/register">Créer un compte</Link></Button>
         <Button asChild variant="ghost"><Link href="/certel/diagnostic"><RotateCcw className="size-4" /> Refaire le test</Link></Button>
       </div>
     </div>

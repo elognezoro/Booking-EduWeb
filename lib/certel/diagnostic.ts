@@ -93,12 +93,44 @@ export interface CertelLevel {
   max: number;
   description: string;
   accent: string; // couleur d'accent
+  appreciation: string; // appréciation de la maturité diagnostiquée
+  suggestion: string; // suggestion d'inscription
 }
 
 export const CERTEL_LEVELS: CertelLevel[] = [
-  { key: "N1", title: "Fondamentaux numériques et bureautiques", range: "0 à 39 / 100", min: 0, max: 39, description: "Besoin de consolider les bases : ordinateur, bureautique, Internet, e-mail, sécurité de base.", accent: "#0891B2" },
-  { key: "N2", title: "Productivité numérique et IA appliquée", range: "40 à 69 / 100", min: 40, max: 69, description: "Utilisateur autonome à renforcer : production professionnelle, contenus numériques, LMS, IA appliquée.", accent: "#6D5DF5" },
-  { key: "N3", title: "Ingénierie numérique, automatisation et IA avancée", range: "70 à 100 / 100", min: 70, max: 100, description: "Profil avancé : ingénierie numérique, administration LMS, IA avancée, automatisation, données.", accent: "#0B5A45" },
+  {
+    key: "N1",
+    title: "Fondamentaux numériques et bureautiques",
+    range: "0 à 39 / 100",
+    min: 0,
+    max: 39,
+    description: "Besoin de consolider les bases : ordinateur, bureautique, Internet, e-mail, sécurité de base.",
+    accent: "#0891B2",
+    appreciation: "Votre maturité numérique est en construction. Vous gagnerez beaucoup d'autonomie en consolidant les fondamentaux (ordinateur, bureautique, Internet, e-mail, sécurité) et en découvrant l'IA générative comme assistant.",
+    suggestion: "Nous vous suggérons de débuter par le Niveau 1 — Fondamentaux numériques et bureautiques pour acquérir un socle solide.",
+  },
+  {
+    key: "N2",
+    title: "Productivité numérique et IA appliquée",
+    range: "40 à 69 / 100",
+    min: 40,
+    max: 69,
+    description: "Utilisateur autonome à renforcer : production professionnelle, contenus numériques, LMS, IA appliquée.",
+    accent: "#6D5DF5",
+    appreciation: "Vous disposez d'une bonne autonomie numérique. L'étape suivante consiste à professionnaliser vos productions, à créer des contenus numériques et à exploiter l'IA de façon raisonnée et efficace.",
+    suggestion: "Nous vous suggérons de vous inscrire au Niveau 2 — Productivité numérique et IA appliquée pour passer à un usage avancé et professionnel.",
+  },
+  {
+    key: "N3",
+    title: "Ingénierie numérique, automatisation et IA avancée",
+    range: "70 à 100 / 100",
+    min: 70,
+    max: 100,
+    description: "Profil avancé : ingénierie numérique, administration LMS, IA avancée, automatisation, données.",
+    accent: "#0B5A45",
+    appreciation: "Votre maturité numérique est avancée. Vous êtes prêt(e) à viser l'expertise : ingénierie pédagogique numérique, administration de plateformes, IA avancée, automatisation et exploitation des données.",
+    suggestion: "Nous vous suggérons de vous inscrire au Niveau 3 — Ingénierie numérique, automatisation et IA avancée pour viser l'expertise et la certification supérieure.",
+  },
 ];
 
 /** Niveau conseillé à partir d'un score /100. */
