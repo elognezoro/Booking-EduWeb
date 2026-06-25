@@ -89,7 +89,7 @@ export default async function CertelDiagnosticsPage() {
                         </td>
                         <td className="py-2 pr-3 text-muted-foreground">{d.createdAt.toLocaleDateString("fr-FR")} · {fromNow(d.createdAt.toISOString())}</td>
                         <td className="py-2 text-right">
-                          <Button asChild size="sm" variant="outline"><Link href={`/certel/resultats/${d.id}`} target="_blank"><Eye className="size-3.5" /> Voir</Link></Button>
+                          <Button asChild size="sm" variant="outline"><Link href={`/dashboard/platform/certel/${d.id}`}><Eye className="size-3.5" /> Voir</Link></Button>
                         </td>
                       </tr>
                     );
