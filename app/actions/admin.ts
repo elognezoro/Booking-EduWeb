@@ -93,6 +93,17 @@ export async function updateDepartment(formData: FormData) {
   redirect("/dashboard/admin/sites");
 }
 
+/** Déplacement hiérarchique (glisser-déposer) : rattache un service à un niveau, ou le remonte en niveau (parentId null). */
+export async function moveDepartment(input: { id: string; parentId: string | null }) {
+  const user = await requirePermission("departments.manage");
+  if (!input?.id) return;
+  let parentId = await resolveParentId(user.organizationId!, input.parentId ?? undefined, input.id);
+  // Un service qui a lui-même des sous-services doit rester un niveau.
+  if (parentId && (await prisma.department.count({ where: { parentId: input.id } })) > 0) parentId = null;
+  await prisma.department.updateMany({ where: { id: input.id, organizationId: user.organizationId! }, data: { parentId } });
+  revalidatePath("/dashboard/admin/sites");
+}
+
 export async function deleteDepartment(formData: FormData) {
   const user = await requirePermission("departments.manage");
   const id = String(formData.get("id"));

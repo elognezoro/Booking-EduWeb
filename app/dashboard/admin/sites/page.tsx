@@ -1,4 +1,4 @@
-import { MapPinned, Plus, Building, Boxes, Users, Trash2, CornerDownRight, Star } from "lucide-react";
+import { MapPinned, Plus, Building, Boxes, Trash2 } from "lucide-react";
 import { requirePermission, getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -8,10 +8,8 @@ import { Input, Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmActionButton } from "@/components/confirm-action";
-import { EditDepartmentButton } from "@/components/dashboard/edit-department-button";
-import { ManageMembersButton } from "@/components/dashboard/manage-members-button";
-import { createSite, createDepartment, deleteSite, deleteDepartment } from "@/app/actions/admin";
-import { cn } from "@/lib/utils";
+import { ServiceTree, type ServiceNode } from "@/components/dashboard/service-tree";
+import { createSite, createDepartment, deleteSite } from "@/app/actions/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +51,7 @@ export default async function SitesAdminPage() {
     <div className="space-y-5">
       <PageHeader
         title="Sites & services"
-        description="Structurez votre organisation : Organisation › Site › Service › Ressources. Chaque service a un responsable et des agents."
+        description="Structurez votre organisation : Organisation › Site › Service › Ressources. Glissez-déposez un service pour le déplacer. Chaque service a un responsable et des agents."
         icon={<span className="inline-flex size-11 items-center justify-center rounded-2xl bg-primary-50 text-primary"><MapPinned className="size-6" /></span>}
       />
 
@@ -69,6 +67,25 @@ export default async function SitesAdminPage() {
             }
             const shown = new Set(ordered.map((o) => o.d.id));
             for (const d of depts) if (!shown.has(d.id)) ordered.push({ d, child: true });
+
+            const nodes: ServiceNode[] = ordered.map(({ d, child }) => {
+              const head = d.users.find((u) => u.id === d.headId);
+              return {
+                id: d.id,
+                name: d.name,
+                code: d.code,
+                siteId: d.siteId,
+                parentId: d.parentId,
+                headId: d.headId,
+                child,
+                headName: head ? fullName(head) : null,
+                counts: { users: d._count.users, resources: d._count.resources, children: d._count.children },
+                members: d.users.map((u) => ({ id: u.id, name: fullName(u) })),
+                candidates: orgUsers
+                  .filter((u) => u.departmentId !== d.id)
+                  .map((u) => ({ id: u.id, name: fullName(u), dept: u.organizationId === null ? "sans institution" : (u.department?.name ?? null) })),
+              };
+            });
 
             return (
               <Card key={site.id}>
@@ -89,49 +106,7 @@ export default async function SitesAdminPage() {
                     </div>
                   </div>
 
-                  {ordered.length > 0 && (
-                    <div className="mt-3 space-y-0.5 border-l-2 border-border pl-3">
-                      {ordered.map(({ d, child }) => {
-                        const empty = d._count.users === 0 && d._count.resources === 0 && d._count.children === 0;
-                        const members = d.users.map((u) => ({ id: u.id, name: fullName(u) }));
-                        const head = d.users.find((u) => u.id === d.headId);
-                        const candidates = orgUsers.filter((u) => u.departmentId !== d.id).map((u) => ({ id: u.id, name: fullName(u), dept: u.organizationId === null ? "sans institution" : (u.department?.name ?? null) }));
-                        return (
-                          <div key={d.id} className={cn("group flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-secondary/60", child && "ml-5")}>
-                            <span className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-foreground">
-                              {child && <CornerDownRight className="size-3.5 shrink-0 text-muted-foreground" />}
-                              <span className="truncate">{d.name}</span>
-                              {d.code && <span className="shrink-0 text-xs text-muted-foreground">· {d.code}</span>}
-                              {head && <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-advanced-fg"><Star className="size-3" /> {fullName(head)}</span>}
-                              {d._count.children > 0 && <span className="shrink-0 text-xs text-muted-foreground">· {d._count.children} sous-service{d._count.children > 1 ? "s" : ""}</span>}
-                            </span>
-                            <span className="flex shrink-0 items-center gap-2">
-                              <span className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span className="inline-flex items-center gap-1"><Users className="size-3" /> {d._count.users}</span>
-                                <span className="inline-flex items-center gap-1"><Boxes className="size-3" /> {d._count.resources}</span>
-                              </span>
-                              <ManageMembersButton dept={{ id: d.id, name: d.name, headId: d.headId }} members={members} candidates={candidates} />
-                              <EditDepartmentButton dept={{ id: d.id, name: d.name, code: d.code, siteId: d.siteId, parentId: d.parentId }} sites={siteOptions} niveaux={niveaux} />
-                              {empty && (
-                                <ConfirmActionButton
-                                  action={deleteDepartment}
-                                  hidden={{ id: d.id }}
-                                  triggerLabel=""
-                                  triggerIcon={<Trash2 className="size-4" />}
-                                  triggerVariant="ghost"
-                                  triggerSize="icon-sm"
-                                  title={`Supprimer le service « ${d.name} » ?`}
-                                  description="Cette action est définitive. Seul un service vide (sans agent, ressource ni sous-service) peut être supprimé."
-                                  confirmLabel="Supprimer"
-                                  confirmVariant="destructive"
-                                />
-                              )}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  {nodes.length > 0 && <ServiceTree nodes={nodes} niveaux={niveaux} sites={siteOptions} />}
                 </CardContent>
               </Card>
             );
