@@ -36,7 +36,12 @@ export async function updateOrganization(formData: FormData) {
       address: formData.get("address") || undefined,
       primaryColor: formData.get("primaryColor") || undefined,
     });
-  await prisma.organization.update({ where: { id: user.organizationId! }, data });
+  // Logo : "" = inchangé · "__REMOVE__" = retirer · "data:image/..." = nouveau (base64).
+  const logoRaw = String(formData.get("logoUrl") || "");
+  const logo: { logoUrl?: string | null } = {};
+  if (logoRaw === "__REMOVE__") logo.logoUrl = null;
+  else if (logoRaw.startsWith("data:image/")) logo.logoUrl = logoRaw;
+  await prisma.organization.update({ where: { id: user.organizationId! }, data: { ...data, ...logo } });
   await audit({ organizationId: user.organizationId, userId: user.id, action: "organization.update", entityType: "Organization", entityId: user.organizationId, newValue: data });
   revalidatePath("/dashboard/admin/organization");
   redirect("/dashboard/admin/organization?saved=1");
@@ -53,21 +58,102 @@ export async function createSite(formData: FormData) {
   redirect("/dashboard/admin/sites");
 }
 
+/** Valide un parent : doit être un « niveau » (sans parent) de l'organisation, et jamais soi-même. */
+async function resolveParentId(organizationId: string, candidate: string | undefined, selfId: string | null): Promise<string | null> {
+  if (!candidate || candidate === selfId) return null;
+  const parent = await prisma.department.findFirst({ where: { id: candidate, organizationId }, select: { id: true, parentId: true } });
+  if (!parent || parent.parentId) return null; // le parent doit être un niveau (sans rattachement)
+  return parent.id;
+}
+
 export async function createDepartment(formData: FormData) {
   const user = await requirePermission("departments.manage");
-  const data = z.object({ name: z.string().min(2), code: z.string().optional(), siteId: z.string().optional() }).parse({
-    name: formData.get("name"), code: formData.get("code") || undefined, siteId: formData.get("siteId") || undefined,
+  const data = z.object({ name: z.string().min(2), code: z.string().optional(), siteId: z.string().optional(), parentId: z.string().optional() }).parse({
+    name: formData.get("name"), code: formData.get("code") || undefined, siteId: formData.get("siteId") || undefined, parentId: formData.get("parentId") || undefined,
   });
-  await prisma.department.create({ data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, organizationId: user.organizationId! } });
+  const parentId = await resolveParentId(user.organizationId!, data.parentId, null);
+  await prisma.department.create({ data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, parentId, organizationId: user.organizationId! } });
   revalidatePath("/dashboard/admin/sites");
   redirect("/dashboard/admin/sites");
+}
+
+export async function updateDepartment(formData: FormData) {
+  const user = await requirePermission("departments.manage");
+  const data = z.object({ id: z.string().min(1), name: z.string().min(2), code: z.string().optional(), siteId: z.string().optional(), parentId: z.string().optional() }).parse({
+    id: formData.get("id"), name: formData.get("name"), code: formData.get("code") || undefined, siteId: formData.get("siteId") || undefined, parentId: formData.get("parentId") || undefined,
+  });
+  let parentId = await resolveParentId(user.organizationId!, data.parentId, data.id);
+  // Un service qui a lui-même des sous-services doit rester un niveau (pas de rattachement).
+  if (parentId && (await prisma.department.count({ where: { parentId: data.id } })) > 0) parentId = null;
+  await prisma.department.updateMany({
+    where: { id: data.id, organizationId: user.organizationId! },
+    data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, parentId },
+  });
+  revalidatePath("/dashboard/admin/sites");
+  redirect("/dashboard/admin/sites");
+}
+
+export async function deleteDepartment(formData: FormData) {
+  const user = await requirePermission("departments.manage");
+  const id = String(formData.get("id"));
+  // Suppression seulement si le service est vide : aucun utilisateur, ressource ni sous-service.
+  const [users, resources, children] = await Promise.all([
+    prisma.user.count({ where: { departmentId: id } }),
+    prisma.resource.count({ where: { departmentId: id } }),
+    prisma.department.count({ where: { parentId: id } }),
+  ]);
+  if (users === 0 && resources === 0 && children === 0) {
+    await prisma.department.deleteMany({ where: { id, organizationId: user.organizationId! } });
+  }
+  revalidatePath("/dashboard/admin/sites");
+  redirect("/dashboard/admin/sites");
+}
+
+/** Inscrit un agent dans un service : un utilisateur de l'institution OU un inscrit
+ * sans institution (qui est alors affecté à cette institution) est rattaché au service. */
+export async function addDepartmentMember(formData: FormData) {
+  const user = await requirePermission("departments.manage");
+  const departmentId = String(formData.get("departmentId") || "");
+  const userId = String(formData.get("userId") || "");
+  const dept = await prisma.department.findFirst({ where: { id: departmentId, organizationId: user.organizationId! }, select: { id: true } });
+  if (dept && userId) {
+    await prisma.user.updateMany({
+      where: { id: userId, OR: [{ organizationId: user.organizationId! }, { organizationId: null }] },
+      data: { organizationId: user.organizationId!, departmentId },
+    });
+  }
+  revalidatePath("/dashboard/admin/sites");
+}
+
+/** Retire un agent d'un service (et le déshabilite comme responsable le cas échéant). */
+export async function removeDepartmentMember(formData: FormData) {
+  const user = await requirePermission("departments.manage");
+  const departmentId = String(formData.get("departmentId") || "");
+  const userId = String(formData.get("userId") || "");
+  await prisma.user.updateMany({ where: { id: userId, organizationId: user.organizationId!, departmentId }, data: { departmentId: null } });
+  await prisma.department.updateMany({ where: { id: departmentId, organizationId: user.organizationId!, headId: userId }, data: { headId: null } });
+  revalidatePath("/dashboard/admin/sites");
+}
+
+/** Désigne (ou retire) le responsable d'un service. Le responsable doit être un membre du service. */
+export async function setDepartmentHead(formData: FormData) {
+  const user = await requirePermission("departments.manage");
+  const departmentId = String(formData.get("departmentId") || "");
+  const userId = String(formData.get("userId") || ""); // "" = aucun responsable
+  let headId: string | null = null;
+  if (userId) {
+    const member = await prisma.user.count({ where: { id: userId, organizationId: user.organizationId!, departmentId } });
+    headId = member === 1 ? userId : null; // doit être un membre du service
+  }
+  await prisma.department.updateMany({ where: { id: departmentId, organizationId: user.organizationId! }, data: { headId } });
+  revalidatePath("/dashboard/admin/sites");
 }
 
 export async function deleteSite(formData: FormData) {
   const user = await requirePermission("sites.manage");
   const id = String(formData.get("id"));
   const count = await prisma.resource.count({ where: { siteId: id } });
-  if (count === 0) await prisma.site.delete({ where: { id } });
+  if (count === 0) await prisma.site.deleteMany({ where: { id, organizationId: user.organizationId! } });
   revalidatePath("/dashboard/admin/sites");
   redirect("/dashboard/admin/sites");
 }

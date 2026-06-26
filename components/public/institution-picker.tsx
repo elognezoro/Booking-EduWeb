@@ -10,6 +10,7 @@ export interface InstitutionOption {
   acronym: string | null;
   city: string | null;
   primaryColor: string | null;
+  logoUrl: string | null;
 }
 
 function normalize(v: string) {
@@ -65,12 +66,17 @@ export function InstitutionPicker({ institutions }: { institutions: InstitutionO
                   onClick={() => go(i.slug)}
                   className="group flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card"
                 >
-                  <span
-                    className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl text-sm font-extrabold"
-                    style={{ backgroundColor: `${color}1a`, color }}
-                  >
-                    {i.acronym ?? <Building2 className="size-6" />}
-                  </span>
+                  {i.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={i.logoUrl} alt={i.name} className="size-12 shrink-0 rounded-2xl border border-border bg-white object-contain p-1" />
+                  ) : (
+                    <span
+                      className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl text-sm font-extrabold"
+                      style={{ backgroundColor: `${color}1a`, color }}
+                    >
+                      {i.acronym ?? <Building2 className="size-6" />}
+                    </span>
+                  )}
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-bold text-foreground">{i.name}</span>
                     {i.city && (

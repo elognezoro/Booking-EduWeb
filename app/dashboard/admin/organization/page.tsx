@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CertificateImageUpload } from "@/components/certificates/image-upload";
 import { updateOrganization } from "@/app/actions/admin";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +47,9 @@ export default async function OrganizationAdminPage({ searchParams }: { searchPa
             <div className="sm:col-span-2">
               <Label htmlFor="address">Adresse</Label>
               <Textarea id="address" name="address" defaultValue={org?.address ?? ""} />
+            </div>
+            <div className="sm:col-span-2">
+              <CertificateImageUpload name="logoUrl" label="Logo de l'institution" initial={org?.logoUrl} hint="PNG/JPEG/WebP. Affiché à la place du sigle dans le sélecteur d'institutions." />
             </div>
             <div>
               <Label htmlFor="primaryColor">Couleur principale</Label>

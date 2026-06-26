@@ -40,11 +40,11 @@ export default async function HomePage() {
   const institutionsRaw = await prisma.organization.findMany({
     where: { isPlatform: false, status: "ACTIVE" },
     orderBy: { name: "asc" },
-    select: { name: true, slug: true, acronym: true, city: true, primaryColor: true },
+    select: { name: true, slug: true, acronym: true, city: true, primaryColor: true, logoUrl: true },
   });
   const institutions = institutionsRaw
     .filter((i): i is typeof i & { slug: string } => !!i.slug)
-    .map((i) => ({ name: i.name, slug: i.slug, acronym: i.acronym, city: i.city, primaryColor: i.primaryColor }));
+    .map((i) => ({ name: i.name, slug: i.slug, acronym: i.acronym, city: i.city, primaryColor: i.primaryColor, logoUrl: i.logoUrl }));
 
   return (
     <>

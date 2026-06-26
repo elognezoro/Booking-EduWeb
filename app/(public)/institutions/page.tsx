@@ -12,13 +12,13 @@ export default async function InstitutionsPage() {
   const institutions = await prisma.organization.findMany({
     where: { isPlatform: false, status: "ACTIVE" },
     orderBy: { name: "asc" },
-    select: { name: true, slug: true, acronym: true, city: true, primaryColor: true },
+    select: { name: true, slug: true, acronym: true, city: true, primaryColor: true, logoUrl: true },
   });
 
   // On n'expose que les institutions disposant d'un identifiant d'espace (slug).
   const list = institutions
     .filter((i): i is typeof i & { slug: string } => !!i.slug)
-    .map((i) => ({ name: i.name, slug: i.slug, acronym: i.acronym, city: i.city, primaryColor: i.primaryColor }));
+    .map((i) => ({ name: i.name, slug: i.slug, acronym: i.acronym, city: i.city, primaryColor: i.primaryColor, logoUrl: i.logoUrl }));
 
   return (
     <section className="section py-16">

@@ -228,12 +228,14 @@ model Department {
   parentId       String? // null = Niveau (Direction/Sous-Direction) ; renseigné = Service rattaché à un niveau
   name           String
   code           String?
+  headId         String? // responsable du service (un utilisateur membre désigné)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   site         Site?        @relation(fields: [siteId], references: [id])
   parent       Department?  @relation("DeptHierarchy", fields: [parentId], references: [id])
   children     Department[] @relation("DeptHierarchy")
-  users        User[]
+  head         User?        @relation("DepartmentHead", fields: [headId], references: [id], onDelete: SetNull)
+  users        User[]       @relation("DepartmentMembers")
   resources    Resource[]
 }
 
@@ -255,7 +257,8 @@ model User {
   updatedAt      DateTime @updatedAt
 
   organization     Organization?       @relation(fields: [organizationId], references: [id])
-  department       Department?         @relation(fields: [departmentId], references: [id])
+  department       Department?         @relation("DepartmentMembers", fields: [departmentId], references: [id])
+  headOf           Department[]        @relation("DepartmentHead")
   roles            UserRole[]
   managedResources Resource[]          @relation("ResourceManager")
   bookings         Booking[]           @relation("BookingRequester")
