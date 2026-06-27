@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmActionButton } from "@/components/confirm-action";
 import { ServiceTree, type ServiceNode } from "@/components/dashboard/service-tree";
+import { DEPARTMENT_LEVELS } from "@/lib/departments";
 import { createSite, createDepartment, deleteSite } from "@/app/actions/admin";
 
 export const dynamic = "force-dynamic";
@@ -76,6 +77,7 @@ export default async function SitesAdminPage() {
                 parentId: d.parentId,
                 headId: d.headId,
                 depth,
+                level: d.level,
                 headName: head ? fullName(head) : null,
                 counts: { users: d._count.users, resources: d._count.resources, children: d._count.children },
                 members: d.users.map((u) => ({ id: u.id, name: fullName(u) })),
@@ -86,15 +88,19 @@ export default async function SitesAdminPage() {
             };
             const nodes: ServiceNode[] = [];
             const visited = new Set<string>();
-            const visit = (parentId: string | null, depth: number) => {
+            // L'indentation suit le rang d'affichage `level` s'il est défini, sinon la profondeur héritée du parent.
+            const visit = (parentId: string | null, inheritedDepth: number) => {
               for (const d of byParent.get(parentId) ?? []) {
                 if (visited.has(d.id)) continue;
                 visited.add(d.id);
-                nodes.push(makeNode(d, depth));
-                visit(d.id, depth + 1);
+                // Racine (sans parent) : toujours au niveau 0. Sinon : rang `level` s'il est défini, sinon la profondeur héritée.
+                const eff = parentId === null ? 0 : (d.level != null ? d.level : inheritedDepth);
+                nodes.push(makeNode(d, eff));
+                visit(d.id, eff + 1);
               }
             };
             visit(null, 0);
+            // Orphelins (parent hors site) : affichés au niveau racine.
             for (const d of depts) if (!visited.has(d.id)) { visited.add(d.id); nodes.push(makeNode(d, 0)); }
 
             return (
@@ -154,6 +160,12 @@ export default async function SitesAdminPage() {
                   <Select id="dparent" name="parentId">
                     <option value="">— (aucun parent)</option>
                     {parentOptions.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="dlevel">Niveau hiérarchique (alignement)</Label>
+                  <Select id="dlevel" name="level">
+                    {DEPARTMENT_LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
                   </Select>
                 </div>
                 <Button type="submit" className="w-full"><Plus className="size-4" /> Ajouter le service</Button>

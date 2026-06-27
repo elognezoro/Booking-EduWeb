@@ -1,12 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Users, UserPlus, X, Star } from "lucide-react";
+import { Users, UserPlus, X, Star, Search, Loader2 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
-import { SubmitButton } from "@/components/ui/submit-button";
-import { addDepartmentMember, removeDepartmentMember, setDepartmentHead } from "@/app/actions/admin";
+import { addDepartmentMembers, removeDepartmentMember, setDepartmentHead } from "@/app/actions/admin";
 
 interface Member { id: string; name: string; }
 interface Candidate { id: string; name: string; dept: string | null; }
@@ -22,6 +21,39 @@ export function ManageMembersButton({
   candidates: Candidate[];
 }) {
   const [open, setOpen] = React.useState(false);
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const [query, setQuery] = React.useState("");
+  const [pending, setPending] = React.useState(false);
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return candidates;
+    return candidates.filter((c) => c.name.toLowerCase().includes(q) || (c.dept?.toLowerCase().includes(q) ?? false));
+  }, [candidates, query]);
+
+  const toggle = (id: string) =>
+    setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every((c) => selected.has(c.id));
+  const toggleAllFiltered = () =>
+    setSelected((s) => {
+      const n = new Set(s);
+      if (allFilteredSelected) filtered.forEach((c) => n.delete(c.id));
+      else filtered.forEach((c) => n.add(c.id));
+      return n;
+    });
+
+  const addSelected = async () => {
+    if (selected.size === 0 || pending) return;
+    setPending(true);
+    try {
+      await addDepartmentMembers({ departmentId: dept.id, userIds: [...selected] });
+      setSelected(new Set());
+      setQuery("");
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
     <>
@@ -71,19 +103,52 @@ export function ManageMembersButton({
             )}
           </div>
 
-          {/* Ajouter un agent */}
+          {/* Ajouter des agents (sélection multiple) */}
           {candidates.length > 0 && (
-            <form action={addDepartmentMember} className="flex items-end gap-2 border-t border-border pt-3">
-              <input type="hidden" name="departmentId" value={dept.id} />
-              <div className="flex-1">
-                <label htmlFor={`addm-${dept.id}`} className="mb-1 block text-xs font-semibold text-muted-foreground">Ajouter un agent</label>
-                <Select id={`addm-${dept.id}`} name="userId" defaultValue="">
-                  <option value="" disabled>Choisir un utilisateur…</option>
-                  {candidates.map((c) => <option key={c.id} value={c.id}>{c.name}{c.dept ? ` (actuellement : ${c.dept})` : ""}</option>)}
-                </Select>
+            <div className="border-t border-border pt-3">
+              <div className="mb-1.5 flex items-center justify-between">
+                <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Ajouter des agents</p>
+                {selected.size > 0 && <span className="text-xs font-semibold text-primary">{selected.size} sélectionné{selected.size > 1 ? "s" : ""}</span>}
               </div>
-              <SubmitButton size="sm" pendingLabel="Ajout…"><UserPlus className="size-4" /> Ajouter</SubmitButton>
-            </form>
+              {candidates.length > 6 && (
+                <div className="relative mb-2">
+                  <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Rechercher un utilisateur…"
+                    className="w-full rounded-lg border border-input bg-background py-1.5 pl-8 pr-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              )}
+              <div className="max-h-56 space-y-0.5 overflow-y-auto rounded-lg border border-border p-1">
+                {filtered.length === 0 ? (
+                  <p className="px-2 py-3 text-center text-sm text-muted-foreground">Aucun utilisateur trouvé.</p>
+                ) : (
+                  filtered.map((c) => (
+                    <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-secondary/60">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(c.id)}
+                        onChange={() => toggle(c.id)}
+                        className="size-4 shrink-0 rounded border-input text-primary focus:ring-2 focus:ring-ring"
+                      />
+                      <span className="text-foreground">{c.name}</span>
+                      {c.dept && <span className="text-xs text-muted-foreground">· {c.dept}</span>}
+                    </label>
+                  ))
+                )}
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <button type="button" onClick={toggleAllFiltered} className="text-xs font-semibold text-primary hover:underline disabled:opacity-50" disabled={filtered.length === 0}>
+                  {allFilteredSelected ? "Tout désélectionner" : "Tout sélectionner"}
+                </button>
+                <Button type="button" size="sm" onClick={addSelected} disabled={selected.size === 0 || pending}>
+                  {pending ? <><Loader2 className="size-4 animate-spin" /> Ajout…</> : <><UserPlus className="size-4" /> Ajouter{selected.size > 0 ? ` (${selected.size})` : ""}</>}
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </Modal>

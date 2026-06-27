@@ -16,6 +16,7 @@ export interface ServiceNode {
   parentId: string | null;
   headId: string | null;
   depth: number;
+  level: number | null;
   headName: string | null;
   counts: { users: number; resources: number; children: number };
   members: { id: string; name: string }[];
@@ -96,7 +97,7 @@ export function ServiceTree({ nodes, parents, sites }: { nodes: ServiceNode[]; p
                 <span className="inline-flex items-center gap-1"><Boxes className="size-3" /> {d.counts.resources}</span>
               </span>
               <ManageMembersButton dept={{ id: d.id, name: d.name, headId: d.headId }} members={d.members} candidates={d.candidates} />
-              <EditDepartmentButton dept={{ id: d.id, name: d.name, code: d.code, siteId: d.siteId, parentId: d.parentId }} sites={sites} niveaux={parents} />
+              <EditDepartmentButton dept={{ id: d.id, name: d.name, code: d.code, siteId: d.siteId, parentId: d.parentId, level: d.level }} sites={sites} niveaux={parents} />
               {empty && (
                 <ConfirmActionButton
                   action={deleteDepartment}

@@ -110,13 +110,22 @@ async function resolveParentId(organizationId: string, candidate: string | undef
   return parent.id;
 }
 
+/** Rang d'affichage (alignement) d'un service : entier 0–6, ou null pour « automatique » (profondeur du parent). */
+function parseLevel(formData: FormData): number | null {
+  const raw = formData.get("level");
+  if (raw == null || raw === "") return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return null;
+  return Math.max(0, Math.min(3, Math.trunc(n))); // 0=Direction … 3=Sous-service (cf. DEPARTMENT_LEVELS)
+}
+
 export async function createDepartment(formData: FormData) {
   const user = await requirePermission("departments.manage");
   const data = z.object({ name: z.string().min(2), code: z.string().optional(), siteId: z.string().optional(), parentId: z.string().optional() }).parse({
     name: formData.get("name"), code: formData.get("code") || undefined, siteId: formData.get("siteId") || undefined, parentId: formData.get("parentId") || undefined,
   });
   const parentId = await resolveParentId(user.organizationId!, data.parentId, null);
-  await prisma.department.create({ data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, parentId, organizationId: user.organizationId! } });
+  await prisma.department.create({ data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, parentId, level: parseLevel(formData), organizationId: user.organizationId! } });
   revalidatePath("/dashboard/admin/sites");
   redirect("/dashboard/admin/sites");
 }
@@ -131,7 +140,7 @@ export async function updateDepartment(formData: FormData) {
   const parentField = data.parentId && resolvedParent === null ? {} : { parentId: resolvedParent };
   await prisma.department.updateMany({
     where: { id: data.id, organizationId: user.organizationId! },
-    data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, ...parentField },
+    data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, level: parseLevel(formData), ...parentField },
   });
   revalidatePath("/dashboard/admin/sites");
   redirect("/dashboard/admin/sites");
@@ -144,7 +153,9 @@ export async function moveDepartment(input: { id: string; parentId: string | nul
   if (!input?.id) return;
   const resolved = await resolveParentId(user.organizationId!, input.parentId ?? undefined, input.id);
   if (input.parentId && resolved === null) return; // parent invalide / cycle → ne rien faire (ne pas détacher)
-  await prisma.department.updateMany({ where: { id: input.id, organizationId: user.organizationId! }, data: { parentId: resolved } });
+  // Remonté à la racine → redevient un niveau de premier rang : on efface le rang d'affichage explicite.
+  const data = resolved === null ? { parentId: null, level: null } : { parentId: resolved };
+  await prisma.department.updateMany({ where: { id: input.id, organizationId: user.organizationId! }, data });
   revalidatePath("/dashboard/admin/sites");
 }
 
@@ -177,6 +188,22 @@ export async function addDepartmentMember(formData: FormData) {
       data: { organizationId: user.organizationId!, departmentId },
     });
   }
+  revalidatePath("/dashboard/admin/sites");
+}
+
+/** Affecte plusieurs agents à un service en une seule fois (sélection multiple).
+ * Chaque utilisateur de l'institution OU sans institution (alors rattaché à l'institution) est affecté au service. */
+export async function addDepartmentMembers(input: { departmentId: string; userIds: string[] }) {
+  const user = await requirePermission("departments.manage");
+  const departmentId = input?.departmentId || "";
+  const userIds = Array.isArray(input?.userIds) ? input.userIds.filter(Boolean) : [];
+  if (!departmentId || userIds.length === 0) return;
+  const dept = await prisma.department.findFirst({ where: { id: departmentId, organizationId: user.organizationId! }, select: { id: true } });
+  if (!dept) return;
+  await prisma.user.updateMany({
+    where: { id: { in: userIds }, OR: [{ organizationId: user.organizationId! }, { organizationId: null }] },
+    data: { organizationId: user.organizationId!, departmentId },
+  });
   revalidatePath("/dashboard/admin/sites");
 }
 

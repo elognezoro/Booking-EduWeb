@@ -8,6 +8,7 @@ import { Input, Select } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { updateDepartment } from "@/app/actions/admin";
+import { DEPARTMENT_LEVELS } from "@/lib/departments";
 
 interface DeptLite {
   id: string;
@@ -15,6 +16,7 @@ interface DeptLite {
   code: string | null;
   siteId: string | null;
   parentId: string | null;
+  level: number | null;
 }
 
 /** Bouton + fenêtre d'édition d'un service (nom, code, site, rattachement à un niveau). */
@@ -60,6 +62,13 @@ export function EditDepartmentButton({
               {parentChoices.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
             </Select>
             <p className="mt-1 text-xs text-muted-foreground">Laisser vide pour un service de premier niveau, ou choisir un parent pour l'imbriquer (profondeur libre).</p>
+          </div>
+          <div>
+            <Label htmlFor={`dl-${dept.id}`}>Niveau hiérarchique (alignement)</Label>
+            <Select id={`dl-${dept.id}`} name="level" defaultValue={dept.level != null ? String(dept.level) : ""}>
+              {DEPARTMENT_LEVELS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">Aligne visuellement le service à ce rang, indépendamment de son rattachement. Ex. : un « Service » rattaché à la Direction s'aligne sur les autres services. « Automatique » suit la profondeur du parent.</p>
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Annuler</Button>

@@ -228,6 +228,7 @@ model Department {
   parentId       String? // null = Niveau (Direction/Sous-Direction) ; renseigné = Service rattaché à un niveau
   name           String
   code           String?
+  level          Int? // rang d'affichage (alignement) : 0=Direction,1=Sous-Direction,2=Service,3=Sous-service ; null = auto (profondeur du parent)
   headId         String? // responsable du service (un utilisateur membre désigné)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
