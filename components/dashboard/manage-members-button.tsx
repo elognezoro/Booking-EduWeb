@@ -82,7 +82,7 @@ export function ManageMembersButton({
           <div>
             <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground"><Users className="size-3.5" /> Agents ({members.length})</p>
             {members.length > 0 ? (
-              <ul className="space-y-1">
+              <ul className="max-h-44 space-y-1 overflow-y-auto pr-0.5">
                 {members.map((m) => (
                   <li key={m.id} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm">
                     <span className="flex items-center gap-1.5 text-foreground">
