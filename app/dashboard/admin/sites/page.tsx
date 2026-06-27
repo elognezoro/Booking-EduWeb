@@ -67,6 +67,16 @@ export default async function SitesAdminPage() {
               a.push(d);
               byParent.set(d.parentId, a);
             }
+            // Ordre d'affichage : sous chaque parent, les services directs (sans sous-service) d'abord
+            // — donc juste sous leur parent —, puis les sous-structures (qui se déploient) ; chaque groupe par nom.
+            for (const arr of byParent.values()) {
+              arr.sort((a, b) => {
+                const ac = a._count.children > 0 ? 1 : 0;
+                const bc = b._count.children > 0 ? 1 : 0;
+                if (ac !== bc) return ac - bc;
+                return a.name.localeCompare(b.name, "fr");
+              });
+            }
             const makeNode = (d: (typeof depts)[number], depth: number): ServiceNode => {
               const head = d.users.find((u) => u.id === d.headId);
               return {
