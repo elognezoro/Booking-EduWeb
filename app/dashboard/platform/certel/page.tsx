@@ -1,13 +1,9 @@
-import Link from "next/link";
-import { GraduationCap, Mail, Briefcase, Building2, Eye, Trash2 } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ConfirmActionButton } from "@/components/confirm-action";
-import { deleteCertelDiagnostic } from "@/app/actions/certel";
+import { CertelJournal, type CertelRow } from "@/components/dashboard/certel-journal";
 import { CERTEL_LEVELS } from "@/lib/certel/diagnostic";
 import { fromNow } from "@/lib/dates";
 
@@ -20,6 +16,22 @@ export default async function CertelDiagnosticsPage() {
   const byLevel: Record<string, number> = { N1: 0, N2: 0, N3: 0 };
   for (const i of items) byLevel[i.levelKey] = (byLevel[i.levelKey] ?? 0) + 1;
   const levelMeta = (k: string) => CERTEL_LEVELS.find((l) => l.key === k);
+
+  const rows: CertelRow[] = items.map((d) => ({
+    id: d.id,
+    fullName: d.fullName,
+    contact: d.contact,
+    functionTitle: d.functionTitle,
+    structure: d.structure,
+    levelKey: d.levelKey,
+    levelAccent: levelMeta(d.levelKey)?.accent ?? "#6D5DF5",
+    total100: d.total100,
+    practicalScore: d.practicalScore,
+    score100: d.score100,
+    autoposScore: d.autoposScore,
+    qcmScore: d.qcmScore,
+    dateLabel: `${d.createdAt.toLocaleDateString("fr-FR")} · ${fromNow(d.createdAt.toISOString())}`,
+  }));
 
   return (
     <div className="space-y-5">
@@ -41,79 +53,7 @@ export default async function CertelDiagnosticsPage() {
 
       <Card>
         <CardContent className="py-5">
-          {items.length === 0 ? (
-            <EmptyState icon={GraduationCap} title="Aucun diagnostic pour le moment" description="Les tests de niveau réalisés depuis la page d'accueil apparaîtront ici." />
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="py-2 pr-3 font-semibold">Participant</th>
-                    <th className="py-2 pr-3 font-semibold">Profil</th>
-                    <th className="py-2 pr-3 font-semibold">Score</th>
-                    <th className="py-2 pr-3 font-semibold">Niveau</th>
-                    <th className="py-2 pr-3 font-semibold">Date</th>
-                    <th className="py-2 font-semibold text-right">Réponses</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((d) => {
-                    const m = levelMeta(d.levelKey);
-                    return (
-                      <tr key={d.id} className="border-b border-border/60 align-top">
-                        <td className="py-2 pr-3">
-                          <p className="font-semibold text-foreground">{d.fullName}</p>
-                          {d.contact && <p className="inline-flex items-center gap-1 text-xs text-muted-foreground"><Mail className="size-3" /> {d.contact}</p>}
-                        </td>
-                        <td className="py-2 pr-3 text-muted-foreground">
-                          {d.functionTitle && <span className="block"><Briefcase className="mr-1 inline size-3" />{d.functionTitle}</span>}
-                          {d.structure && <span className="block"><Building2 className="mr-1 inline size-3" />{d.structure}</span>}
-                          {!d.functionTitle && !d.structure && "—"}
-                        </td>
-                        <td className="py-2 pr-3">
-                          {d.total100 != null ? (
-                            <>
-                              <span className="font-bold text-foreground">{d.total100}</span>
-                              <span className="text-xs text-muted-foreground">/100</span>
-                              <span className="block text-[11px] text-advanced-fg">+ pratiques {d.practicalScore}/40</span>
-                            </>
-                          ) : (
-                            <>
-                              <span className="font-bold text-foreground">{d.score100}</span>
-                              <span className="text-xs text-muted-foreground">/100</span>
-                              <span className="block text-[11px] text-muted-foreground">provisoire</span>
-                            </>
-                          )}
-                          <span className="block text-[11px] text-muted-foreground">auto {d.autoposScore}/30 · QCM {d.qcmScore}/30</span>
-                        </td>
-                        <td className="py-2 pr-3">
-                          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ backgroundColor: m?.accent ?? "#6D5DF5" }}>{d.levelKey}</span>
-                        </td>
-                        <td className="py-2 pr-3 text-muted-foreground">{d.createdAt.toLocaleDateString("fr-FR")} · {fromNow(d.createdAt.toISOString())}</td>
-                        <td className="py-2 text-right">
-                          <div className="inline-flex items-center gap-1.5">
-                            <Button asChild size="sm" variant="outline"><Link href={`/dashboard/platform/certel/${d.id}`}><Eye className="size-3.5" /> Voir</Link></Button>
-                            <ConfirmActionButton
-                              action={deleteCertelDiagnostic}
-                              hidden={{ id: d.id }}
-                              triggerLabel=""
-                              triggerIcon={<Trash2 className="size-4" />}
-                              triggerVariant="ghost"
-                              triggerSize="icon-sm"
-                              title={`Supprimer le diagnostic de « ${d.fullName} » ?`}
-                              description="Cette action est définitive : la réponse et son évaluation seront supprimées."
-                              confirmLabel="Supprimer"
-                              confirmVariant="destructive"
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <CertelJournal rows={rows} />
         </CardContent>
       </Card>
     </div>

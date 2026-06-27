@@ -71,11 +71,13 @@ export async function submitCertelDiagnostic(input: {
   };
 }
 
-/** Supprime un diagnostic CERTEL (réponse + évaluation). Réservé à l'administrateur système. */
-export async function deleteCertelDiagnostic(formData: FormData) {
+/** Supprime un ou plusieurs diagnostics CERTEL (réponses + évaluations) en une fois.
+ * Réservé à l'administrateur système. */
+export async function deleteCertelDiagnostics(input: { ids: string[] }) {
   await requirePermission("platform.manage");
-  const id = String(formData.get("id") || "");
-  if (id) await prisma.certelDiagnostic.deleteMany({ where: { id } });
+  const ids = Array.isArray(input?.ids) ? input.ids.filter(Boolean) : [];
+  if (ids.length === 0) return;
+  await prisma.certelDiagnostic.deleteMany({ where: { id: { in: ids } } });
   revalidatePath("/dashboard/platform/certel");
 }
 
