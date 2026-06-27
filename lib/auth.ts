@@ -103,7 +103,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     organizationName,
     departmentName,
     roles,
-    permissions: await resolveUserPermissions(roles),
+    permissions: await resolveUserPermissions(roles, organizationId),
   };
 });
 

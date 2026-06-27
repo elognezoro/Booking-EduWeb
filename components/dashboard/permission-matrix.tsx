@@ -14,15 +14,22 @@ export function PermissionMatrix({
   labels,
   grants,
   editable,
+  editorIsSuper = true,
+  editorPermissions,
 }: {
   roleHeaders: RoleHeader[];
   permissions: readonly string[];
   labels: Record<string, string>;
   grants: Record<string, string[]>;
   editable: boolean;
+  /** L'éditeur est-il le super administrateur ? Sinon = admin délégué (périmètre établissement). */
+  editorIsSuper?: boolean;
+  /** Droits que l'éditeur possède lui-même (admin délégué : ne peut accorder qu'eux). */
+  editorPermissions?: string[];
 }) {
   const [pending, startTransition] = React.useTransition();
   const [busyCell, setBusyCell] = React.useState<string | null>(null);
+  const editorPerms = React.useMemo(() => new Set(editorPermissions ?? []), [editorPermissions]);
 
   const sets = React.useMemo(() => {
     const m: Record<string, Set<string>> = {};
@@ -64,7 +71,12 @@ export function PermissionMatrix({
                 const isSuper = r.key === "SUPER_ADMIN";
                 const isPlatformPerm = p === "platform.manage";
                 const has = isSuper || sets[r.key].has(p);
-                const locked = isSuper || isPlatformPerm; // super = tous les droits ; platform.manage = super uniquement
+                // super = tous les droits ; platform.manage = super uniquement.
+                // Admin délégué : ne peut pas éditer son propre rôle (ORG_ADMIN) ni un droit qu'il ne possède pas.
+                const locked =
+                  isSuper ||
+                  isPlatformPerm ||
+                  (!editorIsSuper && (r.key === "ORG_ADMIN" || !editorPerms.has(p)));
                 const cellEditable = editable && !locked;
                 const busy = busyCell === `${r.key}|${p}`;
                 return (

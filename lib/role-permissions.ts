@@ -16,25 +16,30 @@ function parsePerms(json: string): Permission[] {
 }
 
 /**
- * Droits effectifs par rôle : personnalisation enregistrée (RolePermissionSet) si présente,
- * sinon valeurs par défaut. SUPER_ADMIN a toujours tous les droits (non modifiable).
+ * Droits effectifs par rôle. Priorité : override PROPRE À L'ÉTABLISSEMENT (si `organizationId`
+ * fourni et présent) > override GLOBAL (RolePermissionSet, réglé par le super admin) > valeurs
+ * par défaut. SUPER_ADMIN a toujours tous les droits (non modifiable).
  */
-export async function getEffectiveRolePermissions(): Promise<Record<RoleKey, Permission[]>> {
-  const rows = await prisma.rolePermissionSet.findMany();
-  const overrides = new Map(rows.map((r) => [r.roleKey, parsePerms(r.permissions)]));
+export async function getEffectiveRolePermissions(organizationId?: string | null): Promise<Record<RoleKey, Permission[]>> {
+  const [globalRows, orgRows] = await Promise.all([
+    prisma.rolePermissionSet.findMany(),
+    organizationId ? prisma.orgRolePermissionSet.findMany({ where: { organizationId } }) : Promise.resolve([]),
+  ]);
+  const globalOv = new Map(globalRows.map((r) => [r.roleKey, parsePerms(r.permissions)]));
+  const orgOv = new Map(orgRows.map((r) => [r.roleKey, parsePerms(r.permissions)]));
   const out = {} as Record<RoleKey, Permission[]>;
   for (const role of ROLES) {
     if (role === "SUPER_ADMIN") { out[role] = ALL; continue; }
-    const ov = overrides.get(role);
+    const ov = orgOv.get(role) ?? globalOv.get(role) ?? null;
     out[role] = ov ? ov.filter((p) => p !== "platform.manage") : (ROLE_PERMISSIONS[role] ?? []);
   }
   return out;
 }
 
-/** Ensemble de permissions d'un utilisateur d'après ses rôles (avec personnalisations). */
-export async function resolveUserPermissions(roleKeys: string[]): Promise<Set<Permission>> {
+/** Ensemble de permissions d'un utilisateur d'après ses rôles et son établissement (avec personnalisations). */
+export async function resolveUserPermissions(roleKeys: string[], organizationId?: string | null): Promise<Set<Permission>> {
   if (roleKeys.includes("SUPER_ADMIN")) return new Set(ALL);
-  const eff = await getEffectiveRolePermissions();
+  const eff = await getEffectiveRolePermissions(organizationId);
   const set = new Set<Permission>();
   for (const key of roleKeys) {
     const perms = eff[key as RoleKey];

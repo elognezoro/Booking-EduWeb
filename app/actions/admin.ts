@@ -5,10 +5,10 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requirePermission, ACTIVE_ORG_COOKIE } from "@/lib/auth";
+import { requirePermission, ACTIVE_ORG_COOKIE, isSuperAdmin } from "@/lib/auth";
 import { hashPassword } from "@/lib/auth";
 import { ROLES, type RoleKey } from "@/lib/enums";
-import { PERMISSIONS } from "@/lib/permissions";
+import { PERMISSIONS, type Permission } from "@/lib/permissions";
 import { getEffectiveRolePermissions } from "@/lib/role-permissions";
 
 /* ----------------------------- Sélecteur d'institution (super admin) ----------------------------- */
@@ -22,10 +22,14 @@ export async function switchInstitution(formData: FormData) {
   revalidatePath("/dashboard", "layout");
 }
 
-/* ----------------------------- Rôles & permissions (super admin) ----------------------------- */
-/** Attribue ou retire une permission à un rôle. Réservé à l'administrateur système. */
+/* ----------------------------- Rôles & permissions ----------------------------- */
+/** Attribue ou retire une permission à un rôle.
+ *  - Super administrateur : réglage GLOBAL (tous les établissements) via RolePermissionSet.
+ *  - Administrateur d'établissement (admin délégué) : réglage PROPRE À SON ÉTABLISSEMENT via
+ *    OrgRolePermissionSet — sans effet sur les autres institutions, sans pouvoir éditer le rôle
+ *    Super Administrateur ni son propre rôle, ni accorder un droit qu'il ne possède pas lui-même. */
 export async function toggleRolePermission(input: { roleKey: string; permission: string; granted: boolean }) {
-  await requirePermission("platform.manage"); // administrateur système uniquement
+  const user = await requirePermission("roles.manage");
   const roleKey = input?.roleKey;
   const permission = input?.permission;
   if (!roleKey || !permission) return;
@@ -34,17 +38,33 @@ export async function toggleRolePermission(input: { roleKey: string; permission:
   if (!(PERMISSIONS as readonly string[]).includes(permission)) return;
   if (permission === "platform.manage") return; // réservé au super administrateur
 
-  const eff = await getEffectiveRolePermissions();
-  const set = new Set<string>(eff[roleKey as RoleKey] ?? []);
-  if (input.granted) set.add(permission);
-  else set.delete(permission);
-  set.delete("platform.manage");
-
-  await prisma.rolePermissionSet.upsert({
-    where: { roleKey },
-    create: { roleKey, permissions: JSON.stringify([...set]) },
-    update: { permissions: JSON.stringify([...set]) },
-  });
+  if (isSuperAdmin(user)) {
+    // Réglage global.
+    const eff = await getEffectiveRolePermissions();
+    const set = new Set<string>(eff[roleKey as RoleKey] ?? []);
+    if (input.granted) set.add(permission); else set.delete(permission);
+    set.delete("platform.manage");
+    await prisma.rolePermissionSet.upsert({
+      where: { roleKey },
+      create: { roleKey, permissions: JSON.stringify([...set]) },
+      update: { permissions: JSON.stringify([...set]) },
+    });
+  } else {
+    // Admin délégué : réglage propre à l'établissement de l'administrateur.
+    const org = user.organizationId;
+    if (!org) return;
+    if (roleKey === "ORG_ADMIN") return; // un admin ne modifie pas son propre rôle
+    if (!user.permissions.has(permission as Permission)) return; // pas d'élévation au-delà de ses droits
+    const eff = await getEffectiveRolePermissions(org);
+    const set = new Set<string>(eff[roleKey as RoleKey] ?? []);
+    if (input.granted) set.add(permission); else set.delete(permission);
+    set.delete("platform.manage");
+    await prisma.orgRolePermissionSet.upsert({
+      where: { organizationId_roleKey: { organizationId: org, roleKey } },
+      create: { organizationId: org, roleKey, permissions: JSON.stringify([...set]) },
+      update: { permissions: JSON.stringify([...set]) },
+    });
+  }
   revalidatePath("/dashboard/admin/roles");
   revalidatePath("/dashboard", "layout");
 }

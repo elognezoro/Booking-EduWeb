@@ -316,6 +316,18 @@ model RolePermissionSet {
   updatedAt   DateTime @updatedAt
 }
 
+// Personnalisation des droits d'un rôle PROPRE À UN ÉTABLISSEMENT (admin délégué).
+// Prend le pas sur le réglage global pour le personnel de cet établissement uniquement.
+model OrgRolePermissionSet {
+  id             String   @id @default(cuid())
+  organizationId String
+  roleKey        String // ORG_ADMIN | RESOURCE_MANAGER | ... (jamais SUPER_ADMIN)
+  permissions    String // JSON : tableau des clés de permission accordées
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organizationId, roleKey])
+}
+
 model ResourceCategory {
   id             String   @id @default(cuid())
   organizationId String
