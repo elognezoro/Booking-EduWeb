@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { prisma } from "./prisma";
 import { SESSION_COOKIE, signSession, verifySession, type SessionPayload } from "./jwt";
-import { permissionsForRoles, type Permission } from "./permissions";
+import { type Permission } from "./permissions";
+import { resolveUserPermissions } from "./role-permissions";
 import type { RoleKey } from "./enums";
 
 // Cookie de l'institution active sélectionnée par le super administrateur.
@@ -102,7 +103,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     organizationName,
     departmentName,
     roles,
-    permissions: permissionsForRoles(roles),
+    permissions: await resolveUserPermissions(roles),
   };
 });
 

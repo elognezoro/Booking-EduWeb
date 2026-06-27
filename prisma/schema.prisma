@@ -306,6 +306,15 @@ model RolePermission {
   @@id([roleId, permissionId])
 }
 
+// Personnalisation des droits par rôle (clé) par l'administrateur système.
+// Présence d'une ligne = jeu de permissions accordé (JSON) qui remplace la matrice par défaut
+// pour ce rôle ; absence = valeurs par défaut (lib/permissions.ts).
+model RolePermissionSet {
+  roleKey     String   @id // SUPER_ADMIN | ORG_ADMIN | ...
+  permissions String // JSON : tableau des clés de permission accordées
+  updatedAt   DateTime @updatedAt
+}
+
 model ResourceCategory {
   id             String   @id @default(cuid())
   organizationId String

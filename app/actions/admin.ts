@@ -7,6 +7,9 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, ACTIVE_ORG_COOKIE } from "@/lib/auth";
 import { hashPassword } from "@/lib/auth";
+import { ROLES, type RoleKey } from "@/lib/enums";
+import { PERMISSIONS } from "@/lib/permissions";
+import { getEffectiveRolePermissions } from "@/lib/role-permissions";
 
 /* ----------------------------- Sélecteur d'institution (super admin) ----------------------------- */
 export async function switchInstitution(formData: FormData) {
@@ -18,6 +21,34 @@ export async function switchInstitution(formData: FormData) {
   }
   revalidatePath("/dashboard", "layout");
 }
+
+/* ----------------------------- Rôles & permissions (super admin) ----------------------------- */
+/** Attribue ou retire une permission à un rôle. Réservé à l'administrateur système. */
+export async function toggleRolePermission(input: { roleKey: string; permission: string; granted: boolean }) {
+  await requirePermission("platform.manage"); // administrateur système uniquement
+  const roleKey = input?.roleKey;
+  const permission = input?.permission;
+  if (!roleKey || !permission) return;
+  if (roleKey === "SUPER_ADMIN") return; // dispose de tous les droits — non modifiable
+  if (!(ROLES as readonly string[]).includes(roleKey)) return;
+  if (!(PERMISSIONS as readonly string[]).includes(permission)) return;
+  if (permission === "platform.manage") return; // réservé au super administrateur
+
+  const eff = await getEffectiveRolePermissions();
+  const set = new Set<string>(eff[roleKey as RoleKey] ?? []);
+  if (input.granted) set.add(permission);
+  else set.delete(permission);
+  set.delete("platform.manage");
+
+  await prisma.rolePermissionSet.upsert({
+    where: { roleKey },
+    create: { roleKey, permissions: JSON.stringify([...set]) },
+    update: { permissions: JSON.stringify([...set]) },
+  });
+  revalidatePath("/dashboard/admin/roles");
+  revalidatePath("/dashboard", "layout");
+}
+
 import { stringifyJson } from "@/lib/json";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
