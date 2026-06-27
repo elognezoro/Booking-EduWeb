@@ -3,7 +3,7 @@ import { requirePermission, getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CertificateImageUpload } from "@/components/certificates/image-upload";
@@ -59,7 +59,7 @@ export default async function OrganizationAdminPage({ searchParams }: { searchPa
               </div>
             </div>
             <div className="sm:col-span-2">
-              <Button type="submit" size="lg"><Save className="size-4" /> Enregistrer</Button>
+              <SubmitButton size="lg" pendingLabel="Enregistrement…"><Save className="size-4" /> Enregistrer</SubmitButton>
             </div>
           </form>
         </CardContent>

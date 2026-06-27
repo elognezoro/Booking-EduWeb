@@ -31,9 +31,10 @@ export default async function AccountRequestsPage({ searchParams }: { searchPara
 
   const [requests, establishments] = await Promise.all([
     prisma.user.findMany({
-      where: isSuper ? { organizationId: null, status: "PENDING" } : { organizationId: me!.organizationId ?? "", status: "PENDING" },
+      // Super admin : TOUS les comptes en attente (quelle que soit l'institution, ou sans institution).
+      where: isSuper ? { status: "PENDING" } : { organizationId: me!.organizationId ?? "", status: "PENDING" },
       orderBy: { createdAt: "asc" },
-      include: { roles: { include: { role: true } } },
+      include: { roles: { include: { role: true } }, organization: { select: { name: true } } },
     }),
     isSuper
       ? prisma.organization.findMany({ where: { isPlatform: false, status: "ACTIVE" }, orderBy: { name: "asc" }, select: { id: true, name: true } })
@@ -82,6 +83,7 @@ export default async function AccountRequestsPage({ searchParams }: { searchPara
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                     {u.functionTitle && <span className="inline-flex items-center gap-1.5"><Briefcase className="size-3.5" /> {u.functionTitle}</span>}
+                    {isSuper && u.organization && <span className="inline-flex items-center gap-1.5 font-medium text-foreground"><Building2 className="size-3.5" /> {u.organization.name}</span>}
                     <span className="inline-flex items-center gap-1.5"><Clock className="size-3.5" /> demandé {fromNow(u.createdAt)}</span>
                   </div>
                   {u.roles.length > 0 && (
@@ -99,7 +101,7 @@ export default async function AccountRequestsPage({ searchParams }: { searchPara
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                           <div>
                             <label className="mb-1 flex items-center gap-1 text-xs font-semibold text-muted-foreground"><Building2 className="size-3.5" /> Établissement</label>
-                            <Select name="organizationId" required defaultValue="">
+                            <Select name="organizationId" required defaultValue={u.organizationId ?? ""}>
                               <option value="" disabled>Choisir…</option>
                               {establishments.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
                             </Select>
