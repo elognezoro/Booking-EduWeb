@@ -34,3 +34,29 @@ export async function setGamesGating(g: GamesGating): Promise<void> {
     update: { value: JSON.stringify(g) },
   });
 }
+
+// ——— Déconnexion automatique après inactivité (réglée par l'administrateur système) ———
+const INACTIVITY_KEY = "inactivity_logout";
+const INACTIVITY_MAX = 480; // 8 h max
+
+/** Délai d'inactivité avant déconnexion automatique, en minutes (0 = désactivé). */
+export async function getInactivityLogoutMinutes(): Promise<number> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: INACTIVITY_KEY } });
+  if (!row) return 0;
+  try {
+    const v = JSON.parse(row.value);
+    const m = Number(v?.minutes);
+    return Number.isFinite(m) ? Math.max(0, Math.min(INACTIVITY_MAX, Math.round(m))) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function setInactivityLogoutMinutes(minutes: number): Promise<void> {
+  const m = Number.isFinite(minutes) ? Math.max(0, Math.min(INACTIVITY_MAX, Math.round(minutes))) : 0;
+  await prisma.platformSetting.upsert({
+    where: { key: INACTIVITY_KEY },
+    create: { key: INACTIVITY_KEY, value: JSON.stringify({ minutes: m }) },
+    update: { value: JSON.stringify({ minutes: m }) },
+  });
+}

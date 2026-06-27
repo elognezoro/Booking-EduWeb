@@ -43,8 +43,8 @@ export default async function SitesAdminPage() {
     }),
   ]);
 
-  // Niveaux (départements sans parent) de toute l'organisation, pour les sélecteurs de rattachement.
-  const niveaux = sites.flatMap((s) => s.departments).filter((d) => !d.parentId).map((d) => ({ id: d.id, name: d.name }));
+  // Tous les services (parents possibles, profondeur libre) pour les sélecteurs de rattachement.
+  const parentOptions = sites.flatMap((s) => s.departments).map((d) => ({ id: d.id, name: d.name }));
   const siteOptions = sites.map((s) => ({ id: s.id, name: s.name }));
 
   return (
@@ -59,16 +59,14 @@ export default async function SitesAdminPage() {
         <div className="space-y-4">
           {sites.map((site) => {
             const depts = site.departments;
-            // Ordonner : chaque niveau suivi de ses sous-services ; les orphelins en fin.
-            const ordered: { d: (typeof depts)[number]; child: boolean }[] = [];
-            for (const n of depts.filter((d) => !d.parentId)) {
-              ordered.push({ d: n, child: false });
-              for (const c of depts.filter((d) => d.parentId === n.id)) ordered.push({ d: c, child: true });
+            // Arborescence de profondeur libre : parcours en profondeur (niveau → sous-services → …).
+            const byParent = new Map<string | null, typeof depts>();
+            for (const d of depts) {
+              const a = byParent.get(d.parentId) ?? [];
+              a.push(d);
+              byParent.set(d.parentId, a);
             }
-            const shown = new Set(ordered.map((o) => o.d.id));
-            for (const d of depts) if (!shown.has(d.id)) ordered.push({ d, child: true });
-
-            const nodes: ServiceNode[] = ordered.map(({ d, child }) => {
+            const makeNode = (d: (typeof depts)[number], depth: number): ServiceNode => {
               const head = d.users.find((u) => u.id === d.headId);
               return {
                 id: d.id,
@@ -77,7 +75,7 @@ export default async function SitesAdminPage() {
                 siteId: d.siteId,
                 parentId: d.parentId,
                 headId: d.headId,
-                child,
+                depth,
                 headName: head ? fullName(head) : null,
                 counts: { users: d._count.users, resources: d._count.resources, children: d._count.children },
                 members: d.users.map((u) => ({ id: u.id, name: fullName(u) })),
@@ -85,7 +83,19 @@ export default async function SitesAdminPage() {
                   .filter((u) => u.departmentId !== d.id)
                   .map((u) => ({ id: u.id, name: fullName(u), dept: u.organizationId === null ? "sans institution" : (u.department?.name ?? null) })),
               };
-            });
+            };
+            const nodes: ServiceNode[] = [];
+            const visited = new Set<string>();
+            const visit = (parentId: string | null, depth: number) => {
+              for (const d of byParent.get(parentId) ?? []) {
+                if (visited.has(d.id)) continue;
+                visited.add(d.id);
+                nodes.push(makeNode(d, depth));
+                visit(d.id, depth + 1);
+              }
+            };
+            visit(null, 0);
+            for (const d of depts) if (!visited.has(d.id)) { visited.add(d.id); nodes.push(makeNode(d, 0)); }
 
             return (
               <Card key={site.id}>
@@ -106,7 +116,7 @@ export default async function SitesAdminPage() {
                     </div>
                   </div>
 
-                  {nodes.length > 0 && <ServiceTree nodes={nodes} niveaux={niveaux} sites={siteOptions} />}
+                  {nodes.length > 0 && <ServiceTree nodes={nodes} parents={parentOptions} sites={siteOptions} />}
                 </CardContent>
               </Card>
             );
@@ -140,10 +150,10 @@ export default async function SitesAdminPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="dparent">Rattaché au niveau (optionnel)</Label>
+                  <Label htmlFor="dparent">Rattaché à (optionnel)</Label>
                   <Select id="dparent" name="parentId">
-                    <option value="">— (créer un niveau)</option>
-                    {niveaux.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
+                    <option value="">— (aucun parent)</option>
+                    {parentOptions.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
                   </Select>
                 </div>
                 <Button type="submit" className="w-full"><Plus className="size-4" /> Ajouter le service</Button>

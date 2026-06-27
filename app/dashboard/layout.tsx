@@ -2,6 +2,8 @@ import { requireUser, isSuperAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { InstitutionSwitcher } from "@/components/dashboard/institution-switcher";
+import { IdleLogout } from "@/components/dashboard/idle-logout";
+import { getInactivityLogoutMinutes } from "@/lib/platform/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +39,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     prisma.notification.count({ where: { userId: user.id, readAt: null, status: { not: "READ" } } }),
   ]);
 
+  const inactivityMinutes = await getInactivityLogoutMinutes();
+
   return (
     <DashboardShell
       user={{
@@ -64,6 +68,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       }))}
       unread={unread}
     >
+      <IdleLogout minutes={inactivityMinutes} />
       {children}
     </DashboardShell>
   );

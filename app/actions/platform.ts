@@ -6,13 +6,24 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { slugify } from "@/lib/utils";
 import { provisionInstitution } from "@/lib/platform/provision";
-import { setGamesGating } from "@/lib/platform/settings";
+import { setGamesGating, setInactivityLogoutMinutes } from "@/lib/platform/settings";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import { CI_MINISTRIES } from "@/lib/ci-ministries";
 
 const ORG_PATH = "/dashboard/platform/organizations";
 const GAMES_PATH = "/dashboard/platform/jeux";
+const SECURITY_PATH = "/dashboard/platform/securite";
 const PLANS = ["PILOTE", "STANDARD", "PREMIUM", "NATIONAL"];
+
+/** Règle le délai d'inactivité avant déconnexion automatique (minutes, 0 = désactivé). Super admin. */
+export async function saveInactivityLogout(formData: FormData) {
+  await requirePermission("platform.manage");
+  const minutes = Number(formData.get("minutes")) || 0;
+  await setInactivityLogoutMinutes(minutes);
+  revalidatePath(SECURITY_PATH);
+  revalidatePath("/dashboard", "layout");
+  redirect(`${SECURITY_PATH}?saved=1`);
+}
 const SUB_STATUS = ["ACTIVE", "SUSPENDED", "CANCELLED"];
 
 export interface CreateOrgState {

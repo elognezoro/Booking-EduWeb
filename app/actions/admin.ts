@@ -89,11 +89,24 @@ export async function createSite(formData: FormData) {
   redirect("/dashboard/admin/sites");
 }
 
-/** Valide un parent : doit être un « niveau » (sans parent) de l'organisation, et jamais soi-même. */
+/** Valide un parent : un département de l'organisation, jamais soi-même ni un de ses descendants (cycle).
+ * Hiérarchie de profondeur libre (Direction › Sous-Direction › Service › …). */
 async function resolveParentId(organizationId: string, candidate: string | undefined, selfId: string | null): Promise<string | null> {
   if (!candidate || candidate === selfId) return null;
-  const parent = await prisma.department.findFirst({ where: { id: candidate, organizationId }, select: { id: true, parentId: true } });
-  if (!parent || parent.parentId) return null; // le parent doit être un niveau (sans rattachement)
+  const parent = await prisma.department.findFirst({ where: { id: candidate, organizationId }, select: { id: true } });
+  if (!parent) return null;
+  if (selfId) {
+    // Empêcher un cycle : le parent ne doit pas être un descendant de selfId.
+    let cur: string | null = candidate;
+    const seen = new Set<string>();
+    while (cur) {
+      if (cur === selfId) return null; // cycle détecté
+      if (seen.has(cur)) break;
+      seen.add(cur);
+      const row: { parentId: string | null } | null = await prisma.department.findUnique({ where: { id: cur }, select: { parentId: true } });
+      cur = row?.parentId ?? null;
+    }
+  }
   return parent.id;
 }
 
@@ -113,25 +126,25 @@ export async function updateDepartment(formData: FormData) {
   const data = z.object({ id: z.string().min(1), name: z.string().min(2), code: z.string().optional(), siteId: z.string().optional(), parentId: z.string().optional() }).parse({
     id: formData.get("id"), name: formData.get("name"), code: formData.get("code") || undefined, siteId: formData.get("siteId") || undefined, parentId: formData.get("parentId") || undefined,
   });
-  let parentId = await resolveParentId(user.organizationId!, data.parentId, data.id);
-  // Un service qui a lui-même des sous-services doit rester un niveau (pas de rattachement).
-  if (parentId && (await prisma.department.count({ where: { parentId: data.id } })) > 0) parentId = null;
+  const resolvedParent = await resolveParentId(user.organizationId!, data.parentId, data.id);
+  // Si un parent a été demandé mais refusé (cycle), on ne touche pas au rattachement existant.
+  const parentField = data.parentId && resolvedParent === null ? {} : { parentId: resolvedParent };
   await prisma.department.updateMany({
     where: { id: data.id, organizationId: user.organizationId! },
-    data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, parentId },
+    data: { name: data.name, code: data.code ?? null, siteId: data.siteId || null, ...parentField },
   });
   revalidatePath("/dashboard/admin/sites");
   redirect("/dashboard/admin/sites");
 }
 
-/** Déplacement hiérarchique (glisser-déposer) : rattache un service à un niveau, ou le remonte en niveau (parentId null). */
+/** Déplacement hiérarchique (glisser-déposer) : rattache un service à n'importe quel parent
+ * (profondeur libre), ou le remonte à la racine (parentId null). Les cycles sont empêchés. */
 export async function moveDepartment(input: { id: string; parentId: string | null }) {
   const user = await requirePermission("departments.manage");
   if (!input?.id) return;
-  let parentId = await resolveParentId(user.organizationId!, input.parentId ?? undefined, input.id);
-  // Un service qui a lui-même des sous-services doit rester un niveau.
-  if (parentId && (await prisma.department.count({ where: { parentId: input.id } })) > 0) parentId = null;
-  await prisma.department.updateMany({ where: { id: input.id, organizationId: user.organizationId! }, data: { parentId } });
+  const resolved = await resolveParentId(user.organizationId!, input.parentId ?? undefined, input.id);
+  if (input.parentId && resolved === null) return; // parent invalide / cycle → ne rien faire (ne pas détacher)
+  await prisma.department.updateMany({ where: { id: input.id, organizationId: user.organizationId! }, data: { parentId: resolved } });
   revalidatePath("/dashboard/admin/sites");
 }
 

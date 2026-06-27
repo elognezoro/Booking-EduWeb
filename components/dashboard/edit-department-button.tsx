@@ -54,12 +54,12 @@ export function EditDepartmentButton({
             </Select>
           </div>
           <div>
-            <Label htmlFor={`dp-${dept.id}`}>Rattaché au niveau</Label>
+            <Label htmlFor={`dp-${dept.id}`}>Rattaché à</Label>
             <Select id={`dp-${dept.id}`} name="parentId" defaultValue={dept.parentId ?? ""}>
-              <option value="">— (niveau, sans rattachement)</option>
+              <option value="">— (aucun parent)</option>
               {parentChoices.map((n) => <option key={n.id} value={n.id}>{n.name}</option>)}
             </Select>
-            <p className="mt-1 text-xs text-muted-foreground">Laisser vide pour un niveau (Direction, Sous-Direction…), ou choisir un niveau pour en faire un sous-service.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Laisser vide pour un service de premier niveau, ou choisir un parent pour l'imbriquer (profondeur libre).</p>
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Annuler</Button>
