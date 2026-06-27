@@ -1,4 +1,4 @@
-import { HelpCircle, BookOpenCheck, LifeBuoy, Download, GraduationCap, FileText } from "lucide-react";
+import { HelpCircle, BookOpenCheck, LifeBuoy, Download, GraduationCap, FileText, ChevronDown, Library } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -7,13 +7,16 @@ import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/status-badges";
 import { GuideArticle } from "@/components/help/guide-article";
 import { ROLE_GUIDES } from "@/lib/guides";
-import { ROLE_META, type RoleKey } from "@/lib/enums";
+import { ROLES, ROLE_META, type RoleKey } from "@/lib/enums";
 
 export const dynamic = "force-dynamic";
 
 export default async function HelpPage() {
   const user = await requireUser();
   const roles = user.roles.filter((r): r is RoleKey => r in ROLE_GUIDES);
+  // Les administrateurs (système ou d'établissement) accèdent aux guides de TOUS les rôles.
+  const canSeeAllGuides = user.permissions.has("users.manage");
+  const allRoles = (ROLES as readonly RoleKey[]).filter((r) => r in ROLE_GUIDES);
 
   return (
     <div className="space-y-6">
@@ -50,6 +53,32 @@ export default async function HelpPage() {
           )}
         </div>
       </div>
+
+      {/* Guides de tous les rôles — réservé aux administrateurs (système ou d'établissement) */}
+      {canSeeAllGuides && (
+        <div>
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-muted-foreground">
+            <Library className="size-4 text-primary" /> Guides de tous les rôles
+          </h2>
+          <p className="mb-3 text-sm text-muted-foreground">En tant qu'administrateur, vous pouvez consulter le guide complet de chaque rôle pour accompagner et former votre personnel. Cliquez sur un rôle pour déplier son guide.</p>
+          <div className="space-y-2.5">
+            {allRoles.map((role) => (
+              <details key={role} className="group overflow-hidden rounded-2xl border border-border bg-card">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-5 py-3.5 hover:bg-secondary/50">
+                  <span className="flex items-center gap-2.5">
+                    <RoleBadge roleKey={role} />
+                    <span className="text-sm font-semibold text-foreground">{ROLE_GUIDES[role].title}</span>
+                  </span>
+                  <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+                </summary>
+                <div className="border-t border-border p-3 sm:p-4">
+                  <GuideArticle guide={ROLE_GUIDES[role]} roleLabel={ROLE_META[role].label} />
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Support de formation académique complet */}
       <Card className="border-primary/30 bg-primary-50/40">
