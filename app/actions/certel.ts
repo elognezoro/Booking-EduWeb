@@ -1,6 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requirePermission } from "@/lib/auth";
 import { computeScores } from "@/lib/certel/scoring";
 import { levelForScore, type LevelKey } from "@/lib/certel/diagnostic";
 import {
@@ -67,6 +69,14 @@ export async function submitCertelDiagnostic(input: {
     scores: { autopos: scores.autopos, qcm: scores.qcm, online60: scores.online60, score100: scores.score100 },
     levelKey: level.key,
   };
+}
+
+/** Supprime un diagnostic CERTEL (réponse + évaluation). Réservé à l'administrateur système. */
+export async function deleteCertelDiagnostic(formData: FormData) {
+  await requirePermission("platform.manage");
+  const id = String(formData.get("id") || "");
+  if (id) await prisma.certelDiagnostic.deleteMany({ where: { id } });
+  revalidatePath("/dashboard/platform/certel");
 }
 
 // ——————————————————————————————————————————————————————————————

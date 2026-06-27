@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { GraduationCap, Mail, Briefcase, Building2, Eye } from "lucide-react";
+import { GraduationCap, Mail, Briefcase, Building2, Eye, Trash2 } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmActionButton } from "@/components/confirm-action";
+import { deleteCertelDiagnostic } from "@/app/actions/certel";
 import { CERTEL_LEVELS } from "@/lib/certel/diagnostic";
 import { fromNow } from "@/lib/dates";
 
@@ -89,7 +91,21 @@ export default async function CertelDiagnosticsPage() {
                         </td>
                         <td className="py-2 pr-3 text-muted-foreground">{d.createdAt.toLocaleDateString("fr-FR")} · {fromNow(d.createdAt.toISOString())}</td>
                         <td className="py-2 text-right">
-                          <Button asChild size="sm" variant="outline"><Link href={`/dashboard/platform/certel/${d.id}`}><Eye className="size-3.5" /> Voir</Link></Button>
+                          <div className="inline-flex items-center gap-1.5">
+                            <Button asChild size="sm" variant="outline"><Link href={`/dashboard/platform/certel/${d.id}`}><Eye className="size-3.5" /> Voir</Link></Button>
+                            <ConfirmActionButton
+                              action={deleteCertelDiagnostic}
+                              hidden={{ id: d.id }}
+                              triggerLabel=""
+                              triggerIcon={<Trash2 className="size-4" />}
+                              triggerVariant="ghost"
+                              triggerSize="icon-sm"
+                              title={`Supprimer le diagnostic de « ${d.fullName} » ?`}
+                              description="Cette action est définitive : la réponse et son évaluation seront supprimées."
+                              confirmLabel="Supprimer"
+                              confirmVariant="destructive"
+                            />
+                          </div>
                         </td>
                       </tr>
                     );
