@@ -31,8 +31,9 @@ export default async function AccountRequestsPage({ searchParams }: { searchPara
 
   const [requests, establishments] = await Promise.all([
     prisma.user.findMany({
-      // Super admin : TOUS les comptes en attente (quelle que soit l'institution, ou sans institution).
-      where: isSuper ? { status: "PENDING" } : { organizationId: me!.organizationId ?? "", status: "PENDING" },
+      // Super admin : comptes CONFIRMÉS (e-mail vérifié → actifs) sans établissement, à affecter.
+      // Org admin : demandes en attente de son établissement.
+      where: isSuper ? { organizationId: null, status: "ACTIVE" } : { organizationId: me!.organizationId ?? "", status: "PENDING" },
       orderBy: { createdAt: "asc" },
       include: { roles: { include: { role: true } }, organization: { select: { name: true } } },
     }),
@@ -45,7 +46,7 @@ export default async function AccountRequestsPage({ searchParams }: { searchPara
     <div className="space-y-5">
       <PageHeader
         title="Demandes de comptes"
-        description={isSuper ? "Affectez chaque nouveau compte à un établissement et un rôle, ou refusez la demande." : "Validez ou refusez les demandes d'inscription à votre institution."}
+        description={isSuper ? "Comptes confirmés (e-mail vérifié) sans établissement : affectez chacun à un établissement et un rôle, ou refusez." : "Validez ou refusez les demandes d'inscription à votre institution."}
         icon={<span className="inline-flex size-11 items-center justify-center rounded-2xl bg-pending-soft text-pending-fg"><UserCheck className="size-6" /></span>}
       />
 

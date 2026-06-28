@@ -66,7 +66,9 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     },
   });
 
-  if (!user || user.status === "SUSPENDED" || user.status === "INACTIVE") return null;
+  // Statuts non autorisés (couche d'autorisation centrale) : SUSPENDED/INACTIVE, et PENDING
+  // (compte non confirmé) — aucune session ne doit donner accès tant que l'e-mail n'est pas confirmé.
+  if (!user || user.status === "SUSPENDED" || user.status === "INACTIVE" || user.status === "PENDING") return null;
 
   const roles = user.roles.map((r) => r.role.key) as RoleKey[];
 

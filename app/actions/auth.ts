@@ -1,12 +1,41 @@
 "use server";
 
 import { z } from "zod";
+import { randomBytes } from "node:crypto";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword, createUserSession, destroyUserSession, hashPassword, requireUser } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
 import { formatGivenName, formatFamilyName } from "@/lib/utils";
+
+const VERIFY_TTL_MS = 48 * 60 * 60 * 1000; // 48 h
+const RESEND_COOLDOWN_MS = 90 * 1000; // anti-spam : 1 envoi / 90 s max par adresse
+
+/** Renvoi possible si aucun e-mail n'a été émis dans la fenêtre de cooldown. */
+function canResend(emailVerifyExpires: Date | null): boolean {
+  if (!emailVerifyExpires) return true;
+  const issuedAt = emailVerifyExpires.getTime() - VERIFY_TTL_MS;
+  return Date.now() - issuedAt >= RESEND_COOLDOWN_MS;
+}
+
+/** Construit et envoie l'e-mail de confirmation de compte (Resend). */
+async function sendVerificationEmail(u: { id: string; email: string; firstName: string; token: string }) {
+  const link = `${APP_URL}/api/auth/verify-email?token=${u.token}`;
+  await sendNotification({
+    userId: u.id,
+    to: u.email,
+    type: "ACCOUNT_VERIFY",
+    subject: "Confirmez votre compte EduWeb Booking",
+    text: `Bonjour ${u.firstName}, confirmez votre adresse e-mail pour activer votre compte EduWeb Booking : ${link} (lien valable 48 heures).`,
+    html: renderEmail({
+      title: "Confirmez votre adresse e-mail",
+      intro: `Bonjour ${u.firstName}, bienvenue sur EduWeb Booking. Pour activer votre compte, confirmez votre adresse e-mail en cliquant sur le bouton ci-dessous. Ce lien est valable 48 heures.`,
+      cta: { label: "Confirmer mon compte", href: link },
+      footer: "Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.",
+    }),
+  });
+}
 
 const loginSchema = z.object({
   email: z.string().email("Adresse e-mail invalide."),
@@ -42,7 +71,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     return { error: "E-mail ou mot de passe incorrect." };
   }
   if (user.status === "PENDING") {
-    return { error: "Votre compte est en attente de validation par un administrateur de votre institution." };
+    return { error: "Votre compte n'est pas encore confirmé. Ouvrez le lien de confirmation reçu par e-mail (vérifiez vos indésirables)." };
   }
   if (user.status === "SUSPENDED" || user.status === "INACTIVE") {
     return { error: "Ce compte est désactivé. Contactez votre administrateur." };
@@ -106,7 +135,7 @@ export async function changeOwnPassword(formData: FormData) {
   redirect(`${ACCOUNT_PATH}?changed=1`);
 }
 
-/* ----------------------------- Auto-inscription (avec validation) ----------------------------- */
+/* ----------------------------- Auto-inscription (confirmation par e-mail) ----------------------------- */
 const registerSchema = z.object({
   firstName: z.string().min(1, "Le prénom est requis."),
   lastName: z.string().min(1, "Le nom est requis."),
@@ -120,6 +149,7 @@ const registerSchema = z.object({
 export interface RegisterState {
   error?: string;
   success?: boolean;
+  email?: string;
 }
 
 export async function registerAccount(_prev: RegisterState, formData: FormData): Promise<RegisterState> {
@@ -136,44 +166,61 @@ export async function registerAccount(_prev: RegisterState, formData: FormData):
   const d = parsed.data;
 
   if (d.password !== d.confirm) return { error: "Les deux mots de passe ne correspondent pas." };
-  if (d.accept !== "on") return { error: "Vous devez accepter que votre compte soit soumis à validation." };
+  if (d.accept !== "on") return { error: "Vous devez accepter les conditions d'utilisation pour créer un compte." };
 
-  const existing = await prisma.user.findUnique({ where: { email: d.email.toLowerCase().trim() } });
-  if (existing) return { error: "Un compte existe déjà avec cette adresse e-mail." };
+  const email = d.email.toLowerCase().trim();
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    // Compte non confirmé (sans établissement) : on renvoie un nouveau lien, avec cooldown anti-spam.
+    if (existing.status === "PENDING" && !existing.organizationId) {
+      if (canResend(existing.emailVerifyExpires)) {
+        const token = randomBytes(32).toString("hex");
+        await prisma.user.update({ where: { id: existing.id }, data: { emailVerifyToken: token, emailVerifyExpires: new Date(Date.now() + VERIFY_TTL_MS) } });
+        await sendVerificationEmail({ id: existing.id, email, firstName: existing.firstName, token });
+      }
+      return { success: true, email };
+    }
+    return { error: "Un compte existe déjà avec cette adresse e-mail." };
+  }
 
-  // Compte créé sans établissement : un administrateur l'affectera lors de la validation.
-  const passwordHash = await hashPassword(d.password);
+  // Compte créé en attente de CONFIRMATION D'E-MAIL (puis actif automatiquement à la confirmation).
+  const token = randomBytes(32).toString("hex");
   const user = await prisma.user.create({
     data: {
-      email: d.email.toLowerCase().trim(),
-      passwordHash,
+      email,
+      passwordHash: await hashPassword(d.password),
       firstName: formatGivenName(d.firstName),
       lastName: formatFamilyName(d.lastName),
       functionTitle: d.functionTitle?.trim() || null,
       organizationId: null,
       status: "PENDING",
+      emailVerifyToken: token,
+      emailVerifyExpires: new Date(Date.now() + VERIFY_TTL_MS),
     },
   });
 
-  // Notifie le(s) super administrateur(s), chargé(s) d'affecter le compte à un établissement.
-  const supers = await prisma.user.findMany({
-    where: { status: "ACTIVE", roles: { some: { role: { key: "SUPER_ADMIN" } } } },
-    select: { id: true, email: true },
-  });
-  for (const a of supers) {
-    await sendNotification({
-      userId: a.id, to: a.email, type: "ACCOUNT_REQUEST",
-      subject: `Nouvelle demande de compte — ${d.firstName} ${d.lastName}`,
-      text: `${d.firstName} ${d.lastName} (${d.email}) a créé un compte, à affecter à un établissement.`,
-      html: renderEmail({
-        title: "Nouvelle demande de compte",
-        intro: `${d.firstName} ${d.lastName} a créé un compte et attend son affectation à un établissement.`,
-        rows: [["Nom", `${d.firstName} ${d.lastName}`], ["E-mail", d.email], ["Fonction", d.functionTitle || "—"]],
-        cta: { label: "Examiner la demande", href: `${APP_URL}/dashboard/admin/account-requests` },
-      }),
-    });
-  }
-  await audit({ userId: user.id, action: "account.request", entityType: "User", entityId: user.id });
+  await sendVerificationEmail({ id: user.id, email, firstName: user.firstName, token });
+  await audit({ userId: user.id, action: "account.register", entityType: "User", entityId: user.id });
 
-  return { success: true };
+  return { success: true, email };
+}
+
+export interface ResendState {
+  error?: string;
+  sent?: boolean;
+}
+
+/** Renvoie l'e-mail de confirmation. Réponse uniforme (anti-énumération de comptes). */
+export async function resendVerificationEmail(_prev: ResendState, formData: FormData): Promise<ResendState> {
+  const email = String(formData.get("email") || "").toLowerCase().trim();
+  if (!email || !/.+@.+\..+/.test(email)) return { error: "Adresse e-mail invalide." };
+  const user = await prisma.user.findUnique({ where: { email } });
+  // Uniquement un compte non confirmé SANS établissement (ne pas contourner la validation manuelle
+  // d'un compte rattaché à une institution), et seulement hors fenêtre de cooldown.
+  if (user && user.status === "PENDING" && !user.organizationId && canResend(user.emailVerifyExpires)) {
+    const token = randomBytes(32).toString("hex");
+    await prisma.user.update({ where: { id: user.id }, data: { emailVerifyToken: token, emailVerifyExpires: new Date(Date.now() + VERIFY_TTL_MS) } });
+    await sendVerificationEmail({ id: user.id, email: user.email, firstName: user.firstName, token });
+  }
+  return { sent: true };
 }

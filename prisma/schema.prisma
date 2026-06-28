@@ -251,8 +251,10 @@ model User {
   phone          String?
   functionTitle  String?
   matricule      String? // matricule étudiant (ENS d'Abidjan) — sert de paramètre de vérification
-  status         String   @default("ACTIVE") // ACTIVE | INACTIVE | SUSPENDED | INVITED
+  status         String   @default("ACTIVE") // ACTIVE | INACTIVE | SUSPENDED | INVITED | PENDING (e-mail non confirmé)
   imageUrl       String?
+  emailVerifyToken   String?   @unique // jeton de confirmation d'e-mail (auto-inscription)
+  emailVerifyExpires DateTime? // expiration du jeton de confirmation
   lastLoginAt    DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

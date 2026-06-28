@@ -3,7 +3,35 @@ import nodemailer from "nodemailer";
 import { prisma } from "./prisma";
 
 const SMTP_HOST = process.env.SMTP_HOST;
-const APP_URL = process.env.APP_URL || "http://localhost:3000";
+// En production, on garantit une URL publique correcte pour les liens (confirmation d'e-mail)
+// même si APP_URL n'est pas définie : repli sur le domaine de production connu.
+const APP_URL =
+  process.env.APP_URL ||
+  (process.env.NODE_ENV === "production" ? "https://booking.eduweb.ci" : "http://localhost:3000");
+
+// Resend (transport e-mail principal). Domaine vérifié : booking.eduweb.ci.
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM = (process.env.RESEND_FROM || "EduWeb Booking <no-reply@booking.eduweb.ci>").trim();
+
+/** Envoi via l'API Resend. Renvoie true si l'e-mail a été accepté par Resend. */
+async function sendViaResend(to: string, subject: string, html: string, text?: string): Promise<boolean> {
+  if (!RESEND_API_KEY) return false;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: RESEND_FROM, to: [to], subject, html, text: text || undefined }),
+    });
+    if (!res.ok) {
+      console.error("Resend: échec d'envoi", res.status, await res.text().catch(() => ""));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Resend: exception", err);
+    return false;
+  }
+}
 
 // Tous les e-mails de l'application partent au nom d'expéditeur « EduWeb Booking »,
 // quelle que soit la configuration SMTP. On ne récupère que l'adresse depuis
@@ -82,15 +110,28 @@ export async function sendNotification(opts: {
     },
   });
 
-  const t = getTransporter();
   try {
-    if (t && opts.to) {
-      await t.sendMail({ from: senderFrom(), to: opts.to, subject: opts.subject, html: opts.html, text: opts.text });
-    } else {
-      // Mode dev sans SMTP : on journalise.
-      console.info(`📧 [EduWeb Booking] (dev) « ${opts.subject} » → ${opts.to ?? "interne"}`);
+    let sent = false;
+    if (opts.to) {
+      // 1) Resend (principal) ; 2) SMTP (repli) ; 3) journalisation en dev.
+      sent = await sendViaResend(opts.to, opts.subject, opts.html, opts.text);
+      if (!sent) {
+        const t = getTransporter();
+        if (t) {
+          await t.sendMail({ from: senderFrom(), to: opts.to, subject: opts.subject, html: opts.html, text: opts.text });
+          sent = true;
+        }
+      }
     }
-    await prisma.notification.update({ where: { id: notif.id }, data: { status: "SENT", sentAt: new Date() } });
+    const hasTransport = !!RESEND_API_KEY || !!SMTP_HOST;
+    if (!sent) {
+      console.info(`📧 [EduWeb Booking] (dev/sans transport) « ${opts.subject} » → ${opts.to ?? "interne"}`);
+    }
+    // SENT si réellement envoyé (Resend/SMTP) ou en l'absence de tout transport (dev) ; sinon FAILED.
+    await prisma.notification.update({
+      where: { id: notif.id },
+      data: sent || !hasTransport ? { status: "SENT", sentAt: new Date() } : { status: "FAILED" },
+    });
   } catch (err) {
     console.error("Échec d'envoi e-mail :", err);
     await prisma.notification.update({ where: { id: notif.id }, data: { status: "FAILED" } });

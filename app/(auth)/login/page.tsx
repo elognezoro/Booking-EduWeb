@@ -7,7 +7,7 @@ import { LoginForm } from "@/components/auth/login-form";
 export const metadata: Metadata = { title: "Connexion" };
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage({ searchParams }: { searchParams: { callbackUrl?: string; org?: string } }) {
+export default async function LoginPage({ searchParams }: { searchParams: { callbackUrl?: string; org?: string; verify?: string } }) {
   // Vérification en base (et non sur le seul jeton) pour éviter toute boucle avec un cookie périmé.
   const user = await getCurrentUser();
   if (user) redirect(searchParams.callbackUrl?.startsWith("/") ? searchParams.callbackUrl : "/dashboard");
@@ -24,5 +24,6 @@ export default async function LoginPage({ searchParams }: { searchParams: { call
     }
   }
 
-  return <LoginForm callbackUrl={searchParams.callbackUrl} institution={institution} />;
+  const verifyNotice = searchParams.verify === "expired" || searchParams.verify === "invalid" ? searchParams.verify : undefined;
+  return <LoginForm callbackUrl={searchParams.callbackUrl} institution={institution} verifyNotice={verifyNotice} />;
 }

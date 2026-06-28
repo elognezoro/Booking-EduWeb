@@ -29,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         })
       : Promise.resolve(0),
     user.permissions.has("users.manage")
-      ? prisma.user.count({ where: isSuperAdmin(user) ? { status: "PENDING" } : { ...orgFilter, status: "PENDING" } })
+      ? prisma.user.count({ where: isSuperAdmin(user) ? { organizationId: null, status: "ACTIVE" } : { ...orgFilter, status: "PENDING" } })
       : Promise.resolve(0),
     prisma.notification.findMany({
       where: { userId: user.id },
@@ -69,6 +69,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
       unread={unread}
     >
       <IdleLogout minutes={inactivityMinutes} />
+      {!user.organizationId && !isSuperAdmin(user) && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-pending/30 bg-pending-soft px-4 py-3 text-sm text-foreground">
+          <span className="mt-0.5 text-base">⏳</span>
+          <p><strong>Compte confirmé.</strong> Un administrateur va rattacher votre compte à votre établissement ; l'ensemble des fonctionnalités (réservations, ressources, bibliothèque…) sera alors débloqué.</p>
+        </div>
+      )}
       {children}
     </DashboardShell>
   );

@@ -453,8 +453,13 @@ export async function rejectAccount(formData: FormData) {
   const id = String(formData.get("id"));
   const u = await prisma.user.findUnique({ where: { id } });
   const isSuper = admin.permissions.has("platform.manage");
-  // Périmètre : compte de l'organisation de l'admin, OU compte sans organisation (file du super admin).
-  if (u && u.status === "PENDING" && (u.organizationId === admin.organizationId || (u.organizationId === null && isSuper))) {
+  // Périmètre : super admin → tout compte sans établissement (confirmé ou non) ;
+  // admin d'établissement → une demande PENDING de son organisation.
+  const canReject = !!u && (
+    (isSuper && u.organizationId === null) ||
+    (!isSuper && u.organizationId === admin.organizationId && u.status === "PENDING")
+  );
+  if (canReject && u) {
     await sendNotification({
       to: u.email, type: "ACCOUNT_REJECTED",
       subject: "Votre demande de compte n'a pas été retenue",
@@ -479,7 +484,9 @@ export async function assignAndApproveAccount(formData: FormData) {
   if (roleKey === "SUPER_ADMIN") redirect("/dashboard/admin/account-requests?error=role");
 
   const u = await prisma.user.findUnique({ where: { id } });
-  if (!u || u.status !== "PENDING") redirect("/dashboard/admin/account-requests?error=notfound");
+  // Uniquement un compte CONFIRMÉ (e-mail vérifié → ACTIVE) et sans établissement : on n'affecte
+  // pas un compte non confirmé (cela contournerait la confirmation par e-mail).
+  if (!u || u.organizationId || u.status !== "ACTIVE") redirect("/dashboard/admin/account-requests?error=notfound");
 
   const org = await prisma.organization.findFirst({
     where: { id: organizationId, isPlatform: false, status: "ACTIVE" },

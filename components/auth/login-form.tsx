@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { LogIn, Loader2, AlertCircle, Building2, ArrowLeftRight, UserPlus } from "lucide-react";
+import { LogIn, Loader2, AlertCircle, Building2, ArrowLeftRight, UserPlus, MailWarning } from "lucide-react";
 import { loginAction, type LoginState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
+import { ResendVerification } from "@/components/auth/resend-verification";
 
 export interface Institution {
   name: string;
@@ -26,7 +27,7 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; institution?: Institution | null }) {
+export function LoginForm({ callbackUrl, institution, verifyNotice }: { callbackUrl?: string; institution?: Institution | null; verifyNotice?: "expired" | "invalid" }) {
   const [state, formAction] = useFormState<LoginState, FormData>(loginAction, {});
   const [email, setEmail] = React.useState("");
 
@@ -56,6 +57,17 @@ export function LoginForm({ callbackUrl, institution }: { callbackUrl?: string; 
       <p className="mt-2 text-muted-foreground">
         {institution ? `Connectez-vous à l'espace ${institution.name}.` : "Connectez-vous à votre espace EduWeb Booking."}
       </p>
+
+      {verifyNotice && (
+        <div className="mt-5 rounded-xl border border-pending/30 bg-pending-soft p-3.5">
+          <p className="flex items-center gap-2 text-sm font-semibold text-pending-fg">
+            <MailWarning className="size-4 shrink-0" />
+            {verifyNotice === "expired" ? "Le lien de confirmation a expiré." : "Lien de confirmation invalide ou déjà utilisé."}
+          </p>
+          <p className="mt-1 mb-2.5 text-xs text-muted-foreground">Saisissez votre adresse pour recevoir un nouveau lien de confirmation :</p>
+          <ResendVerification />
+        </div>
+      )}
 
       <form action={formAction} className="mt-8 space-y-4">
         {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}

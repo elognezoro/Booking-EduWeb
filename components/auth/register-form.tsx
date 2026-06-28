@@ -2,12 +2,13 @@
 
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { UserPlus, Loader2, AlertCircle, CheckCircle2, ShieldCheck } from "lucide-react";
+import { UserPlus, Loader2, AlertCircle, MailCheck, ShieldCheck } from "lucide-react";
 import { registerAccount, type RegisterState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
+import { ResendVerification } from "@/components/auth/resend-verification";
 import { formatGivenName, formatFamilyName } from "@/lib/utils";
 
 function SubmitButton() {
@@ -15,7 +16,7 @@ function SubmitButton() {
   return (
     <Button type="submit" size="lg" className="w-full" disabled={pending}>
       {pending ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
-      Envoyer ma demande
+      Créer mon compte
     </Button>
   );
 }
@@ -27,14 +28,19 @@ export function RegisterForm() {
     return (
       <div className="text-center">
         <span className="mx-auto mb-4 inline-flex size-16 items-center justify-center rounded-2xl bg-available-soft text-available-fg">
-          <CheckCircle2 className="size-8" />
+          <MailCheck className="size-8" />
         </span>
-        <h1 className="text-2xl font-extrabold text-foreground">Demande envoyée 🎉</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">Confirmez votre e-mail 📩</h1>
         <p className="mt-3 text-muted-foreground">
-          Votre compte a été créé et est <strong className="text-foreground">en attente de validation</strong> par un
-          administrateur. Vous recevrez une notification dès qu'il sera activé.
+          Un e-mail de confirmation {state.email ? <>a été envoyé à <strong className="text-foreground">{state.email}</strong></> : "vient de vous être envoyé"}.
+          Cliquez sur le lien qu'il contient pour <strong className="text-foreground">activer votre compte</strong> ; il sera alors immédiatement utilisable. Le lien est valable 48 heures.
         </p>
-        <Button asChild className="mt-6"><a href="/login">Retour à la connexion</a></Button>
+        <p className="mt-2 text-sm text-muted-foreground">Pensez à vérifier votre dossier « indésirables / spam ».</p>
+        <div className="mt-5 rounded-xl border border-border bg-secondary/40 p-3 text-left">
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">Vous n'avez rien reçu ?</p>
+          <ResendVerification defaultEmail={state.email} />
+        </div>
+        <Button asChild variant="ghost" className="mt-5"><a href="/login">Retour à la connexion</a></Button>
       </div>
     );
   }
@@ -42,7 +48,7 @@ export function RegisterForm() {
   return (
     <div>
       <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Créer un compte</h1>
-      <p className="mt-2 text-muted-foreground">Renseignez vos informations ; votre compte sera activé après validation par un administrateur.</p>
+      <p className="mt-2 text-muted-foreground">Renseignez vos informations ; un e-mail de confirmation vous sera envoyé pour activer votre compte immédiatement.</p>
 
       <form action={formAction} className="mt-7 space-y-4">
         {state.error && (
@@ -67,7 +73,7 @@ export function RegisterForm() {
           <input type="checkbox" name="accept" className="mt-0.5 size-4 rounded border-input text-primary focus:ring-ring" required />
           <span className="text-sm text-muted-foreground">
             <ShieldCheck className="mr-1 inline size-4 text-primary" />
-            Je comprends que mon compte sera <strong className="text-foreground">soumis à la validation</strong> d'un administrateur avant de pouvoir être utilisé.
+            J'accepte les conditions d'utilisation et la réception d'un <strong className="text-foreground">e-mail de confirmation</strong> pour activer mon compte.
           </span>
         </label>
 
