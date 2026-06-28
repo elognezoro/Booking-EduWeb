@@ -13,9 +13,9 @@ const APP_URL =
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = (process.env.RESEND_FROM || "EduWeb Booking <no-reply@booking.eduweb.ci>").trim();
 
-/** Envoi via l'API Resend. Renvoie true si l'e-mail a été accepté par Resend. */
-async function sendViaResend(to: string, subject: string, html: string, text?: string): Promise<boolean> {
-  if (!RESEND_API_KEY) return false;
+/** Envoi via l'API Resend. Renvoie { ok } ; en cas d'échec, `error` contient le détail Resend. */
+async function sendViaResend(to: string, subject: string, html: string, text?: string): Promise<{ ok: boolean; error?: string }> {
+  if (!RESEND_API_KEY) return { ok: false, error: "RESEND_API_KEY absente" };
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -23,13 +23,14 @@ async function sendViaResend(to: string, subject: string, html: string, text?: s
       body: JSON.stringify({ from: RESEND_FROM, to: [to], subject, html, text: text || undefined }),
     });
     if (!res.ok) {
-      console.error("Resend: échec d'envoi", res.status, await res.text().catch(() => ""));
-      return false;
+      const body = await res.text().catch(() => "");
+      const error = `HTTP ${res.status} from=${RESEND_FROM} ${body}`.slice(0, 480);
+      console.error("Resend: échec d'envoi —", error);
+      return { ok: false, error };
     }
-    return true;
+    return { ok: true };
   } catch (err) {
-    console.error("Resend: exception", err);
-    return false;
+    return { ok: false, error: `exception ${String(err)}`.slice(0, 480) };
   }
 }
 
@@ -112,9 +113,12 @@ export async function sendNotification(opts: {
 
   try {
     let sent = false;
+    let failDetail = "";
     if (opts.to) {
       // 1) Resend (principal) ; 2) SMTP (repli) ; 3) journalisation en dev.
-      sent = await sendViaResend(opts.to, opts.subject, opts.html, opts.text);
+      const r = await sendViaResend(opts.to, opts.subject, opts.html, opts.text);
+      sent = r.ok;
+      if (!sent) failDetail = r.error ?? "";
       if (!sent) {
         const t = getTransporter();
         if (t) {
@@ -127,10 +131,13 @@ export async function sendNotification(opts: {
     if (!sent) {
       console.info(`📧 [EduWeb Booking] (dev/sans transport) « ${opts.subject} » → ${opts.to ?? "interne"}`);
     }
-    // SENT si réellement envoyé (Resend/SMTP) ou en l'absence de tout transport (dev) ; sinon FAILED.
+    // SENT si réellement envoyé (Resend/SMTP) ou en l'absence de tout transport (dev) ; sinon FAILED
+    // avec le détail de l'erreur Resend conservé dans `content` pour diagnostic.
     await prisma.notification.update({
       where: { id: notif.id },
-      data: sent || !hasTransport ? { status: "SENT", sentAt: new Date() } : { status: "FAILED" },
+      data: sent || !hasTransport
+        ? { status: "SENT", sentAt: new Date() }
+        : { status: "FAILED", content: `${opts.text ?? opts.subject} | ERREUR ENVOI: ${failDetail}`.slice(0, 1000) },
     });
   } catch (err) {
     console.error("Échec d'envoi e-mail :", err);
