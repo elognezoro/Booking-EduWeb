@@ -126,6 +126,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: "Aide",
     icon: LifeBuoy,
     items: [
+      { label: "Formation", href: "/dashboard/training", icon: GraduationCap },
       { label: "Support", href: "/dashboard/support", icon: LifeBuoy },
       { label: "Centre d'aide", href: "/dashboard/help", icon: HelpCircle },
     ],
