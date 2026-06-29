@@ -61,10 +61,20 @@ export async function setInactivityLogoutMinutes(minutes: number): Promise<void>
   });
 }
 
-// ——— Certificat CERTEL Niveau 1 : date de signature & lieu (réglés par le super admin) ———
-export interface CertelCertConfig { signatureDate: string; lieu: string } // signatureDate : "AAAA-MM-JJ" ou ""
+// ——— Certificat CERTEL Niveau 1 (réglé par le super admin) ———
+export interface CertelCertConfig {
+  signatureDate: string; // "AAAA-MM-JJ" ou ""
+  lieu: string;
+  formateur: string;
+  responsable: string;
+  directeur: string; // défaut « Dr Elogne ZORO »
+  signatureDataUrl: string; // image base64 (signature) ou ""
+  cachetDataUrl: string; // image base64 (cachet) ou ""
+}
 const CERTEL_CERT_KEY = "certel_cert_n1";
-export const CERTEL_CERT_DEFAULTS: CertelCertConfig = { signatureDate: "", lieu: "" };
+export const CERTEL_CERT_DEFAULTS: CertelCertConfig = {
+  signatureDate: "", lieu: "", formateur: "", responsable: "", directeur: "Dr Elogne ZORO", signatureDataUrl: "", cachetDataUrl: "",
+};
 
 /** Valide une date calendaire réelle au format "AAAA-MM-JJ" (rejette 2026-02-30, 2026-13-01…). */
 function validIsoDate(s: unknown): string {
@@ -72,25 +82,41 @@ function validIsoDate(s: unknown): string {
   const d = new Date(s + "T00:00:00Z");
   return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s ? s : "";
 }
+const txt = (s: unknown, max = 120) => (typeof s === "string" ? s.trim().slice(0, max) : "");
+const dataImg = (s: unknown) => (typeof s === "string" && s.startsWith("data:image/") && s.length < 3_000_000 ? s : "");
 
 export async function getCertelCertConfig(): Promise<CertelCertConfig> {
   const row = await prisma.platformSetting.findUnique({ where: { key: CERTEL_CERT_KEY } });
   if (!row) return CERTEL_CERT_DEFAULTS;
   try {
     const v = JSON.parse(row.value);
-    const lieu = typeof v?.lieu === "string" ? v.lieu.slice(0, 120) : "";
-    return { signatureDate: validIsoDate(v?.signatureDate), lieu };
+    return {
+      signatureDate: validIsoDate(v?.signatureDate),
+      lieu: txt(v?.lieu),
+      formateur: txt(v?.formateur),
+      responsable: txt(v?.responsable),
+      directeur: txt(v?.directeur) || CERTEL_CERT_DEFAULTS.directeur,
+      signatureDataUrl: dataImg(v?.signatureDataUrl),
+      cachetDataUrl: dataImg(v?.cachetDataUrl),
+    };
   } catch {
     return CERTEL_CERT_DEFAULTS;
   }
 }
 
 export async function setCertelCertConfig(c: CertelCertConfig): Promise<void> {
-  const signatureDate = validIsoDate(c.signatureDate);
-  const lieu = (c.lieu ?? "").trim().slice(0, 120);
+  const clean: CertelCertConfig = {
+    signatureDate: validIsoDate(c.signatureDate),
+    lieu: txt(c.lieu),
+    formateur: txt(c.formateur),
+    responsable: txt(c.responsable),
+    directeur: txt(c.directeur) || CERTEL_CERT_DEFAULTS.directeur,
+    signatureDataUrl: dataImg(c.signatureDataUrl),
+    cachetDataUrl: dataImg(c.cachetDataUrl),
+  };
   await prisma.platformSetting.upsert({
     where: { key: CERTEL_CERT_KEY },
-    create: { key: CERTEL_CERT_KEY, value: JSON.stringify({ signatureDate, lieu }) },
-    update: { value: JSON.stringify({ signatureDate, lieu }) },
+    create: { key: CERTEL_CERT_KEY, value: JSON.stringify(clean) },
+    update: { value: JSON.stringify(clean) },
   });
 }

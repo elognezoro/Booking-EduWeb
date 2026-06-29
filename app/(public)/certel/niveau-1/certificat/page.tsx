@@ -35,15 +35,19 @@ export default async function CertelN1CertificatPage() {
 
   const cert = await getOrCreateCertelCertificate(user.id, user.fullName, "N1");
   const cfg = await getCertelCertConfig();
-  const dateStr = frDate(cfg.signatureDate);
 
   return (
     <div className="formation-scope section py-8 sm:py-10">
       <CertificateView
         name={user.fullName || "—"}
-        dateLabel={dateStr ? `Date : ${dateStr}` : "Date : —"}
-        lieu={cfg.lieu ? `Lieu : ${cfg.lieu}` : "Lieu : —"}
-        reference={`Référence : ${certelRef(cert.levelKey, cert.number)}`}
+        date={frDate(cfg.signatureDate)}
+        lieu={cfg.lieu}
+        formateur={cfg.formateur}
+        responsable={cfg.responsable}
+        directeur={cfg.directeur}
+        reference={certelRef(cert.levelKey, cert.number)}
+        signatureDataUrl={cfg.signatureDataUrl}
+        cachetDataUrl={cfg.cachetDataUrl}
       />
     </div>
   );

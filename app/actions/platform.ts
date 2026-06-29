@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { slugify } from "@/lib/utils";
 import { provisionInstitution } from "@/lib/platform/provision";
-import { setGamesGating, setInactivityLogoutMinutes, setCertelCertConfig } from "@/lib/platform/settings";
+import { setGamesGating, setInactivityLogoutMinutes, setCertelCertConfig, getCertelCertConfig } from "@/lib/platform/settings";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import { CI_MINISTRIES } from "@/lib/ci-ministries";
 
@@ -26,12 +26,20 @@ export async function saveInactivityLogout(formData: FormData) {
   redirect(`${SECURITY_PATH}?saved=1`);
 }
 
-/** Règle la date de signature et le lieu des certificats CERTEL Niveau 1. Super admin. */
+/** Règle date de signature, lieu, signataires et signature/cachet des certificats CERTEL Niveau 1. Super admin. */
 export async function saveCertelCertConfig(formData: FormData) {
   await requirePermission("platform.manage");
+  const cur = await getCertelCertConfig();
+  // Image : "" = inchangée · "__REMOVE__" = retirée · "data:image/..." = nouvelle.
+  const img = (formVal: string, current: string) => (formVal === "__REMOVE__" ? "" : formVal.startsWith("data:image/") ? formVal : current);
   await setCertelCertConfig({
     signatureDate: String(formData.get("signatureDate") || "").trim(),
     lieu: String(formData.get("lieu") || "").trim(),
+    formateur: String(formData.get("formateur") || "").trim(),
+    responsable: String(formData.get("responsable") || "").trim(),
+    directeur: String(formData.get("directeur") || "").trim(),
+    signatureDataUrl: img(String(formData.get("signatureDataUrl") || ""), cur.signatureDataUrl),
+    cachetDataUrl: img(String(formData.get("cachetDataUrl") || ""), cur.cachetDataUrl),
   });
   revalidatePath(CERTEL_PATH);
   revalidatePath("/certel/niveau-1/certificat");

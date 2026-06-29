@@ -8,6 +8,7 @@ import { CERTEL_LEVELS } from "@/lib/certel/diagnostic";
 import { certelRef } from "@/lib/certel/certificate";
 import { getCertelCertConfig } from "@/lib/platform/settings";
 import { saveCertelCertConfig } from "@/app/actions/platform";
+import { CertificateImageUpload } from "@/components/certificates/image-upload";
 import { fromNow } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
@@ -56,15 +57,24 @@ export default async function CertelDiagnosticsPage({ searchParams }: { searchPa
           {searchParams?.certsaved && (
             <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-available-soft px-3 py-1 text-sm font-semibold text-available-fg"><CheckCircle2 className="size-4" /> Paramètres enregistrés.</p>
           )}
-          <form action={saveCertelCertConfig} className="mt-4 flex flex-wrap items-end gap-4">
-            <label className="block">
-              <span className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-foreground"><CalendarCheck className="size-4 text-advanced-fg" /> Date de signature</span>
-              <input type="date" name="signatureDate" defaultValue={cfg.signatureDate} className="rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-advanced/40" />
-            </label>
-            <label className="block">
-              <span className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-foreground"><MapPin className="size-4 text-advanced-fg" /> Lieu</span>
-              <input type="text" name="lieu" defaultValue={cfg.lieu} placeholder="Ex. Abidjan" maxLength={120} className="w-56 rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-advanced/40" />
-            </label>
+          <form action={saveCertelCertConfig} className="mt-4 space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label className="block">
+                <span className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-foreground"><CalendarCheck className="size-4 text-advanced-fg" /> Date de signature</span>
+                <input type="date" name="signatureDate" defaultValue={cfg.signatureDate} className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-advanced/40" />
+              </label>
+              <label className="block">
+                <span className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-foreground"><MapPin className="size-4 text-advanced-fg" /> Lieu</span>
+                <input type="text" name="lieu" defaultValue={cfg.lieu} placeholder="Ex. Abidjan" maxLength={120} className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-advanced/40" />
+              </label>
+              <Field name="formateur" label="Nom du Formateur" value={cfg.formateur} placeholder="Ex. Mme Fatou Bamba" />
+              <Field name="responsable" label="Nom du Responsable" value={cfg.responsable} placeholder="Ex. M. Jean Brou" />
+              <Field name="directeur" label="Direction Générale" value={cfg.directeur} placeholder="Dr Elogne ZORO" />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <CertificateImageUpload name="signatureDataUrl" label="Signature (scan)" initial={cfg.signatureDataUrl || null} hint="Apposée à droite du nom du Directeur Général." maxDim={700} />
+              <CertificateImageUpload name="cachetDataUrl" label="Cachet (scan)" initial={cfg.cachetDataUrl || null} hint="Tampon de certification." maxDim={700} />
+            </div>
             <button type="submit" className="rounded-full bg-advanced px-5 py-2 text-sm font-bold text-white transition hover:bg-advanced/90">Enregistrer</button>
           </form>
           <p className="mt-3 text-sm text-muted-foreground"><span className="font-semibold text-foreground">{certs.length}</span> certificat{certs.length > 1 ? "s" : ""} Niveau 1 délivré{certs.length > 1 ? "s" : ""} à ce jour.</p>
@@ -103,5 +113,14 @@ export default async function CertelDiagnosticsPage({ searchParams }: { searchPa
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function Field({ name, label, value, placeholder }: { name: string; label: string; value: string; placeholder?: string }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-sm font-semibold text-foreground">{label}</span>
+      <input type="text" name={name} defaultValue={value} placeholder={placeholder} maxLength={120} className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-advanced/40" />
+    </label>
   );
 }
