@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RichContent } from "@/components/lms/rich-content";
 import { submitAttempt } from "@/app/actions/lms";
+import type { ClozeRenderSegment } from "@/lib/lms-cloze";
 
-export interface RunnerQuestion { id: string; type: string; name: string; questionText: string; multiple?: boolean; options?: string[] }
+export interface RunnerQuestion { id: string; type: string; name: string; questionText: string; multiple?: boolean; options?: string[]; cloze?: ClozeRenderSegment[] }
 
 export function QuizRunner({ attemptId, questions }: { attemptId: string; questions: RunnerQuestion[] }) {
   const [answers, setAnswers] = React.useState<Record<string, unknown>>({});
@@ -15,6 +16,8 @@ export function QuizRunner({ attemptId, questions }: { attemptId: string; questi
   const set = (id: string, v: unknown) => setAnswers((a) => ({ ...a, [id]: v }));
   const mcqSelected = (id: string): number[] => (Array.isArray(answers[id]) ? (answers[id] as number[]) : []);
   const toggleMulti = (id: string, idx: number) => set(id, mcqSelected(id).includes(idx) ? mcqSelected(id).filter((x) => x !== idx) : [...mcqSelected(id), idx]);
+  const clozeAns = (id: string): Record<string, string> => (answers[id] && typeof answers[id] === "object" && !Array.isArray(answers[id]) ? (answers[id] as Record<string, string>) : {});
+  const setCloze = (id: string, gap: number, v: string) => set(id, { ...clozeAns(id), [String(gap)]: v });
 
   const submit = async () => {
     if (pending) return;
@@ -52,6 +55,30 @@ export function QuizRunner({ attemptId, questions }: { attemptId: string; questi
             )}
             {q.type === "NUMERICAL" && (
               <Input type="number" step="any" value={String(answers[q.id] ?? "")} onChange={(e) => set(q.id, e.target.value)} placeholder="Votre réponse" className="max-w-[200px]" />
+            )}
+            {q.type === "CLOZE" && q.cloze && (
+              <p className="text-[15px] leading-[2.4] text-foreground">
+                {q.cloze.map((seg, si) =>
+                  seg.type === "text" ? (
+                    <span key={si} className="whitespace-pre-wrap">{seg.text}</span>
+                  ) : seg.gap.kind === "MULTICHOICE" ? (
+                    <select key={si} value={clozeAns(q.id)[String(seg.gap.index)] ?? ""} onChange={(e) => setCloze(q.id, seg.gap.index, e.target.value)} className="mx-1 rounded-lg border border-input bg-background px-2 py-1 text-sm">
+                      <option value="">—</option>
+                      {(seg.gap.choices ?? []).map((c, ci) => <option key={ci} value={c}>{c}</option>)}
+                    </select>
+                  ) : (
+                    <input
+                      key={si}
+                      type={seg.gap.kind === "NUMERICAL" ? "number" : "text"}
+                      step={seg.gap.kind === "NUMERICAL" ? "any" : undefined}
+                      value={clozeAns(q.id)[String(seg.gap.index)] ?? ""}
+                      onChange={(e) => setCloze(q.id, seg.gap.index, e.target.value)}
+                      className="mx-1 w-32 rounded-lg border border-input bg-background px-2 py-1 align-middle text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      aria-label={`Trou ${seg.gap.index}`}
+                    />
+                  ),
+                )}
+              </p>
             )}
           </div>
         </div>

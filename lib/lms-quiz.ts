@@ -1,4 +1,5 @@
 import type { McqData, TrueFalseData, ShortAnswerData, NumericalData } from "./lms-questions";
+import { gradeCloze, clozeCorrectText } from "./lms-cloze";
 
 /** Réglages d'un quiz + correction automatique + conditions de visibilité du corrigé. Module neutre. */
 export interface QuizConfig {
@@ -69,8 +70,10 @@ export function gradeOne(type: string, dataJson: string, answer: unknown): numbe
       for (const ans of d.answers) if (Math.abs(a - ans.value) <= Math.abs(ans.tolerance)) best = Math.max(best, ans.grade / 100);
       return best;
     }
+    case "CLOZE":
+      return gradeCloze((data as { clozeText?: string }).clozeText ?? "", answer);
     default:
-      return 0; // CLOZE : correction automatique prévue ultérieurement
+      return 0;
   }
 }
 
@@ -101,6 +104,7 @@ export function correctAnswerText(type: string, dataJson: string): string {
     case "TRUEFALSE": return (data as TrueFalseData).correct ? "Vrai" : "Faux";
     case "SHORTANSWER": { const d = data as ShortAnswerData; const best = d.answers.filter((a) => a.grade >= 100).map((a) => a.text); return (best.length ? best : d.answers.map((a) => a.text)).join(" ; ") || "—"; }
     case "NUMERICAL": { const d = data as NumericalData; return d.answers.map((a) => (a.tolerance ? `${a.value} (± ${a.tolerance})` : `${a.value}`)).join(" ; ") || "—"; }
+    case "CLOZE": return clozeCorrectText((data as { clozeText?: string }).clozeText ?? "");
     default: return "(voir l'énoncé)";
   }
 }

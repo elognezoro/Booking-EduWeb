@@ -3,6 +3,7 @@ import { getLmsAccess } from "@/lib/lms";
 import { prisma } from "@/lib/prisma";
 import { QuizRunner, type RunnerQuestion } from "@/components/lms/quiz-runner";
 import type { McqData } from "@/lib/lms-questions";
+import { clozeRenderSegments } from "@/lib/lms-cloze";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,9 @@ export default async function AttemptPage({ params }: { params: { slug: string; 
     const base: RunnerQuestion = { id: l.question.id, type: l.question.type, name: l.question.name, questionText: l.question.questionText };
     if (l.question.type === "MCQ") {
       try { const d = JSON.parse(l.question.data) as McqData; return { ...base, multiple: d.multiple, options: d.options.map((o) => o.text) }; } catch { return base; }
+    }
+    if (l.question.type === "CLOZE") {
+      try { const d = JSON.parse(l.question.data) as { clozeText?: string }; return { ...base, cloze: clozeRenderSegments(d.clozeText ?? "") }; } catch { return base; }
     }
     return base;
   });

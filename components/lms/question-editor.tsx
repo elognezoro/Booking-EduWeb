@@ -125,7 +125,7 @@ function ClozeFields({ data, setData }: { data: ClozeData; setData: (d: ClozeDat
   return (
     <div className={box}>
       <Textarea value={data.clozeText} onChange={(e) => setData({ clozeText: e.target.value })} rows={6} className="font-mono text-xs" placeholder={"La capitale de la Côte d'Ivoire est {1:SHORTANSWER:=Yamoussoukro}. 2 + 2 = {1:NUMERICAL:=4}."} />
-      <p className="text-xs text-muted-foreground">Format Moodle « Cloze » : champs intégrés <code>{"{note:TYPE:=bonne réponse~mauvaise}"}</code> (SHORTANSWER, NUMERICAL, MULTICHOICE). La correction interactive arrivera avec le module Quiz.</p>
+      <p className="text-xs text-muted-foreground">Format Moodle « Cloze » : champs intégrés <code>{"{note:TYPE:=bonne réponse~mauvaise}"}</code> — types <code>SHORTANSWER</code>/<code>SHORTANSWER_C</code> (sensible à la casse), <code>NUMERICAL</code> (<code>{"=4:0.5"}</code> pour la tolérance), <code>MULTICHOICE</code> (liste déroulante). Crédit partiel avec <code>%50%</code>, retour avec <code>#…</code>. Auto‑corrigé dans le Quiz.</p>
     </div>
   );
 }

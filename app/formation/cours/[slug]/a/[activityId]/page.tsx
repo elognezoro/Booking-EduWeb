@@ -32,7 +32,7 @@ function fmtDate(iso: string | Date): string {
 
 export const dynamic = "force-dynamic";
 
-const AUTO_TYPES = ["MCQ", "TRUEFALSE", "SHORTANSWER", "NUMERICAL"];
+const AUTO_TYPES = ["MCQ", "TRUEFALSE", "SHORTANSWER", "NUMERICAL", "CLOZE"];
 
 function MediaBlock({ url, intro }: { url: string; intro: string | null }) {
   const m = detectMedia(url);
