@@ -4,9 +4,10 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getLmsAccess, canEditCourse } from "@/lib/lms";
+import { getLmsAccess, canEditCourse, getCourseRole } from "@/lib/lms";
 import { sanitizeRich } from "@/lib/lms-content";
 import { normalizeData } from "@/lib/lms-questions";
+import { DEFAULT_QUIZ_CONFIG, parseQuizConfig, gradeAttempt, type QuizConfig } from "@/lib/lms-quiz";
 import { slugify } from "@/lib/utils";
 
 const BASE = "/formation";
@@ -121,11 +122,15 @@ export async function createActivity(formData: FormData) {
   const type = String(formData.get("type") || "PAGE");
   const title = String(formData.get("title") || "").trim() || (type === "URL" ? "Média" : "Page");
   const position = await prisma.lmsActivity.count({ where: { sectionId } });
-  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null } = { sectionId, type, title, position };
+  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string } = { sectionId, type, title, position };
   if (type === "PAGE") data.content = sanitizeRich(String(formData.get("content") || ""));
   if (type === "URL") {
     data.externalUrl = String(formData.get("externalUrl") || "").trim();
     data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
+  }
+  if (type === "QUIZ") {
+    data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
+    data.quizConfig = JSON.stringify(DEFAULT_QUIZ_CONFIG);
   }
   const act = await prisma.lmsActivity.create({ data, select: { id: true } });
   revalidatePath(`${BASE}/cours/${section.course.slug}`);
@@ -195,6 +200,113 @@ export async function deleteQuestion(formData: FormData) {
   await prisma.lmsQuestion.delete({ where: { id } });
   revalidatePath(`${BASE}/cours/${q.course.slug}/banque`);
   redirect(`${BASE}/cours/${q.course.slug}/banque`);
+}
+
+/* ----------------------------- Quiz (assemblage + tentatives) ----------------------------- */
+async function activityGuard(activityId: string) {
+  const access = await getLmsAccess();
+  const act = await prisma.lmsActivity.findUnique({
+    where: { id: activityId },
+    select: { id: true, type: true, quizConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
+  });
+  if (!act) return null;
+  return { access, act, editable: await canEditCourse(access, act.section.courseId) };
+}
+
+export async function configureQuiz(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g || !g.editable) redirect(BASE);
+  const val = (k: string) => String(formData.get(k) || "");
+  const cfg: QuizConfig = {
+    attempts: Math.max(0, Number(formData.get("attempts")) || 0),
+    gradeMethod: (["highest", "last", "average"].includes(val("gradeMethod")) ? val("gradeMethod") : "highest") as QuizConfig["gradeMethod"],
+    shuffle: formData.get("shuffle") === "on",
+    timeLimitMin: Math.max(0, Number(formData.get("timeLimitMin")) || 0),
+    corrige: (["immediate", "afterAttempts", "manual", "never"].includes(val("corrige")) ? val("corrige") : "afterAttempts") as QuizConfig["corrige"],
+    released: parseQuizConfig(g.act.quizConfig).released,
+    passing: Math.max(0, Math.min(100, Number(formData.get("passing")) || 50)),
+  };
+  await prisma.lmsActivity.update({
+    where: { id: activityId },
+    data: { title: val("title").trim() || undefined, intro: sanitizeRich(val("intro")) || null, quizConfig: JSON.stringify(cfg) },
+  });
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+}
+
+export async function addQuizQuestions(input: { activityId: string; questionIds: string[] }) {
+  const g = await activityGuard(input.activityId);
+  if (!g || !g.editable) return;
+  const ids = Array.isArray(input.questionIds) ? input.questionIds.filter(Boolean) : [];
+  if (!ids.length) return;
+  const valid = await prisma.lmsQuestion.findMany({ where: { id: { in: ids }, courseId: g.act.section.courseId }, select: { id: true, defaultMark: true } });
+  let pos = await prisma.lmsQuizQuestion.count({ where: { activityId: input.activityId } });
+  for (const q of valid) {
+    await prisma.lmsQuizQuestion.upsert({
+      where: { activityId_questionId: { activityId: input.activityId, questionId: q.id } },
+      create: { activityId: input.activityId, questionId: q.id, position: pos++, mark: q.defaultMark },
+      update: {},
+    });
+  }
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${input.activityId}`);
+}
+
+export async function removeQuizQuestion(formData: FormData) {
+  const access = await getLmsAccess();
+  const id = String(formData.get("id") || "");
+  const link = await prisma.lmsQuizQuestion.findUnique({ where: { id }, select: { activity: { select: { id: true, section: { select: { courseId: true, course: { select: { slug: true } } } } } } } });
+  if (!link || !(await canEditCourse(access, link.activity.section.courseId))) redirect(BASE);
+  await prisma.lmsQuizQuestion.delete({ where: { id } });
+  revalidatePath(`${BASE}/cours/${link.activity.section.course.slug}/a/${link.activity.id}`);
+}
+
+export async function releaseCorrige(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g || !g.editable) redirect(BASE);
+  const cfg = parseQuizConfig(g.act.quizConfig);
+  cfg.released = true;
+  await prisma.lmsActivity.update({ where: { id: activityId }, data: { quizConfig: JSON.stringify(cfg) } });
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+}
+
+export async function startAttempt(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g) redirect(BASE);
+  if (!g.access) redirect("/login?callbackUrl=/formation");
+  const slug = g.act.section.course.slug;
+  const role = await getCourseRole(g.access.userId, g.act.section.courseId);
+  if (role === null && !g.editable) redirect(`${BASE}/cours/${slug}`);
+  const cfg = parseQuizConfig(g.act.quizConfig);
+  const used = await prisma.lmsAttempt.count({ where: { activityId, userId: g.access.userId, state: "finished" } });
+  if (cfg.attempts > 0 && used >= cfg.attempts) redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+  const existing = await prisma.lmsAttempt.findFirst({ where: { activityId, userId: g.access.userId, state: "inprogress" } });
+  if (!existing) await prisma.lmsAttempt.create({ data: { activityId, userId: g.access.userId, state: "inprogress" } });
+  redirect(`${BASE}/cours/${slug}/a/${activityId}/tentative`);
+}
+
+export async function submitAttempt(input: { attemptId: string; answers: Record<string, unknown> }) {
+  const access = await getLmsAccess();
+  if (!access) redirect("/login?callbackUrl=/formation");
+  const attempt = await prisma.lmsAttempt.findUnique({
+    where: { id: input.attemptId },
+    select: { id: true, userId: true, state: true, activityId: true, activity: { select: { section: { select: { course: { select: { slug: true } } } } } } },
+  });
+  if (!attempt || attempt.userId !== access.userId || attempt.state === "finished") redirect(BASE);
+  const links = await prisma.lmsQuizQuestion.findMany({
+    where: { activityId: attempt.activityId },
+    include: { question: { select: { id: true, type: true, data: true, defaultMark: true } } },
+    orderBy: { position: "asc" },
+  });
+  const items = links.map((l) => ({ questionId: l.question.id, type: l.question.type, data: l.question.data, mark: l.mark ?? l.question.defaultMark }));
+  const graded = gradeAttempt(items, input.answers || {});
+  await prisma.lmsAttempt.update({
+    where: { id: attempt.id },
+    data: { state: "finished", submittedAt: new Date(), answers: JSON.stringify(input.answers || {}), score: graded.score, maxScore: graded.maxScore },
+  });
+  redirect(`${BASE}/cours/${attempt.activity.section.course.slug}/a/${attempt.activityId}`);
 }
 
 /* ----------------------------- Inscription (apprenant) ----------------------------- */
