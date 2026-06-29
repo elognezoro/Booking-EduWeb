@@ -18,9 +18,10 @@ const POS: Record<string, FieldPos> = {
   name: { top: "53.5%", left: "50%", size: "3.1cqw", color: "#0d4d38", weight: 700, anchor: "center" },
   date: { top: "70%", left: "36.5%", size: "1.6cqw", color: "#1f2937", weight: 600, anchor: "left" },
   lieu: { top: "70%", left: "64%", size: "1.6cqw", color: "#1f2937", weight: 600, anchor: "left" },
-  formateur: { top: "81.5%", left: "20.5%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
-  responsable: { top: "81.5%", left: "50%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
-  directeur: { top: "81.5%", left: "78%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
+  // Noms des signataires : juste AU-DESSUS des lignes de signature (lignes à ~81.5 %), non barrés.
+  formateur: { top: "80%", left: "20.5%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
+  responsable: { top: "80%", left: "50%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
+  directeur: { top: "80%", left: "78%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
   ref: { top: "89%", left: "86.5%", size: "1.25cqw", color: "#1f2937", weight: 700, anchor: "center", maxw: "16cqw" },
 };
 
