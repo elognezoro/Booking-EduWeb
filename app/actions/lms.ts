@@ -9,6 +9,7 @@ import { sanitizeRich } from "@/lib/lms-content";
 import { normalizeData } from "@/lib/lms-questions";
 import { DEFAULT_QUIZ_CONFIG, parseQuizConfig, gradeAttempt, type QuizConfig } from "@/lib/lms-quiz";
 import { DEFAULT_ASSIGN_CONFIG, parseAssignConfig, ASSIGN_MAX_FILE_MB, dataUrlBytes, isAllowedFile, type AssignConfig } from "@/lib/lms-assign";
+import { DEFAULT_FORUM_CONFIG, parseForumConfig, type ForumConfig } from "@/lib/lms-forum";
 import { slugify } from "@/lib/utils";
 
 const BASE = "/formation";
@@ -123,7 +124,7 @@ export async function createActivity(formData: FormData) {
   const type = String(formData.get("type") || "PAGE");
   const title = String(formData.get("title") || "").trim() || (type === "URL" ? "Média" : "Page");
   const position = await prisma.lmsActivity.count({ where: { sectionId } });
-  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string; assignConfig?: string } = { sectionId, type, title, position };
+  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string; assignConfig?: string; forumConfig?: string } = { sectionId, type, title, position };
   if (type === "PAGE") data.content = sanitizeRich(String(formData.get("content") || ""));
   if (type === "URL") {
     data.externalUrl = String(formData.get("externalUrl") || "").trim();
@@ -136,6 +137,10 @@ export async function createActivity(formData: FormData) {
   if (type === "DEVOIR") {
     data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
     data.assignConfig = JSON.stringify(DEFAULT_ASSIGN_CONFIG);
+  }
+  if (type === "FORUM") {
+    data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
+    data.forumConfig = JSON.stringify(DEFAULT_FORUM_CONFIG);
   }
   const act = await prisma.lmsActivity.create({ data, select: { id: true } });
   revalidatePath(`${BASE}/cours/${section.course.slug}`);
@@ -212,7 +217,7 @@ async function activityGuard(activityId: string) {
   const access = await getLmsAccess();
   const act = await prisma.lmsActivity.findUnique({
     where: { id: activityId },
-    select: { id: true, type: true, quizConfig: true, assignConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
+    select: { id: true, type: true, quizConfig: true, assignConfig: true, forumConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
   });
   if (!act) return null;
   return { access, act, editable: await canEditCourse(access, act.section.courseId) };
@@ -413,6 +418,118 @@ export async function gradeSubmission(formData: FormData) {
     data: { grade, feedback, state: "graded", gradedById: access.userId, gradedAt: new Date() },
   });
   revalidatePath(`${BASE}/cours/${sub.activity.section.course.slug}/a/${sub.activity.id}`);
+}
+
+/* ----------------------------- Forum (discussions + réponses) ----------------------------- */
+// Peut participer (lire/écrire) : inscrit au cours OU éditeur (enseignant/gestionnaire).
+async function canParticipate(access: Awaited<ReturnType<typeof getLmsAccess>>, courseId: string): Promise<{ ok: boolean; role: "TEACHER" | "STUDENT" | null; editable: boolean }> {
+  if (!access) return { ok: false, role: null, editable: false };
+  const editable = await canEditCourse(access, courseId);
+  const role = await getCourseRole(access.userId, courseId);
+  return { ok: editable || role !== null, role, editable };
+}
+
+export async function configureForum(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g || !g.editable) redirect(BASE);
+  const cfg: ForumConfig = { allowStudentDiscussions: formData.get("allowStudentDiscussions") === "on" };
+  await prisma.lmsActivity.update({
+    where: { id: activityId },
+    data: { title: String(formData.get("title") || "").trim() || undefined, intro: sanitizeRich(String(formData.get("intro") || "")) || null, forumConfig: JSON.stringify(cfg) },
+  });
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+}
+
+export async function createDiscussion(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g) redirect(BASE);
+  const part = await canParticipate(g.access, g.act.section.courseId);
+  if (!part.ok) redirect(`${BASE}/cours/${g.act.section.course.slug}`);
+  const cfg = parseForumConfig(g.act.forumConfig);
+  // Un apprenant ne peut ouvrir une discussion que si c'est autorisé ; l'éditeur le peut toujours.
+  if (!part.editable && !cfg.allowStudentDiscussions) redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  const title = String(formData.get("title") || "").trim().slice(0, 200);
+  const message = sanitizeRich(String(formData.get("message") || ""));
+  if (!title || !message) redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  const d = await prisma.lmsForumDiscussion.create({ data: { activityId, userId: g.access!.userId, title, message }, select: { id: true } });
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}/d/${d.id}`);
+}
+
+// Garde commune pour une discussion : renvoie la discussion + le contexte d'accès.
+async function discussionGuard(discussionId: string) {
+  const access = await getLmsAccess();
+  const d = await prisma.lmsForumDiscussion.findUnique({
+    where: { id: discussionId },
+    select: { id: true, userId: true, locked: true, pinned: true, activityId: true, activity: { select: { section: { select: { courseId: true, course: { select: { slug: true } } } } } } },
+  });
+  if (!d) return null;
+  const part = await canParticipate(access, d.activity.section.courseId);
+  return { access, d, slug: d.activity.section.course.slug, ...part };
+}
+
+export async function replyPost(formData: FormData) {
+  const discussionId = String(formData.get("discussionId") || "");
+  const g = await discussionGuard(discussionId);
+  if (!g || !g.ok) redirect(BASE);
+  if (g.d.locked && !g.editable) redirect(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${discussionId}`);
+  const message = sanitizeRich(String(formData.get("message") || ""));
+  if (!message) redirect(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${discussionId}`);
+  await prisma.lmsForumPost.create({ data: { discussionId, userId: g.access!.userId, message } });
+  await prisma.lmsForumDiscussion.update({ where: { id: discussionId }, data: { lastPostAt: new Date() } });
+  revalidatePath(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${discussionId}`);
+  revalidatePath(`${BASE}/cours/${g.slug}/a/${g.d.activityId}`); // liste du forum (dernière activité / tri)
+  redirect(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${discussionId}`);
+}
+
+export async function deletePost(formData: FormData) {
+  const access = await getLmsAccess();
+  const id = String(formData.get("id") || "");
+  const post = await prisma.lmsForumPost.findUnique({
+    where: { id },
+    select: { userId: true, discussionId: true, discussion: { select: { activityId: true, createdAt: true, activity: { select: { section: { select: { courseId: true, course: { select: { slug: true } } } } } } } } },
+  });
+  if (!post) redirect(BASE);
+  const courseId = post.discussion.activity.section.courseId;
+  const editable = await canEditCourse(access, courseId);
+  // Auteur ET toujours participant au cours, OU éditeur.
+  const isAuthorParticipant = !!access && post.userId === access.userId && (await getCourseRole(access.userId, courseId)) !== null;
+  if (!editable && !isAuthorParticipant) redirect(BASE);
+  await prisma.lmsForumPost.delete({ where: { id } });
+  // Recalcule la dernière activité de la discussion (sinon tri/affichage périmés).
+  const last = await prisma.lmsForumPost.findFirst({ where: { discussionId: post.discussionId }, orderBy: { createdAt: "desc" }, select: { createdAt: true } });
+  await prisma.lmsForumDiscussion.update({ where: { id: post.discussionId }, data: { lastPostAt: last?.createdAt ?? post.discussion.createdAt } });
+  const base = `${BASE}/cours/${post.discussion.activity.section.course.slug}/a/${post.discussion.activityId}`;
+  revalidatePath(`${base}/d/${post.discussionId}`);
+  revalidatePath(base);
+  redirect(`${base}/d/${post.discussionId}`);
+}
+
+export async function deleteDiscussion(formData: FormData) {
+  const g = await discussionGuard(String(formData.get("id") || ""));
+  if (!g) redirect(BASE);
+  const isAuthor = !!g.access && g.d.userId === g.access.userId;
+  if (!isAuthor && !g.editable) redirect(BASE);
+  await prisma.lmsForumDiscussion.delete({ where: { id: g.d.id } });
+  revalidatePath(`${BASE}/cours/${g.slug}/a/${g.d.activityId}`);
+  redirect(`${BASE}/cours/${g.slug}/a/${g.d.activityId}`);
+}
+
+export async function toggleDiscussionFlag(formData: FormData) {
+  const g = await discussionGuard(String(formData.get("id") || ""));
+  if (!g || !g.editable) redirect(BASE);
+  const flag = String(formData.get("flag") || "");
+  const data = flag === "pinned" ? { pinned: !g.d.pinned }
+    : flag === "locked" ? { locked: !g.d.locked }
+    : null;
+  if (!data) redirect(BASE);
+  await prisma.lmsForumDiscussion.update({ where: { id: g.d.id }, data });
+  revalidatePath(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${g.d.id}`);
+  revalidatePath(`${BASE}/cours/${g.slug}/a/${g.d.activityId}`);
+  redirect(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${g.d.id}`);
 }
 
 /* ----------------------------- Inscription (apprenant) ----------------------------- */

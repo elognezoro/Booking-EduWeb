@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Trash2, Play, Eye, Download, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Trash2, Play, Eye, Download, Clock, CheckCircle2, Pin, Lock, MessageSquare } from "lucide-react";
 import { getLmsAccess, canEditCourse, getCourseRole, lmsDisplayNames } from "@/lib/lms";
 import { prisma } from "@/lib/prisma";
 import { detectMedia } from "@/lib/lms-media";
 import { parseQuizConfig, canSeeCorrige, correctAnswerText, gradeOne, CORRIGE_LABEL } from "@/lib/lms-quiz";
 import { parseAssignConfig, isLate, type AssignConfig } from "@/lib/lms-assign";
+import { parseForumConfig } from "@/lib/lms-forum";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { RichContent } from "@/components/lms/rich-content";
 import { PageEditor } from "@/components/lms/page-editor";
 import { UrlEditButton } from "@/components/lms/url-edit-button";
@@ -17,8 +19,9 @@ import { QuizConfigForm } from "@/components/lms/quiz-config";
 import { QuizQuestionPicker } from "@/components/lms/quiz-question-picker";
 import { AssignConfigForm } from "@/components/lms/assign-config";
 import { SubmissionForm } from "@/components/lms/submission-form";
+import { ForumDiscussionForm } from "@/components/lms/forum-discussion-form";
 import { ConfirmActionButton } from "@/components/confirm-action";
-import { deleteActivity, startAttempt, releaseCorrige, gradeSubmission, removeSubmission } from "@/app/actions/lms";
+import { deleteActivity, startAttempt, releaseCorrige, gradeSubmission, removeSubmission, configureForum } from "@/app/actions/lms";
 
 function fmtDate(iso: string | Date): string {
   return new Date(iso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Africa/Abidjan" });
@@ -221,6 +224,64 @@ async function AssignSection({ activity, canEdit, userId }: { activity: AssignAc
   );
 }
 
+interface ForumActivity { id: string; title: string; intro: string | null; forumConfig: string | null }
+
+async function ForumSection({ activity, courseSlug, canEdit, role }: { activity: ForumActivity; courseSlug: string; canEdit: boolean; role: "TEACHER" | "STUDENT" | null }) {
+  const config = parseForumConfig(activity.forumConfig);
+  const discussions = await prisma.lmsForumDiscussion.findMany({
+    where: { activityId: activity.id },
+    orderBy: [{ pinned: "desc" }, { lastPostAt: "desc" }],
+    include: { _count: { select: { posts: true } } },
+  });
+  const names = await lmsDisplayNames(discussions.map((d) => d.userId));
+  const canStart = canEdit || (role !== null && config.allowStudentDiscussions);
+
+  return (
+    <div className="space-y-4">
+      {activity.intro && <Card><CardContent className="py-4"><RichContent html={activity.intro} /></CardContent></Card>}
+      {canEdit && (
+        <Card><CardContent className="py-5">
+          <h2 className="mb-3 font-bold text-foreground">Réglages</h2>
+          <form action={configureForum} className="space-y-3">
+            <input type="hidden" name="activityId" value={activity.id} />
+            <div><Label htmlFor="ff-title" required>Titre</Label><Input id="ff-title" name="title" defaultValue={activity.title} required /></div>
+            <div><Label htmlFor="ff-intro">Consigne</Label><Textarea id="ff-intro" name="intro" rows={2} defaultValue={activity.intro ?? ""} /></div>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="allowStudentDiscussions" defaultChecked={config.allowStudentDiscussions} className="size-4" /> Autoriser les apprenants à ouvrir des discussions</label>
+            <div className="flex justify-end"><SubmitButton pendingLabel="Enregistrement…">Enregistrer les réglages</SubmitButton></div>
+          </form>
+        </CardContent></Card>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">{discussions.length} discussion(s)</p>
+        {canStart && <ForumDiscussionForm activityId={activity.id} />}
+      </div>
+
+      {discussions.length === 0 ? (
+        <Card><CardContent className="py-6 text-center text-sm text-muted-foreground">Aucune discussion pour le moment.{canStart ? " Ouvrez la première !" : ""}</CardContent></Card>
+      ) : (
+        <div className="space-y-2">
+          {discussions.map((d) => (
+            <Link key={d.id} href={`/formation/cours/${courseSlug}/a/${activity.id}/d/${d.id}`} className="block rounded-xl border border-border bg-card p-3 transition hover:border-advanced-fg/40 hover:bg-secondary/40">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 font-semibold text-foreground">
+                    {d.pinned && <Pin className="size-3.5 shrink-0 text-advanced-fg" />}
+                    {d.locked && <Lock className="size-3.5 shrink-0 text-muted-foreground" />}
+                    <span className="truncate">{d.title}</span>
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Par {names.get(d.userId)?.fullName ?? "—"} · {d._count.posts} réponse(s) · dernière activité {fmtDate(d.lastPostAt)}</p>
+                </div>
+                <MessageSquare className="size-4 shrink-0 text-muted-foreground" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default async function ActivityPage({ params }: { params: { slug: string; activityId: string } }) {
   const access = (await getLmsAccess())!;
   const activity = await prisma.lmsActivity.findUnique({
@@ -255,6 +316,7 @@ export default async function ActivityPage({ params }: { params: { slug: string;
       {activity.type === "URL" && <Card><CardContent className="py-5"><MediaBlock url={activity.externalUrl ?? ""} intro={activity.intro} /></CardContent></Card>}
       {activity.type === "QUIZ" && <QuizSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, quizConfig: activity.quizConfig }} courseId={course.id} courseSlug={course.slug} canEdit={canEdit} userId={access.userId} />}
       {activity.type === "DEVOIR" && <AssignSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, assignConfig: activity.assignConfig }} canEdit={canEdit} userId={access.userId} />}
+      {activity.type === "FORUM" && <ForumSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, forumConfig: activity.forumConfig }} courseSlug={course.slug} canEdit={canEdit} role={role} />}
     </div>
   );
 }

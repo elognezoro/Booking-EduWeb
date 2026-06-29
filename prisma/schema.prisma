@@ -858,11 +858,11 @@ model LmsSection {
   @@index([courseId])
 }
 
-// Activité/ressource d'une section : PAGE (texte enrichi) | URL (média par lien) | QUIZ | DEVOIR.
+// Activité/ressource d'une section : PAGE (texte enrichi) | URL (média par lien) | QUIZ | DEVOIR | FORUM.
 model LmsActivity {
   id           String  @id @default(cuid())
   sectionId    String
-  type         String // PAGE | URL | QUIZ | DEVOIR
+  type         String // PAGE | URL | QUIZ | DEVOIR | FORUM
   title        String
   intro        String? // HTML (description affichée / consigne)
   position     Int     @default(0)
@@ -871,11 +871,13 @@ model LmsActivity {
   externalUrl  String? // URL : lien média
   quizConfig   String? // QUIZ : JSON (tentatives, méthode de note, options de relecture/corrigé, mélange, durée)
   assignConfig String? // DEVOIR : JSON (date limite, texte/fichier autorisés, taille max, note max, retard)
+  forumConfig  String? // FORUM : JSON (les apprenants peuvent ouvrir des discussions, etc.)
 
-  section       LmsSection        @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  quizQuestions LmsQuizQuestion[]
-  attempts      LmsAttempt[]
-  submissions   LmsSubmission[]
+  section          LmsSection           @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  quizQuestions    LmsQuizQuestion[]
+  attempts         LmsAttempt[]
+  submissions      LmsSubmission[]
+  forumDiscussions LmsForumDiscussion[]
 
   @@index([sectionId])
 }
@@ -965,4 +967,37 @@ model LmsSubmission {
 
   @@unique([activityId, userId])
   @@index([activityId])
+}
+
+// Forum : fil de discussion (message d'ouverture porté par la discussion).
+model LmsForumDiscussion {
+  id         String   @id @default(cuid())
+  activityId String
+  userId     String
+  title      String
+  message    String // HTML (message d'ouverture)
+  pinned     Boolean  @default(false)
+  locked     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  lastPostAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  activity LmsActivity    @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  posts    LmsForumPost[]
+
+  @@index([activityId])
+}
+
+// Forum : réponse (plate) à une discussion.
+model LmsForumPost {
+  id           String   @id @default(cuid())
+  discussionId String
+  userId       String
+  message      String // HTML
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  discussion LmsForumDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+
+  @@index([discussionId])
 }

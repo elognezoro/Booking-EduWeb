@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Check, X, FileText, Link2, ListChecks, ClipboardList } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, FileText, Link2, ListChecks, ClipboardList, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmActionButton } from "@/components/confirm-action";
@@ -17,6 +17,7 @@ const ACT_ICON: Record<string, React.ReactNode> = {
   URL: <Link2 className="size-3.5" />,
   QUIZ: <ListChecks className="size-3.5" />,
   DEVOIR: <ClipboardList className="size-3.5" />,
+  FORUM: <MessageSquare className="size-3.5" />,
 };
 
 /** Gestion des sections + contenus d'un cours (enseignants/gestionnaires). */
