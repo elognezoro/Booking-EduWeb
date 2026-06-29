@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, UserPlus, ArrowLeft, FileText, Link2, ListChecks } from "lucide-react";
+import { BookOpen, UserPlus, ArrowLeft, FileText, Link2, ListChecks, HelpCircle } from "lucide-react";
 import { getLmsAccess, canEditCourse, getCourseRole } from "@/lib/lms";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,8 +48,9 @@ export default async function CoursePage({ params }: { params: { slug: string } 
           </div>
         </div>
         {canEdit && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-advanced-soft px-2.5 py-1 text-xs font-bold text-advanced-fg">Mode édition</span>
+            <Button asChild variant="outline" size="sm"><Link href={`/formation/cours/${course.slug}/banque`}><HelpCircle className="size-4" /> Banque de questions</Link></Button>
             <CourseEditButton course={{ id: course.id, title: course.title, level: course.level, summary: course.summary, visible: course.visible }} />
           </div>
         )}
@@ -68,7 +69,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
       )}
 
       {canEdit ? (
-        <SectionManager courseId={course.id} sections={course.sections} />
+        <SectionManager courseId={course.id} courseSlug={course.slug} sections={course.sections} />
       ) : (
         <div className="space-y-3">
           {course.sections.length === 0 ? (
