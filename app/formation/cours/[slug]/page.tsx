@@ -55,7 +55,7 @@ export default async function CoursePage({ params }: { params: { slug: string } 
               <Button asChild variant="outline" size="sm"><a href={`/api/formation/cours/${course.slug}/mbz`} download><Download className="size-4" /> Export Moodle (.mbz)</a></Button>
               <CourseEditButton course={{ id: course.id, title: course.title, level: course.level, summary: course.summary, visible: course.visible }} />
             </div>
-            <p className="max-w-md text-right text-[11px] leading-snug text-muted-foreground">Export Moodle : pages, médias et quiz. Pour les quiz, seuls les QCM, Vrai/Faux, réponses courtes et numériques sont convertis ; les autres types (Cloze, appariement, etc.) sont ignorés.</p>
+            <p className="max-w-md text-right text-[11px] leading-snug text-muted-foreground">Export Moodle : pages, médias, quiz, devoirs, forums, wikis et ateliers. Questions converties : QCM, Vrai/Faux, réponse courte, numérique, Cloze, appariement ; les autres (glisser-déposer, ordonnancement, texte à trous) sont ignorées.</p>
           </div>
         )}
       </div>

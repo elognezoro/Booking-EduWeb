@@ -72,6 +72,32 @@ export function parseCloze(clozeText: string): ClozeSegment[] {
   return segs;
 }
 
+/**
+ * Conversion vers le format Moodle « multianswer » : texte parent avec marqueurs {#1}, {#2}…
+ * (un par champ valide, dans l'ordre) + pour chaque champ le sous-texte brut `{...}` et le trou analysé.
+ * Réutilise exactement le même filtrage que parseCloze pour rester cohérent.
+ */
+export function clozeToMoodle(clozeText: string): { parentText: string; fields: { raw: string; gap: ClozeGap }[] } {
+  const fields: { raw: string; gap: ClozeGap }[] = [];
+  const re = /\{([^{}]*)\}/g;
+  let parent = "";
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let gapIndex = 0;
+  while ((m = re.exec(clozeText)) !== null) {
+    const gm = m[1].match(/^\s*(\d*)\s*:\s*([A-Za-z_]+)\s*:\s*([\s\S]*)$/);
+    if (!gm || !TYPE_MAP[gm[2].toUpperCase()]) continue; // champ invalide → laissé dans le texte parent
+    const mapped = TYPE_MAP[gm[2].toUpperCase()];
+    gapIndex++;
+    parent += clozeText.slice(last, m.index) + `{#${gapIndex}}`;
+    const answers = splitAnswers(gm[3]).map((tok) => parseAnswerToken(tok, mapped.kind)).filter((a) => a.text !== "");
+    fields.push({ raw: m[0], gap: { index: gapIndex, weight: gm[1] ? Math.max(1, parseInt(gm[1], 10)) : 1, kind: mapped.kind, caseSensitive: !!mapped.caseSensitive, answers } });
+    last = m.index + m[0].length;
+  }
+  parent += clozeText.slice(last);
+  return { parentText: parent, fields };
+}
+
 /** Note (0..1) d'un champ selon la valeur fournie. */
 export function gradeGap(gap: ClozeGap, value: unknown): number {
   if (gap.kind === "NUMERICAL") {
