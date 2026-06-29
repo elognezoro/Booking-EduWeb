@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "CERTEL — Niveau 1 · Formation int
 
 export default function CertelNiveau1Hub() {
   return (
-    <>
+    <div className="formation-scope">
       {/* Hero */}
       <section className="relative isolate overflow-hidden text-white" style={{ background: `linear-gradient(135deg, ${N1_ACCENT} 0%, #155E75 55%, #172554 100%)` }}>
         <div className="pointer-events-none absolute inset-0 bg-grid-soft bg-[size:32px_32px] opacity-[0.14]" />
@@ -72,7 +72,7 @@ export default function CertelNiveau1Hub() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
 

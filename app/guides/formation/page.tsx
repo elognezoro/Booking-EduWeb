@@ -13,7 +13,7 @@ export default async function FormationManualPage() {
   const generatedOn = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div className="mx-auto max-w-4xl p-6 sm:p-8">
+    <div className="formation-scope mx-auto max-w-4xl p-6 sm:p-8">
       <div className="no-print mb-6 flex items-center justify-end gap-2">
         <Button asChild variant="outline">
           <a href="/api/guides/formation/word"><FileText className="size-4" /> Télécharger en Word</a>

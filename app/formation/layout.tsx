@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export default async function FormationLayout({ children }: { children: React.ReactNode }) {
   const access = await requireLms();
   return (
-    <div className="min-h-screen bg-secondary/30">
+    <div className="formation-scope min-h-screen bg-secondary/30">
       <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link href="/formation" className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-foreground">

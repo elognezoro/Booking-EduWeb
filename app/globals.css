@@ -189,3 +189,13 @@
     background: #fff;
   }
 }
+
+/* Espaces de formation : plancher de lisibilité — aucune police inférieure à 13px.
+   Règle non-layered : prioritaire sur les utilitaires Tailwind (placés dans @layer utilities). */
+.formation-scope .text-xs,
+.formation-scope [class*="text-[10px]"],
+.formation-scope [class*="text-[11px]"],
+.formation-scope [class*="text-[12px]"] {
+  font-size: 0.8125rem; /* 13px */
+  line-height: 1.15rem;
+}
