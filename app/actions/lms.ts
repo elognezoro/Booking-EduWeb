@@ -11,6 +11,7 @@ import { DEFAULT_QUIZ_CONFIG, parseQuizConfig, gradeAttempt, type QuizConfig } f
 import { DEFAULT_ASSIGN_CONFIG, parseAssignConfig, ASSIGN_MAX_FILE_MB, dataUrlBytes, isAllowedFile, type AssignConfig } from "@/lib/lms-assign";
 import { DEFAULT_FORUM_CONFIG, parseForumConfig, type ForumConfig } from "@/lib/lms-forum";
 import { DEFAULT_WIKI_CONFIG, parseWikiConfig, type WikiConfig } from "@/lib/lms-wiki";
+import { DEFAULT_WORKSHOP_CONFIG, parseWorkshopConfig, type WorkshopConfig, type WorkshopCriterion, type WorkshopPhase, PHASE_ORDER } from "@/lib/lms-workshop";
 import { slugify } from "@/lib/utils";
 
 const BASE = "/formation";
@@ -125,7 +126,7 @@ export async function createActivity(formData: FormData) {
   const type = String(formData.get("type") || "PAGE");
   const title = String(formData.get("title") || "").trim() || (type === "URL" ? "Média" : "Page");
   const position = await prisma.lmsActivity.count({ where: { sectionId } });
-  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string; assignConfig?: string; forumConfig?: string; wikiConfig?: string } = { sectionId, type, title, position };
+  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string; assignConfig?: string; forumConfig?: string; wikiConfig?: string; workshopConfig?: string } = { sectionId, type, title, position };
   if (type === "PAGE") data.content = sanitizeRich(String(formData.get("content") || ""));
   if (type === "URL") {
     data.externalUrl = String(formData.get("externalUrl") || "").trim();
@@ -146,6 +147,10 @@ export async function createActivity(formData: FormData) {
   if (type === "WIKI") {
     data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
     data.wikiConfig = JSON.stringify(DEFAULT_WIKI_CONFIG);
+  }
+  if (type === "WORKSHOP") {
+    data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
+    data.workshopConfig = JSON.stringify(DEFAULT_WORKSHOP_CONFIG);
   }
   const act = await prisma.lmsActivity.create({ data, select: { id: true } });
   if (type === "WIKI") {
@@ -228,7 +233,7 @@ async function activityGuard(activityId: string) {
   const access = await getLmsAccess();
   const act = await prisma.lmsActivity.findUnique({
     where: { id: activityId },
-    select: { id: true, type: true, quizConfig: true, assignConfig: true, forumConfig: true, wikiConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
+    select: { id: true, type: true, quizConfig: true, assignConfig: true, forumConfig: true, wikiConfig: true, workshopConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
   });
   if (!act) return null;
   return { access, act, editable: await canEditCourse(access, act.section.courseId) };
@@ -645,6 +650,138 @@ export async function revertWikiPage(formData: FormData) {
   await prisma.lmsWikiRevision.create({ data: { pageId: rev.pageId, userId: w.g.access.userId, content } });
   revalidatePath(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`);
   redirect(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`);
+}
+
+/* ----------------------------- Atelier (workshop) : remise + évaluation par les pairs ----------------------------- */
+export async function configureWorkshop(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g || !g.editable) redirect(BASE);
+  const current = parseWorkshopConfig(g.act.workshopConfig);
+  let criteria: WorkshopCriterion[] = current.criteria;
+  // Les critères ne sont modifiables qu'en phase SETUP (sinon on fausserait des notes déjà calculées).
+  if (current.phase === "SETUP") {
+    try {
+      const raw = JSON.parse(String(formData.get("criteria") || "[]")) as { description?: string; maxScore?: unknown }[];
+      const cleaned = raw
+        .map((c, i) => ({ id: `c${i + 1}`, description: String(c.description || "").trim().slice(0, 300), maxScore: Math.max(1, Math.min(100, Number(c.maxScore) || 10)) }))
+        .filter((c) => c.description);
+      if (cleaned.length) criteria = cleaned;
+    } catch { /* garde les critères courants */ }
+  }
+  const cfg: WorkshopConfig = {
+    phase: current.phase, // la phase n'est pas modifiée ici
+    instructions: sanitizeRich(String(formData.get("instructions") || "")),
+    criteria,
+    reviewsPerStudent: Math.max(1, Math.min(10, Number(formData.get("reviewsPerStudent")) || 2)),
+  };
+  await prisma.lmsActivity.update({
+    where: { id: activityId },
+    data: { title: String(formData.get("title") || "").trim() || undefined, intro: sanitizeRich(String(formData.get("intro") || "")) || null, workshopConfig: JSON.stringify(cfg) },
+  });
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+}
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Attribue à chaque apprenant des remises de pairs à évaluer (aléatoire, hors la sienne).
+// Idempotent et incrémental : ne complète que le déficit de chaque évaluateur (gère les remises tardives
+// et les retours en phase ASSESSMENT sans dupliquer les attributions existantes).
+async function allocateWorkshop(activityId: string, reviewsPerStudent: number) {
+  const subs = await prisma.lmsWorkshopSubmission.findMany({ where: { activityId }, select: { id: true, userId: true } });
+  if (subs.length < 2) return;
+  const existing = await prisma.lmsWorkshopAssessment.findMany({ where: { submission: { activityId } }, select: { reviewerId: true, submissionId: true } });
+  const existingPairs = new Set(existing.map((e) => `${e.reviewerId}:${e.submissionId}`));
+  const outgoing = new Map<string, number>();
+  for (const e of existing) outgoing.set(e.reviewerId, (outgoing.get(e.reviewerId) ?? 0) + 1);
+  const rows: { submissionId: string; reviewerId: string }[] = [];
+  for (const reviewer of subs) {
+    const need = reviewsPerStudent - (outgoing.get(reviewer.userId) ?? 0);
+    if (need <= 0) continue;
+    const candidates = shuffle(subs.filter((s) => s.userId !== reviewer.userId && !existingPairs.has(`${reviewer.userId}:${s.id}`)));
+    for (const target of candidates.slice(0, need)) rows.push({ submissionId: target.id, reviewerId: reviewer.userId });
+  }
+  if (rows.length) await prisma.lmsWorkshopAssessment.createMany({ data: rows, skipDuplicates: true });
+}
+
+export async function setWorkshopPhase(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g || !g.editable) redirect(BASE);
+  const phase = String(formData.get("phase") || "");
+  if (!PHASE_ORDER.includes(phase as WorkshopPhase)) redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  const cfg = parseWorkshopConfig(g.act.workshopConfig);
+  cfg.phase = phase as WorkshopPhase;
+  await prisma.lmsActivity.update({ where: { id: activityId }, data: { workshopConfig: JSON.stringify(cfg) } });
+  if (cfg.phase === "ASSESSMENT") await allocateWorkshop(activityId, cfg.reviewsPerStudent);
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+}
+
+export async function submitWorkshop(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g) redirect(BASE);
+  if (!g.access) redirect("/login?callbackUrl=/formation");
+  const slug = g.act.section.course.slug;
+  const userId = g.access.userId;
+  const role = await getCourseRole(userId, g.act.section.courseId);
+  if (role !== "STUDENT") redirect(`${BASE}/cours/${slug}/a/${activityId}`); // seuls les apprenants remettent
+  const cfg = parseWorkshopConfig(g.act.workshopConfig);
+  if (cfg.phase !== "SUBMISSION") redirect(`${BASE}/cours/${slug}/a/${activityId}`); // remise hors phase
+  const title = String(formData.get("title") || "").trim().slice(0, 200);
+  const content = sanitizeRich(String(formData.get("content") || ""));
+  let fileName: string | null = null, fileMime: string | null = null, fileData: string | null = null;
+  const fd = String(formData.get("fileData") || "");
+  if (fd.startsWith("data:")) {
+    if (dataUrlBytes(fd) > ASSIGN_MAX_FILE_MB * 1024 * 1024) redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+    fileName = String(formData.get("fileName") || "fichier").slice(0, 200);
+    if (!isAllowedFile(fileName)) redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+    fileData = fd;
+    fileMime = String(formData.get("fileMime") || "").slice(0, 120) || null;
+  } else {
+    const cur = await prisma.lmsWorkshopSubmission.findUnique({ where: { activityId_userId: { activityId, userId } }, select: { fileName: true, fileMime: true, fileData: true } });
+    fileName = cur?.fileName ?? null; fileMime = cur?.fileMime ?? null; fileData = cur?.fileData ?? null;
+  }
+  if (!title && !content && !fileData) redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+  await prisma.lmsWorkshopSubmission.upsert({
+    where: { activityId_userId: { activityId, userId } },
+    create: { activityId, userId, title: title || "Sans titre", content, fileName, fileMime, fileData },
+    update: { title: title || "Sans titre", content, fileName, fileMime, fileData },
+  });
+  revalidatePath(`${BASE}/cours/${slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+}
+
+export async function saveAssessment(formData: FormData) {
+  const access = await getLmsAccess();
+  if (!access) redirect("/login?callbackUrl=/formation");
+  const assessmentId = String(formData.get("assessmentId") || "");
+  const a = await prisma.lmsWorkshopAssessment.findUnique({
+    where: { id: assessmentId },
+    select: { id: true, reviewerId: true, submission: { select: { activityId: true, activity: { select: { workshopConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } } } } } },
+  });
+  if (!a || a.reviewerId !== access.userId) redirect(BASE); // seul l'évaluateur attribué
+  const cfg = parseWorkshopConfig(a.submission.activity.workshopConfig);
+  const slug = a.submission.activity.section.course.slug;
+  const dest = `${BASE}/cours/${slug}/a/${a.submission.activityId}`;
+  // Défense en profondeur : l'évaluateur doit toujours être inscrit au cours.
+  if ((await getCourseRole(access.userId, a.submission.activity.section.courseId)) === null) redirect(dest);
+  if (cfg.phase !== "ASSESSMENT") redirect(dest); // évaluation hors phase
+  const scores: Record<string, number> = {};
+  for (const c of cfg.criteria) scores[c.id] = Math.max(0, Math.min(c.maxScore, Number(formData.get(`score_${c.id}`)) || 0));
+  const feedback = sanitizeRich(String(formData.get("feedback") || "")) || null;
+  await prisma.lmsWorkshopAssessment.update({ where: { id: assessmentId }, data: { scores: JSON.stringify(scores), feedback, submitted: true } });
+  revalidatePath(dest);
+  redirect(dest);
 }
 
 /* ----------------------------- Inscription (apprenant) ----------------------------- */

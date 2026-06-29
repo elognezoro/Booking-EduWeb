@@ -22,6 +22,7 @@ import { AssignConfigForm } from "@/components/lms/assign-config";
 import { SubmissionForm } from "@/components/lms/submission-form";
 import { ForumDiscussionForm } from "@/components/lms/forum-discussion-form";
 import { WikiNewPage } from "@/components/lms/wiki-new-page";
+import { WorkshopSection } from "@/components/lms/workshop-section";
 import { ConfirmActionButton } from "@/components/confirm-action";
 import { deleteActivity, startAttempt, releaseCorrige, gradeSubmission, removeSubmission, configureForum, configureWiki } from "@/app/actions/lms";
 
@@ -367,6 +368,7 @@ export default async function ActivityPage({ params }: { params: { slug: string;
       {activity.type === "DEVOIR" && <AssignSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, assignConfig: activity.assignConfig }} canEdit={canEdit} userId={access.userId} />}
       {activity.type === "FORUM" && <ForumSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, forumConfig: activity.forumConfig }} courseSlug={course.slug} canEdit={canEdit} role={role} />}
       {activity.type === "WIKI" && <WikiSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, wikiConfig: activity.wikiConfig }} courseSlug={course.slug} canEdit={canEdit} role={role} />}
+      {activity.type === "WORKSHOP" && <WorkshopSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, workshopConfig: activity.workshopConfig }} courseSlug={course.slug} canEdit={canEdit} userId={access.userId} role={role} />}
     </div>
   );
 }

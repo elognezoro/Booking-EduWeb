@@ -858,28 +858,30 @@ model LmsSection {
   @@index([courseId])
 }
 
-// Activité/ressource d'une section : PAGE | URL | QUIZ | DEVOIR | FORUM | WIKI.
+// Activité/ressource d'une section : PAGE | URL | QUIZ | DEVOIR | FORUM | WIKI | WORKSHOP.
 model LmsActivity {
-  id           String  @id @default(cuid())
-  sectionId    String
-  type         String // PAGE | URL | QUIZ | DEVOIR | FORUM | WIKI
-  title        String
-  intro        String? // HTML (description affichée / consigne)
-  position     Int     @default(0)
-  visible      Boolean @default(true)
-  content      String? // PAGE : HTML
-  externalUrl  String? // URL : lien média
-  quizConfig   String? // QUIZ : JSON (tentatives, méthode de note, options de relecture/corrigé, mélange, durée)
-  assignConfig String? // DEVOIR : JSON (date limite, texte/fichier autorisés, taille max, note max, retard)
-  forumConfig  String? // FORUM : JSON (les apprenants peuvent ouvrir des discussions, etc.)
-  wikiConfig   String? // WIKI : JSON (les apprenants peuvent éditer/créer des pages, etc.)
+  id             String  @id @default(cuid())
+  sectionId      String
+  type           String // PAGE | URL | QUIZ | DEVOIR | FORUM | WIKI | WORKSHOP
+  title          String
+  intro          String? // HTML (description affichée / consigne)
+  position       Int     @default(0)
+  visible        Boolean @default(true)
+  content        String? // PAGE : HTML
+  externalUrl    String? // URL : lien média
+  quizConfig     String? // QUIZ : JSON
+  assignConfig   String? // DEVOIR : JSON
+  forumConfig    String? // FORUM : JSON
+  wikiConfig     String? // WIKI : JSON
+  workshopConfig String? // WORKSHOP (atelier) : JSON (phase, consignes, critères, nb d'évaluations/apprenant)
 
-  section          LmsSection           @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  quizQuestions    LmsQuizQuestion[]
-  attempts         LmsAttempt[]
-  submissions      LmsSubmission[]
-  forumDiscussions LmsForumDiscussion[]
-  wikiPages        LmsWikiPage[]
+  section           LmsSection              @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  quizQuestions     LmsQuizQuestion[]
+  attempts          LmsAttempt[]
+  submissions       LmsSubmission[]
+  forumDiscussions  LmsForumDiscussion[]
+  wikiPages         LmsWikiPage[]
+  workshopSubmissions LmsWorkshopSubmission[]
 
   @@index([sectionId])
 }
@@ -1035,4 +1037,42 @@ model LmsWikiRevision {
   page LmsWikiPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   @@index([pageId])
+}
+
+// Atelier (workshop) : remise d'un apprenant, ensuite évaluée par ses pairs.
+model LmsWorkshopSubmission {
+  id         String   @id @default(cuid())
+  activityId String
+  userId     String
+  title      String
+  content    String   @default("") // HTML
+  fileName   String?
+  fileMime   String?
+  fileData   String? // data URL base64
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  activity    LmsActivity             @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  assessments LmsWorkshopAssessment[]
+
+  @@unique([activityId, userId])
+  @@index([activityId])
+}
+
+// Atelier : évaluation d'une remise par un pair (allouée à l'entrée en phase d'évaluation).
+model LmsWorkshopAssessment {
+  id           String   @id @default(cuid())
+  submissionId String
+  reviewerId   String
+  scores       String   @default("{}") // JSON { critereId: note }
+  feedback     String? // HTML
+  submitted    Boolean  @default(false) // l'évaluateur a validé son évaluation
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  submission LmsWorkshopSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, reviewerId])
+  @@index([submissionId])
+  @@index([reviewerId])
 }
