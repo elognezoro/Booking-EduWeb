@@ -8,8 +8,9 @@ import { RichContent } from "@/components/lms/rich-content";
 import { submitAttempt } from "@/app/actions/lms";
 import type { ClozeRenderSegment } from "@/lib/lms-cloze";
 import type { DragTextRender, MatchingRender } from "@/lib/lms-exercises";
+import type { GapfillRenderSegment } from "@/lib/lms-gapfill";
 
-export interface RunnerQuestion { id: string; type: string; name: string; questionText: string; multiple?: boolean; options?: string[]; cloze?: ClozeRenderSegment[]; dragText?: DragTextRender; matching?: MatchingRender; ordering?: string[] }
+export interface RunnerQuestion { id: string; type: string; name: string; questionText: string; multiple?: boolean; options?: string[]; cloze?: ClozeRenderSegment[]; dragText?: DragTextRender; matching?: MatchingRender; ordering?: string[]; gapfill?: GapfillRenderSegment[] }
 
 export function QuizRunner({ attemptId, questions }: { attemptId: string; questions: RunnerQuestion[] }) {
   const [answers, setAnswers] = React.useState<Record<string, unknown>>({});
@@ -128,6 +129,22 @@ export function QuizRunner({ attemptId, questions }: { attemptId: string; questi
                 </div>
                 <p className="text-xs text-muted-foreground">Glissez une étiquette dans un trou (ou cliquez l'étiquette puis le trou). Cliquez un trou rempli pour le vider. Une même étiquette peut servir plusieurs fois.</p>
               </div>
+            )}
+            {q.type === "GAPFILL" && q.gapfill && (
+              <p className="text-[15px] leading-[2.6] text-foreground">
+                {q.gapfill.map((seg, si) => seg.type === "text" ? (
+                  <span key={si} className="whitespace-pre-wrap">{seg.text}</span>
+                ) : (
+                  <input
+                    key={si}
+                    type="text"
+                    value={clozeAns(q.id)[String(seg.index)] ?? ""}
+                    onChange={(e) => setKey(q.id, String(seg.index), e.target.value)}
+                    className="mx-1 w-36 rounded-lg border border-input bg-background px-2 py-1 align-middle text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    aria-label={`Trou ${seg.index}`}
+                  />
+                ))}
+              </p>
             )}
             {q.type === "MATCHING" && q.matching && (
               <div className="space-y-2">

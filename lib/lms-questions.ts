@@ -1,5 +1,5 @@
 /** Types d'exerciseurs (banque de questions LMS) — module neutre (client/serveur). */
-export type LmsQuestionType = "MCQ" | "TRUEFALSE" | "SHORTANSWER" | "NUMERICAL" | "CLOZE" | "DRAGTEXT" | "MATCHING" | "ORDERING";
+export type LmsQuestionType = "MCQ" | "TRUEFALSE" | "SHORTANSWER" | "NUMERICAL" | "CLOZE" | "DRAGTEXT" | "MATCHING" | "ORDERING" | "GAPFILL";
 
 export const QUESTION_TYPES: { key: LmsQuestionType; label: string; desc: string }[] = [
   { key: "MCQ", label: "Choix multiple", desc: "Une ou plusieurs bonnes réponses parmi des propositions." },
@@ -10,6 +10,7 @@ export const QUESTION_TYPES: { key: LmsQuestionType; label: string; desc: string
   { key: "DRAGTEXT", label: "Glisser-déposer dans un texte", desc: "Faire glisser des étiquettes dans les trous d'un texte." },
   { key: "MATCHING", label: "Appariement", desc: "Relier chaque élément à sa correspondance." },
   { key: "ORDERING", label: "Ordonnancement", desc: "Remettre des éléments dans le bon ordre." },
+  { key: "GAPFILL", label: "Texte à trous (saisie)", desc: "L'apprenant tape les mots manquants, marqués entre crochets." },
 ];
 
 export const QUESTION_TYPE_LABEL: Record<string, string> = Object.fromEntries(QUESTION_TYPES.map((t) => [t.key, t.label]));
@@ -26,6 +27,7 @@ export interface DragTextData { text: string; answers: string[]; distractors: st
 export interface MatchingPair { left: string; right: string }
 export interface MatchingData { pairs: MatchingPair[]; extraRights: string[] }
 export interface OrderingData { items: string[] } // dans le bon ordre
+export interface GapfillData { text: string; caseSensitive: boolean } // mots cachés marqués [mot] ou [mot|alt]
 
 export function defaultData(type: LmsQuestionType): unknown {
   switch (type) {
@@ -37,6 +39,7 @@ export function defaultData(type: LmsQuestionType): unknown {
     case "DRAGTEXT": return { text: "Le soleil est une [[1]] et la Terre une [[2]].", answers: ["étoile", "planète"], distractors: ["galaxie"] } satisfies DragTextData;
     case "MATCHING": return { pairs: [{ left: "", right: "" }, { left: "", right: "" }], extraRights: [] } satisfies MatchingData;
     case "ORDERING": return { items: ["", ""] } satisfies OrderingData;
+    case "GAPFILL": return { text: "La capitale de la Côte d'Ivoire est [Yamoussoukro].", caseSensitive: false } satisfies GapfillData;
   }
 }
 
@@ -90,6 +93,8 @@ export function normalizeData(type: string, raw: unknown): unknown {
       const items = (Array.isArray(d.items) ? d.items : []).slice(0, 30).map((a) => str(a).slice(0, 300).trim()).filter(Boolean);
       return { items } satisfies OrderingData;
     }
+    case "GAPFILL":
+      return { text: str(d.text).slice(0, 5000), caseSensitive: !!d.caseSensitive } satisfies GapfillData;
     default:
       return {};
   }

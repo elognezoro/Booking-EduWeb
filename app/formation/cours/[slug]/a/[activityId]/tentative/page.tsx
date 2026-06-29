@@ -5,6 +5,7 @@ import { QuizRunner, type RunnerQuestion } from "@/components/lms/quiz-runner";
 import type { McqData, DragTextData, MatchingData, OrderingData } from "@/lib/lms-questions";
 import { clozeRenderSegments } from "@/lib/lms-cloze";
 import { dragTextRender, matchingRender, orderingRender } from "@/lib/lms-exercises";
+import { gapfillRenderSegments } from "@/lib/lms-gapfill";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,9 @@ export default async function AttemptPage({ params }: { params: { slug: string; 
     }
     if (l.question.type === "ORDERING") {
       try { return { ...base, ordering: orderingRender(JSON.parse(l.question.data) as OrderingData).items }; } catch { return base; }
+    }
+    if (l.question.type === "GAPFILL") {
+      try { const d = JSON.parse(l.question.data) as { text?: string }; return { ...base, gapfill: gapfillRenderSegments(d.text ?? "") }; } catch { return base; }
     }
     return base;
   });

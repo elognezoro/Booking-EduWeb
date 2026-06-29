@@ -1,6 +1,7 @@
-import type { McqData, TrueFalseData, ShortAnswerData, NumericalData, DragTextData, MatchingData, OrderingData } from "./lms-questions";
+import type { McqData, TrueFalseData, ShortAnswerData, NumericalData, DragTextData, MatchingData, OrderingData, GapfillData } from "./lms-questions";
 import { gradeCloze, clozeCorrectText } from "./lms-cloze";
 import { gradeDragText, dragTextCorrect, gradeMatching, matchingCorrect, gradeOrdering, orderingCorrect } from "./lms-exercises";
+import { gradeGapfill, gapfillCorrect } from "./lms-gapfill";
 
 /** Réglages d'un quiz + correction automatique + conditions de visibilité du corrigé. Module neutre. */
 export interface QuizConfig {
@@ -79,6 +80,8 @@ export function gradeOne(type: string, dataJson: string, answer: unknown): numbe
       return gradeMatching(data as MatchingData, answer);
     case "ORDERING":
       return gradeOrdering(data as OrderingData, answer);
+    case "GAPFILL":
+      return gradeGapfill(data as GapfillData, answer);
     default:
       return 0;
   }
@@ -115,6 +118,7 @@ export function correctAnswerText(type: string, dataJson: string): string {
     case "DRAGTEXT": return dragTextCorrect(data as DragTextData);
     case "MATCHING": return matchingCorrect(data as MatchingData);
     case "ORDERING": return orderingCorrect(data as OrderingData);
+    case "GAPFILL": return gapfillCorrect(data as GapfillData);
     default: return "(voir l'énoncé)";
   }
 }

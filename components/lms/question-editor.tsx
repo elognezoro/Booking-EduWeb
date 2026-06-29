@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { RichTextEditor } from "@/components/lms/rich-text-editor";
 import { saveQuestion } from "@/app/actions/lms";
-import type { LmsQuestionType, McqData, TrueFalseData, ShortAnswerData, NumericalData, ClozeData, DragTextData, MatchingData, OrderingData } from "@/lib/lms-questions";
+import type { LmsQuestionType, McqData, TrueFalseData, ShortAnswerData, NumericalData, ClozeData, DragTextData, MatchingData, OrderingData, GapfillData } from "@/lib/lms-questions";
 
-type AnyData = McqData | TrueFalseData | ShortAnswerData | NumericalData | ClozeData | DragTextData | MatchingData | OrderingData;
+type AnyData = McqData | TrueFalseData | ShortAnswerData | NumericalData | ClozeData | DragTextData | MatchingData | OrderingData | GapfillData;
 interface Initial { id?: string; name: string; questionText: string; generalFeedback: string; defaultMark: number; data: unknown }
 
 export function QuestionEditor({ courseId, courseSlug, type, initial }: { courseId: string; courseSlug: string; type: LmsQuestionType; initial: Initial }) {
@@ -40,6 +40,7 @@ export function QuestionEditor({ courseId, courseSlug, type, initial }: { course
         {type === "DRAGTEXT" && <DragTextFields data={data as DragTextData} setData={setData} />}
         {type === "MATCHING" && <MatchingFields data={data as MatchingData} setData={setData} />}
         {type === "ORDERING" && <OrderingFields data={data as OrderingData} setData={setData} />}
+        {type === "GAPFILL" && <GapfillFields data={data as GapfillData} setData={setData} />}
       </div>
 
       <div><Label>Feedback général (corrigé / explication)</Label><RichTextEditor name="generalFeedback" initialHtml={initial.generalFeedback} /></div>
@@ -184,6 +185,16 @@ function MatchingFields({ data, setData }: { data: MatchingData; setData: (d: Ma
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, extraRights: [...data.extraRights, ""] })}><Plus className="size-4" /> Ajouter un intrus</Button>
       <p className="text-xs text-muted-foreground">L'apprenant choisit, pour chaque élément, la bonne correspondance dans une liste déroulante (mélangée).</p>
+    </div>
+  );
+}
+
+function GapfillFields({ data, setData }: { data: GapfillData; setData: (d: GapfillData) => void }) {
+  return (
+    <div className={box}>
+      <Textarea value={data.text} onChange={(e) => setData({ ...data, text: e.target.value })} rows={4} placeholder={"La capitale de la Côte d'Ivoire est [Yamoussoukro]. Le fleuve est le [Bandama|fleuve Bandama]."} />
+      <p className="text-xs text-muted-foreground">Écrivez votre texte et placez les mots à cacher <strong>entre crochets</strong> : <code>[Paris]</code>. Plusieurs réponses acceptées : <code>[Paris|Lutèce]</code>. L'apprenant saisit les mots manquants.</p>
+      <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={data.caseSensitive} onChange={(e) => setData({ ...data, caseSensitive: e.target.checked })} className="size-4" /> Réponse stricte (respecter la casse et les accents)</label>
     </div>
   );
 }
