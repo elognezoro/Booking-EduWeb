@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FilePlus, Link2, ListChecks, ClipboardList, MessageSquare } from "lucide-react";
+import { FilePlus, Link2, ListChecks, ClipboardList, MessageSquare, NotebookText } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { createActivity } from "@/app/actions/lms";
 
-/** Boutons d'ajout de contenu à une section : Page, Média (URL), Quiz, Devoir ou Forum. */
+/** Boutons d'ajout de contenu à une section : Page, Média (URL), Quiz, Devoir, Forum ou Wiki. */
 export function ActivityAddButtons({ sectionId }: { sectionId: string }) {
-  const [modal, setModal] = React.useState<null | "PAGE" | "URL" | "QUIZ" | "DEVOIR" | "FORUM">(null);
+  const [modal, setModal] = React.useState<null | "PAGE" | "URL" | "QUIZ" | "DEVOIR" | "FORUM" | "WIKI">(null);
   return (
     <>
       <div className="flex flex-wrap gap-2">
@@ -20,7 +20,18 @@ export function ActivityAddButtons({ sectionId }: { sectionId: string }) {
         <Button type="button" variant="outline" size="sm" onClick={() => setModal("QUIZ")}><ListChecks className="size-4" /> Quiz</Button>
         <Button type="button" variant="outline" size="sm" onClick={() => setModal("DEVOIR")}><ClipboardList className="size-4" /> Devoir</Button>
         <Button type="button" variant="outline" size="sm" onClick={() => setModal("FORUM")}><MessageSquare className="size-4" /> Forum</Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => setModal("WIKI")}><NotebookText className="size-4" /> Wiki</Button>
       </div>
+
+      <Modal open={modal === "WIKI"} onClose={() => setModal(null)} title="Nouveau wiki" description="Un espace de pages éditables collaborativement (une page d'accueil est créée automatiquement).">
+        <form action={createActivity} className="space-y-3">
+          <input type="hidden" name="sectionId" value={sectionId} />
+          <input type="hidden" name="type" value="WIKI" />
+          <div><Label htmlFor="wi-title" required>Titre du wiki</Label><Input id="wi-title" name="title" required placeholder="Ex. Wiki du cours" /></div>
+          <div><Label htmlFor="wi-intro">Consigne (facultatif)</Label><Textarea id="wi-intro" name="intro" rows={2} /></div>
+          <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setModal(null)}>Annuler</Button><SubmitButton pendingLabel="Création…">Créer le wiki</SubmitButton></div>
+        </form>
+      </Modal>
 
       <Modal open={modal === "FORUM"} onClose={() => setModal(null)} title="Nouveau forum" description="Créez le forum, puis les apprenants pourront y ouvrir des discussions.">
         <form action={createActivity} className="space-y-3">

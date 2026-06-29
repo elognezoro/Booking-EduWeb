@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Trash2, Play, Eye, Download, Clock, CheckCircle2, Pin, Lock, MessageSquare } from "lucide-react";
+import { ArrowLeft, Trash2, Play, Eye, Download, Clock, CheckCircle2, Pin, Lock, MessageSquare, NotebookText, Home } from "lucide-react";
 import { getLmsAccess, canEditCourse, getCourseRole, lmsDisplayNames } from "@/lib/lms";
 import { prisma } from "@/lib/prisma";
 import { detectMedia } from "@/lib/lms-media";
 import { parseQuizConfig, canSeeCorrige, correctAnswerText, gradeOne, CORRIGE_LABEL } from "@/lib/lms-quiz";
 import { parseAssignConfig, isLate, type AssignConfig } from "@/lib/lms-assign";
 import { parseForumConfig } from "@/lib/lms-forum";
+import { parseWikiConfig } from "@/lib/lms-wiki";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -20,8 +21,9 @@ import { QuizQuestionPicker } from "@/components/lms/quiz-question-picker";
 import { AssignConfigForm } from "@/components/lms/assign-config";
 import { SubmissionForm } from "@/components/lms/submission-form";
 import { ForumDiscussionForm } from "@/components/lms/forum-discussion-form";
+import { WikiNewPage } from "@/components/lms/wiki-new-page";
 import { ConfirmActionButton } from "@/components/confirm-action";
-import { deleteActivity, startAttempt, releaseCorrige, gradeSubmission, removeSubmission, configureForum } from "@/app/actions/lms";
+import { deleteActivity, startAttempt, releaseCorrige, gradeSubmission, removeSubmission, configureForum, configureWiki } from "@/app/actions/lms";
 
 function fmtDate(iso: string | Date): string {
   return new Date(iso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Africa/Abidjan" });
@@ -282,6 +284,53 @@ async function ForumSection({ activity, courseSlug, canEdit, role }: { activity:
   );
 }
 
+interface WikiActivity { id: string; title: string; intro: string | null; wikiConfig: string | null }
+
+async function WikiSection({ activity, courseSlug, canEdit, role }: { activity: WikiActivity; courseSlug: string; canEdit: boolean; role: "TEACHER" | "STUDENT" | null }) {
+  const config = parseWikiConfig(activity.wikiConfig);
+  const pages = await prisma.lmsWikiPage.findMany({
+    where: { activityId: activity.id },
+    orderBy: [{ isHome: "desc" }, { title: "asc" }],
+    select: { id: true, slug: true, title: true, isHome: true, updatedAt: true },
+  });
+  const canEditPages = canEdit || (role !== null && config.allowStudentEdit);
+
+  return (
+    <div className="space-y-4">
+      {activity.intro && <Card><CardContent className="py-4"><RichContent html={activity.intro} /></CardContent></Card>}
+      {canEdit && (
+        <Card><CardContent className="py-5">
+          <h2 className="mb-3 font-bold text-foreground">Réglages</h2>
+          <form action={configureWiki} className="space-y-3">
+            <input type="hidden" name="activityId" value={activity.id} />
+            <div><Label htmlFor="fw-title" required>Titre</Label><Input id="fw-title" name="title" defaultValue={activity.title} required /></div>
+            <div><Label htmlFor="fw-intro">Consigne</Label><Textarea id="fw-intro" name="intro" rows={2} defaultValue={activity.intro ?? ""} /></div>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="allowStudentEdit" defaultChecked={config.allowStudentEdit} className="size-4" /> Autoriser les apprenants à créer / modifier des pages</label>
+            <div className="flex justify-end"><SubmitButton pendingLabel="Enregistrement…">Enregistrer les réglages</SubmitButton></div>
+          </form>
+        </CardContent></Card>
+      )}
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">{pages.length} page(s)</p>
+        {canEditPages && <WikiNewPage activityId={activity.id} />}
+      </div>
+
+      <div className="space-y-2">
+        {pages.map((p) => (
+          <Link key={p.id} href={`/formation/cours/${courseSlug}/a/${activity.id}/w/${p.slug}`} className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card p-3 transition hover:border-advanced-fg/40 hover:bg-secondary/40">
+            <span className="flex min-w-0 items-center gap-1.5 font-semibold text-foreground">
+              {p.isHome && <Home className="size-3.5 shrink-0 text-advanced-fg" />}
+              <span className="truncate">{p.title}</span>
+            </span>
+            <span className="shrink-0 text-xs text-muted-foreground">modifiée {fmtDate(p.updatedAt)}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default async function ActivityPage({ params }: { params: { slug: string; activityId: string } }) {
   const access = (await getLmsAccess())!;
   const activity = await prisma.lmsActivity.findUnique({
@@ -317,6 +366,7 @@ export default async function ActivityPage({ params }: { params: { slug: string;
       {activity.type === "QUIZ" && <QuizSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, quizConfig: activity.quizConfig }} courseId={course.id} courseSlug={course.slug} canEdit={canEdit} userId={access.userId} />}
       {activity.type === "DEVOIR" && <AssignSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, assignConfig: activity.assignConfig }} canEdit={canEdit} userId={access.userId} />}
       {activity.type === "FORUM" && <ForumSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, forumConfig: activity.forumConfig }} courseSlug={course.slug} canEdit={canEdit} role={role} />}
+      {activity.type === "WIKI" && <WikiSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, wikiConfig: activity.wikiConfig }} courseSlug={course.slug} canEdit={canEdit} role={role} />}
     </div>
   );
 }

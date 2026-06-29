@@ -858,11 +858,11 @@ model LmsSection {
   @@index([courseId])
 }
 
-// Activité/ressource d'une section : PAGE (texte enrichi) | URL (média par lien) | QUIZ | DEVOIR | FORUM.
+// Activité/ressource d'une section : PAGE | URL | QUIZ | DEVOIR | FORUM | WIKI.
 model LmsActivity {
   id           String  @id @default(cuid())
   sectionId    String
-  type         String // PAGE | URL | QUIZ | DEVOIR | FORUM
+  type         String // PAGE | URL | QUIZ | DEVOIR | FORUM | WIKI
   title        String
   intro        String? // HTML (description affichée / consigne)
   position     Int     @default(0)
@@ -872,12 +872,14 @@ model LmsActivity {
   quizConfig   String? // QUIZ : JSON (tentatives, méthode de note, options de relecture/corrigé, mélange, durée)
   assignConfig String? // DEVOIR : JSON (date limite, texte/fichier autorisés, taille max, note max, retard)
   forumConfig  String? // FORUM : JSON (les apprenants peuvent ouvrir des discussions, etc.)
+  wikiConfig   String? // WIKI : JSON (les apprenants peuvent éditer/créer des pages, etc.)
 
   section          LmsSection           @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   quizQuestions    LmsQuizQuestion[]
   attempts         LmsAttempt[]
   submissions      LmsSubmission[]
   forumDiscussions LmsForumDiscussion[]
+  wikiPages        LmsWikiPage[]
 
   @@index([sectionId])
 }
@@ -1000,4 +1002,37 @@ model LmsForumPost {
   discussion LmsForumDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
 
   @@index([discussionId])
+}
+
+// Wiki : page collaborative (contenu courant) ; l'historique est dans LmsWikiRevision.
+model LmsWikiPage {
+  id          String   @id @default(cuid())
+  activityId  String
+  slug        String
+  title       String
+  content     String   @default("") // HTML courant
+  isHome      Boolean  @default(false)
+  createdById String?
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  activity  LmsActivity       @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  revisions LmsWikiRevision[]
+
+  @@unique([activityId, slug])
+  @@index([activityId])
+}
+
+// Wiki : instantané d'une page à chaque enregistrement (historique des versions).
+model LmsWikiRevision {
+  id        String   @id @default(cuid())
+  pageId    String
+  userId    String
+  content   String // HTML (instantané)
+  createdAt DateTime @default(now())
+
+  page LmsWikiPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId])
 }

@@ -10,6 +10,7 @@ import { normalizeData } from "@/lib/lms-questions";
 import { DEFAULT_QUIZ_CONFIG, parseQuizConfig, gradeAttempt, type QuizConfig } from "@/lib/lms-quiz";
 import { DEFAULT_ASSIGN_CONFIG, parseAssignConfig, ASSIGN_MAX_FILE_MB, dataUrlBytes, isAllowedFile, type AssignConfig } from "@/lib/lms-assign";
 import { DEFAULT_FORUM_CONFIG, parseForumConfig, type ForumConfig } from "@/lib/lms-forum";
+import { DEFAULT_WIKI_CONFIG, parseWikiConfig, type WikiConfig } from "@/lib/lms-wiki";
 import { slugify } from "@/lib/utils";
 
 const BASE = "/formation";
@@ -124,7 +125,7 @@ export async function createActivity(formData: FormData) {
   const type = String(formData.get("type") || "PAGE");
   const title = String(formData.get("title") || "").trim() || (type === "URL" ? "Média" : "Page");
   const position = await prisma.lmsActivity.count({ where: { sectionId } });
-  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string; assignConfig?: string; forumConfig?: string } = { sectionId, type, title, position };
+  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string; assignConfig?: string; forumConfig?: string; wikiConfig?: string } = { sectionId, type, title, position };
   if (type === "PAGE") data.content = sanitizeRich(String(formData.get("content") || ""));
   if (type === "URL") {
     data.externalUrl = String(formData.get("externalUrl") || "").trim();
@@ -142,7 +143,17 @@ export async function createActivity(formData: FormData) {
     data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
     data.forumConfig = JSON.stringify(DEFAULT_FORUM_CONFIG);
   }
+  if (type === "WIKI") {
+    data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
+    data.wikiConfig = JSON.stringify(DEFAULT_WIKI_CONFIG);
+  }
   const act = await prisma.lmsActivity.create({ data, select: { id: true } });
+  if (type === "WIKI") {
+    // Page d'accueil par défaut + révision initiale (historique cohérent dès le départ).
+    const uid = (await getLmsAccess())?.userId;
+    const home = await prisma.lmsWikiPage.create({ data: { activityId: act.id, slug: "accueil", title: "Accueil", content: "", isHome: true, createdById: uid ?? null, updatedById: uid ?? null } });
+    if (uid) await prisma.lmsWikiRevision.create({ data: { pageId: home.id, userId: uid, content: "" } });
+  }
   revalidatePath(`${BASE}/cours/${section.course.slug}`);
   redirect(`${BASE}/cours/${section.course.slug}/a/${act.id}`);
 }
@@ -217,7 +228,7 @@ async function activityGuard(activityId: string) {
   const access = await getLmsAccess();
   const act = await prisma.lmsActivity.findUnique({
     where: { id: activityId },
-    select: { id: true, type: true, quizConfig: true, assignConfig: true, forumConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
+    select: { id: true, type: true, quizConfig: true, assignConfig: true, forumConfig: true, wikiConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
   });
   if (!act) return null;
   return { access, act, editable: await canEditCourse(access, act.section.courseId) };
@@ -530,6 +541,110 @@ export async function toggleDiscussionFlag(formData: FormData) {
   revalidatePath(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${g.d.id}`);
   revalidatePath(`${BASE}/cours/${g.slug}/a/${g.d.activityId}`);
   redirect(`${BASE}/cours/${g.slug}/a/${g.d.activityId}/d/${g.d.id}`);
+}
+
+/* ----------------------------- Wiki (pages collaboratives + historique) ----------------------------- */
+async function uniqueWikiSlug(activityId: string, title: string): Promise<string> {
+  const base = slugify(title) || "page";
+  let slug = base;
+  for (let i = 2; i < 100; i++) {
+    const exists = await prisma.lmsWikiPage.findUnique({ where: { activityId_slug: { activityId, slug } }, select: { id: true } });
+    if (!exists) return slug;
+    slug = `${base}-${i}`;
+  }
+  return `${base}-${Date.now().toString(36)}`;
+}
+
+export async function configureWiki(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g || !g.editable) redirect(BASE);
+  const cfg: WikiConfig = { allowStudentEdit: formData.get("allowStudentEdit") === "on" };
+  await prisma.lmsActivity.update({
+    where: { id: activityId },
+    data: { title: String(formData.get("title") || "").trim() || undefined, intro: sanitizeRich(String(formData.get("intro") || "")) || null, wikiConfig: JSON.stringify(cfg) },
+  });
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+}
+
+// Peut éditer/créer des pages : éditeur, OU apprenant inscrit si le wiki l'autorise.
+async function canEditWiki(g: NonNullable<Awaited<ReturnType<typeof activityGuard>>>): Promise<boolean> {
+  if (g.editable) return true;
+  if (!g.access) return false;
+  const cfg = parseWikiConfig(g.act.wikiConfig);
+  if (!cfg.allowStudentEdit) return false;
+  return (await getCourseRole(g.access.userId, g.act.section.courseId)) !== null;
+}
+
+export async function createWikiPage(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g) redirect(BASE);
+  const slugCourse = g.act.section.course.slug;
+  if (!g.access || !(await canEditWiki(g))) redirect(`${BASE}/cours/${slugCourse}/a/${activityId}`);
+  const uid = g.access.userId;
+  const title = String(formData.get("title") || "").trim().slice(0, 200);
+  if (!title) redirect(`${BASE}/cours/${slugCourse}/a/${activityId}`);
+  let slug = await uniqueWikiSlug(activityId, title);
+  let page: { id: string };
+  try {
+    page = await prisma.lmsWikiPage.create({ data: { activityId, slug, title, content: "", createdById: uid, updatedById: uid }, select: { id: true } });
+  } catch {
+    // Course critique sur le slug (création concurrente) : on réessaie avec un suffixe unique.
+    slug = `${slug}-${Date.now().toString(36)}`;
+    page = await prisma.lmsWikiPage.create({ data: { activityId, slug, title, content: "", createdById: uid, updatedById: uid }, select: { id: true } });
+  }
+  await prisma.lmsWikiRevision.create({ data: { pageId: page.id, userId: uid, content: "" } }); // révision initiale
+  revalidatePath(`${BASE}/cours/${slugCourse}/a/${activityId}`);
+  redirect(`${BASE}/cours/${slugCourse}/a/${activityId}/w/${slug}`);
+}
+
+// Garde d'une page wiki : page + contexte d'édition.
+async function wikiPageGuard(pageId: string) {
+  const page = await prisma.lmsWikiPage.findUnique({
+    where: { id: pageId },
+    select: { id: true, slug: true, isHome: true, activityId: true, activity: { select: { wikiConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } } } },
+  });
+  if (!page) return null;
+  const g = await activityGuard(page.activityId);
+  if (!g) return null;
+  return { page, g, slug: page.activity.section.course.slug, canEdit: await canEditWiki(g) };
+}
+
+export async function saveWikiPage(formData: FormData) {
+  const pageId = String(formData.get("pageId") || "");
+  const w = await wikiPageGuard(pageId);
+  if (!w) redirect(BASE);
+  if (!w.canEdit || !w.g.access) redirect(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`);
+  const content = sanitizeRich(String(formData.get("content") || ""));
+  await prisma.lmsWikiPage.update({ where: { id: pageId }, data: { content, updatedById: w.g.access.userId } });
+  await prisma.lmsWikiRevision.create({ data: { pageId, userId: w.g.access.userId, content } });
+  revalidatePath(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`);
+  redirect(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`);
+}
+
+export async function deleteWikiPage(formData: FormData) {
+  const pageId = String(formData.get("pageId") || "");
+  const w = await wikiPageGuard(pageId);
+  if (!w || !w.g.editable) redirect(BASE); // suppression réservée aux enseignants/gestionnaires
+  if (w.page.isHome) redirect(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`); // la page d'accueil n'est pas supprimable
+  await prisma.lmsWikiPage.delete({ where: { id: pageId } });
+  revalidatePath(`${BASE}/cours/${w.slug}/a/${w.page.activityId}`);
+  redirect(`${BASE}/cours/${w.slug}/a/${w.page.activityId}`);
+}
+
+export async function revertWikiPage(formData: FormData) {
+  const revisionId = String(formData.get("revisionId") || "");
+  const rev = await prisma.lmsWikiRevision.findUnique({ where: { id: revisionId }, select: { content: true, pageId: true } });
+  if (!rev) redirect(BASE);
+  const w = await wikiPageGuard(rev.pageId);
+  if (!w || !w.g.editable || !w.g.access) redirect(BASE); // restauration réservée aux enseignants/gestionnaires
+  const content = sanitizeRich(rev.content); // re-nettoyage défensif au moment de la restauration
+  await prisma.lmsWikiPage.update({ where: { id: rev.pageId }, data: { content, updatedById: w.g.access.userId } });
+  await prisma.lmsWikiRevision.create({ data: { pageId: rev.pageId, userId: w.g.access.userId, content } });
+  revalidatePath(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`);
+  redirect(`${BASE}/cours/${w.slug}/a/${w.page.activityId}/w/${w.page.slug}`);
 }
 
 /* ----------------------------- Inscription (apprenant) ----------------------------- */
