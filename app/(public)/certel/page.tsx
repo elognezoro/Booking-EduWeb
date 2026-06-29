@@ -69,6 +69,12 @@ export default function CertelProgramPage() {
 
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground">{level.finalite}</p>
 
+              {level.levelKey === "N1" && (
+                <Button asChild className="mt-4 text-white hover:opacity-90" style={{ backgroundColor: accent }}>
+                  <Link href="/certel/niveau-1"><GraduationCap className="size-4" /> Accéder à la formation interactive du Niveau 1 <ArrowRight className="size-4" /></Link>
+                </Button>
+              )}
+
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <InfoCard icon={Users} title="Public cible">{level.publicCible}</InfoCard>
                 <InfoCard icon={CheckCircle2} title="Prérequis">{level.prerequisNiveau}</InfoCard>
