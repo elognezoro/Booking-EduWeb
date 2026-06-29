@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, ArrowRight, ArrowLeft, Clock, Lock, Headphones, Sparkles, ClipboardCheck, Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { N1_MODULES_META, N1_ACCENT } from "@/lib/certel/niveau1";
 
 export const metadata: Metadata = { title: "CERTEL — Niveau 1 · Formation interactive" };
@@ -22,6 +23,11 @@ export default function CertelNiveau1Hub() {
             <Feature icon={Headphones}>Lecture audio</Feature>
             <Feature icon={Sparkles}>Infographies</Feature>
             <Feature icon={ClipboardCheck}>Exercices auto-corrigés</Feature>
+          </div>
+          <div className="mt-6">
+            <Button asChild variant="outline" className="border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
+              <Link href="/certel/niveau-1/certificat"><Award className="size-4" /> Mon certificat de réussite</Link>
+            </Button>
           </div>
         </div>
       </section>

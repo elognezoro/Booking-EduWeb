@@ -199,3 +199,16 @@
   font-size: 0.8125rem; /* 13px */
   line-height: 1.15rem;
 }
+
+/* Certificat CERTEL : impression A4 paysage, n'imprimer que la feuille (scopé via .cert-print-mode sur <html>).
+   Page nommée « certif » → l'orientation paysage ne s'applique QU'au certificat (les autres impressions
+   gardent leur orientation). Repli : l'utilisateur choisit « paysage » dans la boîte d'impression. */
+@page certif { size: A4 landscape; margin: 0; }
+.cert-sheet { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+@media print {
+  html.cert-print-mode { background: #fff; }
+  html.cert-print-mode body * { visibility: hidden; }
+  html.cert-print-mode .cert-sheet, html.cert-print-mode .cert-sheet * { visibility: visible; }
+  html.cert-print-mode .cert-sheet { page: certif; position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; margin: 0; border-radius: 0; box-shadow: none; }
+  html.cert-print-mode .no-print { display: none !important; }
+}

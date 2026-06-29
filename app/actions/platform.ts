@@ -6,13 +6,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { slugify } from "@/lib/utils";
 import { provisionInstitution } from "@/lib/platform/provision";
-import { setGamesGating, setInactivityLogoutMinutes } from "@/lib/platform/settings";
+import { setGamesGating, setInactivityLogoutMinutes, setCertelCertConfig } from "@/lib/platform/settings";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import { CI_MINISTRIES } from "@/lib/ci-ministries";
 
 const ORG_PATH = "/dashboard/platform/organizations";
 const GAMES_PATH = "/dashboard/platform/jeux";
 const SECURITY_PATH = "/dashboard/platform/securite";
+const CERTEL_PATH = "/dashboard/platform/certel";
 const PLANS = ["PILOTE", "STANDARD", "PREMIUM", "NATIONAL"];
 
 /** Règle le délai d'inactivité avant déconnexion automatique (minutes, 0 = désactivé). Super admin. */
@@ -23,6 +24,18 @@ export async function saveInactivityLogout(formData: FormData) {
   revalidatePath(SECURITY_PATH);
   revalidatePath("/dashboard", "layout");
   redirect(`${SECURITY_PATH}?saved=1`);
+}
+
+/** Règle la date de signature et le lieu des certificats CERTEL Niveau 1. Super admin. */
+export async function saveCertelCertConfig(formData: FormData) {
+  await requirePermission("platform.manage");
+  await setCertelCertConfig({
+    signatureDate: String(formData.get("signatureDate") || "").trim(),
+    lieu: String(formData.get("lieu") || "").trim(),
+  });
+  revalidatePath(CERTEL_PATH);
+  revalidatePath("/certel/niveau-1/certificat");
+  redirect(`${CERTEL_PATH}?certsaved=1`);
 }
 const SUB_STATUS = ["ACTIVE", "SUSPENDED", "CANCELLED"];
 

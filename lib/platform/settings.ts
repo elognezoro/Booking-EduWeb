@@ -60,3 +60,37 @@ export async function setInactivityLogoutMinutes(minutes: number): Promise<void>
     update: { value: JSON.stringify({ minutes: m }) },
   });
 }
+
+// ——— Certificat CERTEL Niveau 1 : date de signature & lieu (réglés par le super admin) ———
+export interface CertelCertConfig { signatureDate: string; lieu: string } // signatureDate : "AAAA-MM-JJ" ou ""
+const CERTEL_CERT_KEY = "certel_cert_n1";
+export const CERTEL_CERT_DEFAULTS: CertelCertConfig = { signatureDate: "", lieu: "" };
+
+/** Valide une date calendaire réelle au format "AAAA-MM-JJ" (rejette 2026-02-30, 2026-13-01…). */
+function validIsoDate(s: unknown): string {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return "";
+  const d = new Date(s + "T00:00:00Z");
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s ? s : "";
+}
+
+export async function getCertelCertConfig(): Promise<CertelCertConfig> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: CERTEL_CERT_KEY } });
+  if (!row) return CERTEL_CERT_DEFAULTS;
+  try {
+    const v = JSON.parse(row.value);
+    const lieu = typeof v?.lieu === "string" ? v.lieu.slice(0, 120) : "";
+    return { signatureDate: validIsoDate(v?.signatureDate), lieu };
+  } catch {
+    return CERTEL_CERT_DEFAULTS;
+  }
+}
+
+export async function setCertelCertConfig(c: CertelCertConfig): Promise<void> {
+  const signatureDate = validIsoDate(c.signatureDate);
+  const lieu = (c.lieu ?? "").trim().slice(0, 120);
+  await prisma.platformSetting.upsert({
+    where: { key: CERTEL_CERT_KEY },
+    create: { key: CERTEL_CERT_KEY, value: JSON.stringify({ signatureDate, lieu }) },
+    update: { value: JSON.stringify({ signatureDate, lieu }) },
+  });
+}

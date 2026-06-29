@@ -166,6 +166,20 @@ model CertelDiagnostic {
   @@index([createdAt])
 }
 
+// Certificat d'achèvement CERTEL (un par utilisateur et par niveau) — numérotation séquentielle + journal.
+model CertelCertificate {
+  id        String   @id @default(cuid())
+  userId    String
+  levelKey  String // N1 | N2 | N3
+  number    Int // numéro séquentiel par niveau (réf. CERTEL-<niveau>-NNNN)
+  fullName  String // instantané du nom au moment de l'émission
+  issuedAt  DateTime @default(now())
+
+  @@unique([userId, levelKey])
+  @@unique([levelKey, number])
+  @@index([levelKey, issuedAt])
+}
+
 // Réglages globaux de la plateforme (clé/valeur), administrés par le super admin EduWeb.
 model PlatformSetting {
   key       String   @id
