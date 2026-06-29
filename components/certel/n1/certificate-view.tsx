@@ -22,7 +22,8 @@ const POS: Record<string, FieldPos> = {
   formateur: { top: "80%", left: "20.5%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
   responsable: { top: "80%", left: "50%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
   directeur: { top: "80%", left: "78%", size: "1.3cqw", color: "#1f2937", weight: 600, anchor: "center", maxw: "24cqw" },
-  ref: { top: "89%", left: "86.5%", size: "1.25cqw", color: "#1f2937", weight: 700, anchor: "center", maxw: "16cqw" },
+  // Référence : centrée dans l'encadré orange (cadre détecté ~72.3–90.7 % × 86.6–90.9 %).
+  ref: { top: "88.8%", left: "81.5%", size: "1.35cqw", color: "#1f2937", weight: 700, anchor: "center", maxw: "17cqw" },
 };
 
 function Field({ text, p }: { text: string; p: FieldPos }) {
