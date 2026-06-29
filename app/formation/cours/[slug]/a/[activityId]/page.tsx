@@ -1,19 +1,28 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Trash2, Play, Eye } from "lucide-react";
-import { getLmsAccess, canEditCourse, getCourseRole } from "@/lib/lms";
+import { ArrowLeft, Trash2, Play, Eye, Download, Clock, CheckCircle2 } from "lucide-react";
+import { getLmsAccess, canEditCourse, getCourseRole, lmsDisplayNames } from "@/lib/lms";
 import { prisma } from "@/lib/prisma";
 import { detectMedia } from "@/lib/lms-media";
 import { parseQuizConfig, canSeeCorrige, correctAnswerText, gradeOne, CORRIGE_LABEL } from "@/lib/lms-quiz";
+import { parseAssignConfig, isLate, type AssignConfig } from "@/lib/lms-assign";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input, Textarea } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { RichContent } from "@/components/lms/rich-content";
 import { PageEditor } from "@/components/lms/page-editor";
 import { UrlEditButton } from "@/components/lms/url-edit-button";
 import { QuizConfigForm } from "@/components/lms/quiz-config";
 import { QuizQuestionPicker } from "@/components/lms/quiz-question-picker";
+import { AssignConfigForm } from "@/components/lms/assign-config";
+import { SubmissionForm } from "@/components/lms/submission-form";
 import { ConfirmActionButton } from "@/components/confirm-action";
-import { deleteActivity, startAttempt, releaseCorrige } from "@/app/actions/lms";
+import { deleteActivity, startAttempt, releaseCorrige, gradeSubmission, removeSubmission } from "@/app/actions/lms";
+
+function fmtDate(iso: string | Date): string {
+  return new Date(iso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Africa/Abidjan" });
+}
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +130,97 @@ async function QuizSection({ activity, courseId, courseSlug, canEdit, userId }: 
   );
 }
 
+interface AssignActivity { id: string; title: string; intro: string | null; assignConfig: string | null }
+
+async function AssignSection({ activity, canEdit, userId }: { activity: AssignActivity; canEdit: boolean; userId: string }) {
+  const config = parseAssignConfig(activity.assignConfig);
+  const closed = !config.allowLate && !!config.dueAt && Date.now() > new Date(config.dueAt).getTime();
+
+  if (canEdit) {
+    const subs = await prisma.lmsSubmission.findMany({ where: { activityId: activity.id }, orderBy: { submittedAt: "desc" } });
+    const names = await lmsDisplayNames(subs.map((s) => s.userId));
+    const nameOf = (uid: string) => names.get(uid)?.fullName || names.get(uid)?.email || uid;
+    const graded = subs.filter((s) => s.state === "graded").length;
+    return (
+      <div className="space-y-4">
+        <Card><CardContent className="py-5"><h2 className="mb-3 font-bold text-foreground">Réglages</h2><AssignConfigForm activityId={activity.id} title={activity.title} intro={activity.intro ?? ""} config={config} /></CardContent></Card>
+        <Card><CardContent className="py-5">
+          <h2 className="mb-1 font-bold text-foreground">Remises ({subs.length})</h2>
+          <p className="mb-3 text-sm text-muted-foreground">{graded} notée(s){config.dueAt ? ` · date limite : ${fmtDate(config.dueAt)}` : ""}.</p>
+          {subs.length === 0 ? <p className="text-sm text-muted-foreground">Aucune remise pour le moment.</p> : (
+            <div className="space-y-3">{subs.map((s) => (
+              <div key={s.id} className="rounded-xl border border-border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-foreground">{nameOf(s.userId)}</p>
+                  <p className="text-xs text-muted-foreground">Remis le {fmtDate(s.submittedAt)}{isLate(config, s.submittedAt) ? " · en retard" : ""}{s.state === "graded" ? ` · noté ${s.grade}/${config.maxGrade}` : ""}</p>
+                </div>
+                {s.text && <div className="mt-2 rounded-lg bg-secondary/40 p-2"><RichContent html={s.text} /></div>}
+                {s.fileData && <a href={s.fileData} download={s.fileName ?? "fichier"} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"><Download className="size-4" /> {s.fileName ?? "Télécharger le fichier"}</a>}
+                <form action={gradeSubmission} className="mt-3 flex flex-wrap items-end gap-2">
+                  <input type="hidden" name="id" value={s.id} />
+                  <div><Label htmlFor={`g-${s.id}`}>Note /{config.maxGrade}</Label><Input id={`g-${s.id}`} name="grade" type="number" min={0} max={config.maxGrade} step="0.5" defaultValue={s.grade ?? ""} className="w-24" /></div>
+                  <div className="min-w-[200px] flex-1"><Label htmlFor={`f-${s.id}`}>Retour (facultatif)</Label><Textarea id={`f-${s.id}`} name="feedback" rows={2} defaultValue={s.feedback ?? ""} /></div>
+                  <Button type="submit" size="sm">{s.state === "graded" ? "Mettre à jour" : "Noter"}</Button>
+                </form>
+              </div>))}
+            </div>
+          )}
+        </CardContent></Card>
+      </div>
+    );
+  }
+
+  // Vue apprenant
+  const sub = await prisma.lmsSubmission.findUnique({ where: { activityId_userId: { activityId: activity.id, userId } } });
+  return (
+    <div className="space-y-4">
+      {activity.intro && <Card><CardContent className="py-4"><RichContent html={activity.intro} /></CardContent></Card>}
+      <Card><CardContent className="space-y-2 py-5">
+        <p className="text-sm text-muted-foreground">
+          Note maximale : {config.maxGrade}.{config.dueAt ? ` Date limite : ${fmtDate(config.dueAt)}.` : ""} Remise par {[config.allowText ? "texte en ligne" : null, config.allowFile ? "fichier joint" : null].filter(Boolean).join(" et/ou ")}.
+        </p>
+        {sub && (
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            {sub.state === "graded"
+              ? <><CheckCircle2 className="size-4 text-available-fg" /> Noté : {sub.grade}/{config.maxGrade}</>
+              : <><Clock className="size-4 text-advanced-fg" /> Remis{isLate(config, sub.submittedAt) ? " (en retard)" : ""} le {fmtDate(sub.submittedAt)}</>}
+          </p>
+        )}
+      </CardContent></Card>
+
+      {sub?.state === "graded" ? (
+        <Card><CardContent className="py-5">
+          <h2 className="mb-2 font-bold text-foreground">Votre remise</h2>
+          {sub.text && <div className="rounded-lg bg-secondary/40 p-2"><RichContent html={sub.text} /></div>}
+          {sub.fileData && <a href={sub.fileData} download={sub.fileName ?? "fichier"} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"><Download className="size-4" /> {sub.fileName ?? "Votre fichier"}</a>}
+          {sub.feedback && <div className="mt-3"><p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Retour de l'enseignant</p><div className="mt-1 rounded-lg border border-border p-2"><RichContent html={sub.feedback} /></div></div>}
+        </CardContent></Card>
+      ) : closed ? (
+        <Card><CardContent className="py-5">
+          {sub ? (
+            <>
+              <h2 className="mb-1 font-bold text-foreground">Votre remise</h2>
+              <p className="mb-2 text-sm text-muted-foreground">La date limite est dépassée : la remise ne peut plus être modifiée (en attente de notation).</p>
+              {sub.text && <div className="rounded-lg bg-secondary/40 p-2"><RichContent html={sub.text} /></div>}
+              {sub.fileData && <a href={sub.fileData} download={sub.fileName ?? "fichier"} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"><Download className="size-4" /> {sub.fileName ?? "Votre fichier"}</a>}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">La date limite est dépassée et les remises en retard ne sont pas autorisées.</p>
+          )}
+        </CardContent></Card>
+      ) : (
+        <Card><CardContent className="py-5">
+          <h2 className="mb-3 font-bold text-foreground">{sub ? "Modifier ma remise" : "Remettre le devoir"}</h2>
+          <SubmissionForm activityId={activity.id} config={config} current={sub ? { text: sub.text, fileName: sub.fileName } : null} />
+          {sub && (
+            <div className="mt-3"><ConfirmActionButton action={removeSubmission} hidden={{ id: sub.id }} triggerLabel="Retirer ma remise" triggerIcon={<Trash2 className="size-4" />} triggerVariant="ghost" triggerSize="sm" title="Retirer votre remise ?" description="Votre texte et votre fichier seront supprimés." confirmLabel="Retirer" confirmVariant="destructive" /></div>
+          )}
+        </CardContent></Card>
+      )}
+    </div>
+  );
+}
+
 export default async function ActivityPage({ params }: { params: { slug: string; activityId: string } }) {
   const access = (await getLmsAccess())!;
   const activity = await prisma.lmsActivity.findUnique({
@@ -154,6 +254,7 @@ export default async function ActivityPage({ params }: { params: { slug: string;
       {activity.type === "PAGE" && <Card><CardContent className="py-5"><PageEditor activity={{ id: activity.id, title: activity.title, content: activity.content ?? "" }} canEdit={canEdit} /></CardContent></Card>}
       {activity.type === "URL" && <Card><CardContent className="py-5"><MediaBlock url={activity.externalUrl ?? ""} intro={activity.intro} /></CardContent></Card>}
       {activity.type === "QUIZ" && <QuizSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, quizConfig: activity.quizConfig }} courseId={course.id} courseSlug={course.slug} canEdit={canEdit} userId={access.userId} />}
+      {activity.type === "DEVOIR" && <AssignSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, assignConfig: activity.assignConfig }} canEdit={canEdit} userId={access.userId} />}
     </div>
   );
 }

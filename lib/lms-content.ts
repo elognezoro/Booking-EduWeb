@@ -14,7 +14,7 @@ export function sanitizeRich(html: string): string {
       img: ["src", "alt", "width", "height"],
     },
     allowedSchemes: ["http", "https", "mailto"],
-    allowedSchemesByTag: { img: ["http", "https", "data"] },
+    allowedSchemesByTag: { img: ["http", "https"] }, // pas de data: (vecteur XSS SVG/polyglot)
     transformTags: {
       a: sanitizeHtmlLib.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" }),
     },

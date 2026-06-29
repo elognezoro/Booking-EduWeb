@@ -8,6 +8,7 @@ import { getLmsAccess, canEditCourse, getCourseRole } from "@/lib/lms";
 import { sanitizeRich } from "@/lib/lms-content";
 import { normalizeData } from "@/lib/lms-questions";
 import { DEFAULT_QUIZ_CONFIG, parseQuizConfig, gradeAttempt, type QuizConfig } from "@/lib/lms-quiz";
+import { DEFAULT_ASSIGN_CONFIG, parseAssignConfig, ASSIGN_MAX_FILE_MB, dataUrlBytes, isAllowedFile, type AssignConfig } from "@/lib/lms-assign";
 import { slugify } from "@/lib/utils";
 
 const BASE = "/formation";
@@ -122,7 +123,7 @@ export async function createActivity(formData: FormData) {
   const type = String(formData.get("type") || "PAGE");
   const title = String(formData.get("title") || "").trim() || (type === "URL" ? "Média" : "Page");
   const position = await prisma.lmsActivity.count({ where: { sectionId } });
-  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string } = { sectionId, type, title, position };
+  const data: { sectionId: string; type: string; title: string; position: number; content?: string; externalUrl?: string; intro?: string | null; quizConfig?: string; assignConfig?: string } = { sectionId, type, title, position };
   if (type === "PAGE") data.content = sanitizeRich(String(formData.get("content") || ""));
   if (type === "URL") {
     data.externalUrl = String(formData.get("externalUrl") || "").trim();
@@ -131,6 +132,10 @@ export async function createActivity(formData: FormData) {
   if (type === "QUIZ") {
     data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
     data.quizConfig = JSON.stringify(DEFAULT_QUIZ_CONFIG);
+  }
+  if (type === "DEVOIR") {
+    data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
+    data.assignConfig = JSON.stringify(DEFAULT_ASSIGN_CONFIG);
   }
   const act = await prisma.lmsActivity.create({ data, select: { id: true } });
   revalidatePath(`${BASE}/cours/${section.course.slug}`);
@@ -207,7 +212,7 @@ async function activityGuard(activityId: string) {
   const access = await getLmsAccess();
   const act = await prisma.lmsActivity.findUnique({
     where: { id: activityId },
-    select: { id: true, type: true, quizConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
+    select: { id: true, type: true, quizConfig: true, assignConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } },
   });
   if (!act) return null;
   return { access, act, editable: await canEditCourse(access, act.section.courseId) };
@@ -307,6 +312,107 @@ export async function submitAttempt(input: { attemptId: string; answers: Record<
     data: { state: "finished", submittedAt: new Date(), answers: JSON.stringify(input.answers || {}), score: graded.score, maxScore: graded.maxScore },
   });
   redirect(`${BASE}/cours/${attempt.activity.section.course.slug}/a/${attempt.activityId}`);
+}
+
+/* ----------------------------- Devoir (dépôt + notation) ----------------------------- */
+export async function configureAssign(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g || !g.editable) redirect(BASE);
+  const val = (k: string) => String(formData.get(k) || "");
+  const dueRaw = val("dueAt").trim();
+  // datetime-local sans fuseau : on l'interprète en UTC de façon déterministe (CI = UTC+0).
+  const dueIso = dueRaw ? new Date(`${dueRaw.length === 16 ? `${dueRaw}:00` : dueRaw}Z`) : null;
+  const cfg: AssignConfig = {
+    dueAt: dueIso && !isNaN(dueIso.getTime()) ? dueIso.toISOString() : null,
+    allowText: formData.get("allowText") === "on",
+    allowFile: formData.get("allowFile") === "on",
+    maxFileMb: Math.max(1, Math.min(ASSIGN_MAX_FILE_MB, Number(formData.get("maxFileMb")) || 5)),
+    maxGrade: Math.max(1, Math.min(100, Number(formData.get("maxGrade")) || 20)),
+    allowLate: formData.get("allowLate") === "on",
+  };
+  if (!cfg.allowText && !cfg.allowFile) cfg.allowText = true; // au moins un mode de remise
+  await prisma.lmsActivity.update({
+    where: { id: activityId },
+    data: { title: val("title").trim() || undefined, intro: sanitizeRich(val("intro")) || null, assignConfig: JSON.stringify(cfg) },
+  });
+  revalidatePath(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${g.act.section.course.slug}/a/${activityId}`);
+}
+
+export async function submitAssignment(formData: FormData) {
+  const activityId = String(formData.get("activityId") || "");
+  const g = await activityGuard(activityId);
+  if (!g) redirect(BASE);
+  if (!g.access) redirect("/login?callbackUrl=/formation");
+  const slug = g.act.section.course.slug;
+  const userId = g.access.userId;
+  // Seul un APPRENANT inscrit peut remettre (un enseignant/gestionnaire ne soumet pas de devoir).
+  const role = await getCourseRole(userId, g.act.section.courseId);
+  if (role !== "STUDENT") redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+  const cfg = parseAssignConfig(g.act.assignConfig);
+
+  // Remise déjà notée → on ne permet pas d'écraser la note.
+  const existing = await prisma.lmsSubmission.findUnique({ where: { activityId_userId: { activityId, userId } }, select: { id: true, state: true } });
+  if (existing?.state === "graded") redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+  if (!cfg.allowLate && cfg.dueAt && Date.now() > new Date(cfg.dueAt).getTime()) redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+
+  const text = cfg.allowText ? sanitizeRich(String(formData.get("text") || "")) || null : null;
+  let fileName: string | null = null, fileMime: string | null = null, fileData: string | null = null;
+  if (cfg.allowFile) {
+    const fd = String(formData.get("fileData") || "");
+    if (fd.startsWith("data:")) {
+      if (dataUrlBytes(fd) > cfg.maxFileMb * 1024 * 1024) redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+      fileName = String(formData.get("fileName") || "fichier").slice(0, 200);
+      if (!isAllowedFile(fileName)) redirect(`${BASE}/cours/${slug}/a/${activityId}`); // liste blanche d'extensions (serveur)
+      fileData = fd;
+      fileMime = String(formData.get("fileMime") || "").slice(0, 120) || null;
+    } else if (existing) {
+      // conserver le fichier existant si rien de nouveau n'est déposé
+      const cur = await prisma.lmsSubmission.findUnique({ where: { id: existing.id }, select: { fileName: true, fileMime: true, fileData: true } });
+      fileName = cur?.fileName ?? null; fileMime = cur?.fileMime ?? null; fileData = cur?.fileData ?? null;
+    }
+  }
+  if (!text && !fileData) redirect(`${BASE}/cours/${slug}/a/${activityId}`); // rien à remettre
+
+  // Écriture sûre face à la concurrence : ne jamais écraser une remise déjà notée.
+  const upd = await prisma.lmsSubmission.updateMany({
+    where: { activityId, userId, state: { not: "graded" } },
+    data: { text, fileName, fileMime, fileData, state: "submitted", submittedAt: new Date() },
+  });
+  if (upd.count === 0) {
+    const cur = await prisma.lmsSubmission.findUnique({ where: { activityId_userId: { activityId, userId } }, select: { id: true } });
+    if (!cur) await prisma.lmsSubmission.create({ data: { activityId, userId, text, fileName, fileMime, fileData, state: "submitted" } });
+  }
+  revalidatePath(`${BASE}/cours/${slug}/a/${activityId}`);
+  redirect(`${BASE}/cours/${slug}/a/${activityId}`);
+}
+
+export async function removeSubmission(formData: FormData) {
+  const access = await getLmsAccess();
+  if (!access) redirect("/login?callbackUrl=/formation");
+  const id = String(formData.get("id") || "");
+  const sub = await prisma.lmsSubmission.findUnique({ where: { id }, select: { userId: true, state: true, activity: { select: { id: true, section: { select: { course: { select: { slug: true } } } } } } } });
+  if (!sub || sub.userId !== access.userId || sub.state === "graded") redirect(BASE);
+  await prisma.lmsSubmission.delete({ where: { id } });
+  revalidatePath(`${BASE}/cours/${sub.activity.section.course.slug}/a/${sub.activity.id}`);
+  redirect(`${BASE}/cours/${sub.activity.section.course.slug}/a/${sub.activity.id}`);
+}
+
+export async function gradeSubmission(formData: FormData) {
+  const access = await getLmsAccess();
+  if (!access) redirect("/login?callbackUrl=/formation");
+  const id = String(formData.get("id") || "");
+  const sub = await prisma.lmsSubmission.findUnique({ where: { id }, select: { activity: { select: { id: true, assignConfig: true, section: { select: { courseId: true, course: { select: { slug: true } } } } } } } });
+  if (!sub || !(await canEditCourse(access, sub.activity.section.courseId))) redirect(BASE);
+  const cfg = parseAssignConfig(sub.activity.assignConfig);
+  const grade = Math.max(0, Math.min(cfg.maxGrade, Number(formData.get("grade")) || 0));
+  const feedback = sanitizeRich(String(formData.get("feedback") || "")) || null;
+  await prisma.lmsSubmission.update({
+    where: { id },
+    data: { grade, feedback, state: "graded", gradedById: access.userId, gradedAt: new Date() },
+  });
+  revalidatePath(`${BASE}/cours/${sub.activity.section.course.slug}/a/${sub.activity.id}`);
 }
 
 /* ----------------------------- Inscription (apprenant) ----------------------------- */

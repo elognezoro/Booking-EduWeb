@@ -858,22 +858,24 @@ model LmsSection {
   @@index([courseId])
 }
 
-// Activité/ressource d'une section : PAGE (texte enrichi) | URL (média par lien) | QUIZ.
+// Activité/ressource d'une section : PAGE (texte enrichi) | URL (média par lien) | QUIZ | DEVOIR.
 model LmsActivity {
-  id          String  @id @default(cuid())
-  sectionId   String
-  type        String // PAGE | URL | QUIZ
-  title       String
-  intro       String? // HTML (description affichée)
-  position    Int     @default(0)
-  visible     Boolean @default(true)
-  content     String? // PAGE : HTML
-  externalUrl String? // URL : lien média
-  quizConfig  String? // QUIZ : JSON (tentatives, méthode de note, options de relecture/corrigé, mélange, durée)
+  id           String  @id @default(cuid())
+  sectionId    String
+  type         String // PAGE | URL | QUIZ | DEVOIR
+  title        String
+  intro        String? // HTML (description affichée / consigne)
+  position     Int     @default(0)
+  visible      Boolean @default(true)
+  content      String? // PAGE : HTML
+  externalUrl  String? // URL : lien média
+  quizConfig   String? // QUIZ : JSON (tentatives, méthode de note, options de relecture/corrigé, mélange, durée)
+  assignConfig String? // DEVOIR : JSON (date limite, texte/fichier autorisés, taille max, note max, retard)
 
   section       LmsSection        @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   quizQuestions LmsQuizQuestion[]
   attempts      LmsAttempt[]
+  submissions   LmsSubmission[]
 
   @@index([sectionId])
 }
@@ -940,4 +942,27 @@ model LmsAttempt {
   activity LmsActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@index([activityId, userId])
+}
+
+// Remise d'un devoir par un apprenant : texte en ligne et/ou fichier joint (base64).
+model LmsSubmission {
+  id          String    @id @default(cuid())
+  activityId  String
+  userId      String
+  text        String? // HTML (texte en ligne)
+  fileName    String?
+  fileMime    String?
+  fileData    String? // data URL base64
+  state       String    @default("submitted") // submitted | graded
+  grade       Float?
+  feedback    String? // HTML (retour de l'enseignant)
+  gradedById  String?
+  submittedAt DateTime  @default(now())
+  gradedAt    DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  activity LmsActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, userId])
+  @@index([activityId])
 }

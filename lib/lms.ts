@@ -46,6 +46,14 @@ export async function requireLms(): Promise<LmsAccess> {
   return access;
 }
 
+/** Noms d'affichage (et e-mails) des apprenants par id — pour l'affichage des remises/notes. */
+export async function lmsDisplayNames(ids: string[]): Promise<Map<string, { fullName: string; email: string }>> {
+  const uniq = [...new Set(ids)].filter(Boolean);
+  if (!uniq.length) return new Map();
+  const users = await prisma.user.findMany({ where: { id: { in: uniq } }, select: { id: true, firstName: true, lastName: true, email: true } });
+  return new Map(users.map((u) => [u.id, { fullName: `${u.firstName} ${u.lastName}`.trim(), email: u.email }]));
+}
+
 /** Rôle de l'utilisateur DANS un cours (enseignant / étudiant), ou null s'il n'y est pas inscrit. */
 export async function getCourseRole(userId: string, courseId: string): Promise<LmsCourseRole | null> {
   const e = await prisma.lmsEnrolment.findUnique({
