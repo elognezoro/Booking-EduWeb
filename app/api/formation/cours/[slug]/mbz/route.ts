@@ -25,9 +25,15 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
         select: {
           title: true, summary: true,
           activities: {
-            where: { type: { in: ["PAGE", "URL"] } },
+            where: { type: { in: ["PAGE", "URL", "QUIZ"] } },
             orderBy: { position: "asc" },
-            select: { type: true, title: true, intro: true, content: true, externalUrl: true },
+            select: {
+              type: true, title: true, intro: true, content: true, externalUrl: true,
+              quizQuestions: {
+                orderBy: { position: "asc" },
+                select: { mark: true, question: { select: { id: true, type: true, name: true, questionText: true, generalFeedback: true, defaultMark: true, data: true } } },
+              },
+            },
           },
         },
       },
@@ -38,7 +44,7 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
   const sections: MbzSection[] = course.sections.map((s) => ({
     title: s.title,
     summary: s.summary,
-    pages: s.activities.map((a) => {
+    pages: s.activities.filter((a) => a.type === "PAGE" || a.type === "URL").map((a) => {
       if (a.type === "URL") {
         const url = (a.externalUrl || "").trim();
         // Lien sûr : uniquement http(s), avec échappement d'attribut HTML (anti-injection).
@@ -47,10 +53,20 @@ export async function GET(_req: Request, { params }: { params: { slug: string } 
       }
       return { title: a.title, intro: null, content: a.content || "" };
     }),
+    quizzes: s.activities.filter((a) => a.type === "QUIZ").map((a) => ({
+      title: a.title,
+      intro: a.intro,
+      questions: a.quizQuestions.map((qq) => ({
+        q: { type: qq.question.type, name: qq.question.name, questionText: qq.question.questionText, generalFeedback: qq.question.generalFeedback ?? "", defaultMark: qq.question.defaultMark, data: qq.question.data },
+        mark: qq.mark ?? qq.question.defaultMark,
+        key: qq.question.id,
+      })),
+    })),
   }));
 
-  if (sections.every((s) => s.pages.length === 0)) {
-    return new Response("Aucune page ni média à exporter dans ce cours (phase 1 : Page/Média).", { status: 400 });
+  const totalItems = sections.reduce((n, s) => n + s.pages.length + (s.quizzes?.length ?? 0), 0);
+  if (totalItems === 0) {
+    return new Response("Aucune activité exportable dans ce cours (Page, Média ou Quiz).", { status: 400 });
   }
 
   const now = Math.floor(Date.now() / 1000);

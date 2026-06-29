@@ -48,11 +48,14 @@ export default async function CoursePage({ params }: { params: { slug: string } 
           </div>
         </div>
         {canEdit && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-advanced-soft px-2.5 py-1 text-xs font-bold text-advanced-fg">Mode édition</span>
-            <Button asChild variant="outline" size="sm"><Link href={`/formation/cours/${course.slug}/banque`}><HelpCircle className="size-4" /> Banque de questions</Link></Button>
-            <Button asChild variant="outline" size="sm"><a href={`/api/formation/cours/${course.slug}/mbz`} download><Download className="size-4" /> Export Moodle (.mbz)</a></Button>
-            <CourseEditButton course={{ id: course.id, title: course.title, level: course.level, summary: course.summary, visible: course.visible }} />
+          <div className="flex flex-col items-end gap-1.5">
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="rounded-full bg-advanced-soft px-2.5 py-1 text-xs font-bold text-advanced-fg">Mode édition</span>
+              <Button asChild variant="outline" size="sm"><Link href={`/formation/cours/${course.slug}/banque`}><HelpCircle className="size-4" /> Banque de questions</Link></Button>
+              <Button asChild variant="outline" size="sm"><a href={`/api/formation/cours/${course.slug}/mbz`} download><Download className="size-4" /> Export Moodle (.mbz)</a></Button>
+              <CourseEditButton course={{ id: course.id, title: course.title, level: course.level, summary: course.summary, visible: course.visible }} />
+            </div>
+            <p className="max-w-md text-right text-[11px] leading-snug text-muted-foreground">Export Moodle : pages, médias et quiz. Pour les quiz, seuls les QCM, Vrai/Faux, réponses courtes et numériques sont convertis ; les autres types (Cloze, appariement, etc.) sont ignorés.</p>
           </div>
         )}
       </div>

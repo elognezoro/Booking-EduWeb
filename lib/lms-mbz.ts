@@ -1,4 +1,5 @@
 import { buildTarGz, type TarEntry } from "./lms-tar";
+import { buildQuestionBank, type MbzQuestion } from "./lms-mbz-quiz";
 
 /**
  * Génère une sauvegarde Moodle 4.5 (.mbz) à partir d'un cours LMS.
@@ -17,11 +18,13 @@ const HEAD = '<?xml version="1.0" encoding="UTF-8"?>\n';
 const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export interface MbzPage { title: string; intro: string | null; content: string }
-export interface MbzSection { title: string; summary?: string | null; pages: MbzPage[] }
+export interface MbzQuiz { title: string; intro: string | null; questions: { q: MbzQuestion; mark: number; key: string }[] }
+export interface MbzSection { title: string; summary?: string | null; pages: MbzPage[]; quizzes?: MbzQuiz[] }
 export interface MbzCourse { fullname: string; shortname: string; summary?: string; sections: MbzSection[] }
 
 interface PageNode { cmid: number; instanceId: number; ctxId: number; title: string; intro: string; content: string; sectionId: number; sectionNumber: number }
-interface SectionNode { id: number; number: number; name: string | null; summary: string; pages: PageNode[] }
+interface QuizNode { cmid: number; instanceId: number; ctxId: number; gradeItemId: number; title: string; intro: string; sectionId: number; sectionNumber: number; questions: { q: MbzQuestion; mark: number; key: string }[] }
+interface SectionNode { id: number; number: number; name: string | null; summary: string; pages: PageNode[]; quizzes: QuizNode[] }
 
 /* ----------------------------- Fichiers par activité (page) ----------------------------- */
 function pageXml(p: PageNode, now: number): string {
@@ -78,9 +81,184 @@ const PAGE_CALENDAR = HEAD + "<events>\n</events>";
 const PAGE_COMPETENCIES = HEAD + "<course_module_competencies>\n  <competencies>\n  </competencies>\n</course_module_competencies>";
 const PAGE_FILTERS = HEAD + "<filters>\n  <filter_actives>\n  </filter_actives>\n  <filter_configs>\n  </filter_configs>\n</filters>";
 
+/* ----------------------------- Quiz ----------------------------- */
+function quizModuleXml(qz: QuizNode, now: number): string {
+  return HEAD + `<module id="${qz.cmid}" version="${BACKUP_VERSION}">
+  <modulename>quiz</modulename>
+  <sectionid>${qz.sectionId}</sectionid>
+  <sectionnumber>${qz.sectionNumber}</sectionnumber>
+  <idnumber></idnumber>
+  <added>${now}</added>
+  <score>0</score>
+  <indent>0</indent>
+  <visible>1</visible>
+  <visibleoncoursepage>1</visibleoncoursepage>
+  <visibleold>1</visibleold>
+  <groupmode>0</groupmode>
+  <groupingid>0</groupingid>
+  <completion>0</completion>
+  <completiongradeitemnumber>${NULL}</completiongradeitemnumber>
+  <completionpassgrade>0</completionpassgrade>
+  <completionview>0</completionview>
+  <completionexpected>0</completionexpected>
+  <availability>${NULL}</availability>
+  <showdescription>0</showdescription>
+  <downloadcontent>1</downloadcontent>
+  <lang></lang>
+  <tags>
+  </tags>
+</module>`;
+}
+
+function quizActivityXml(qz: QuizNode, entries: Map<string, { entryId: number }>, now: number, alloc: () => number): string {
+  const slots = qz.questions.map((item) => ({ item, entry: entries.get(item.key) })).filter((x) => x.entry);
+  const sumgrades = slots.reduce((s, x) => s + (x.item.mark || 0), 0);
+  const grade = sumgrades > 0 ? sumgrades : 0;
+  const instances = slots.map((x, i) => `      <question_instance id="${alloc()}">
+        <quizid>${qz.instanceId}</quizid>
+        <slot>${i + 1}</slot>
+        <page>1</page>
+        <displaynumber>${NULL}</displaynumber>
+        <requireprevious>0</requireprevious>
+        <maxmark>${(x.item.mark || 0).toFixed(7)}</maxmark>
+        <quizgradeitemid>${NULL}</quizgradeitemid>
+        <question_reference id="${alloc()}">
+          <usingcontextid>${qz.ctxId}</usingcontextid>
+          <component>mod_quiz</component>
+          <questionarea>slot</questionarea>
+          <questionbankentryid>${entries.get(x.item.key)!.entryId}</questionbankentryid>
+          <version>${NULL}</version>
+        </question_reference>
+      </question_instance>`).join("\n");
+  return HEAD + `<activity id="${qz.instanceId}" moduleid="${qz.cmid}" modulename="quiz" contextid="${qz.ctxId}">
+  <quiz id="${qz.instanceId}">
+    <name>${esc(qz.title)}</name>
+    <intro>${esc(qz.intro)}</intro>
+    <introformat>1</introformat>
+    <timeopen>0</timeopen>
+    <timeclose>0</timeclose>
+    <timelimit>0</timelimit>
+    <overduehandling>autosubmit</overduehandling>
+    <graceperiod>0</graceperiod>
+    <preferredbehaviour>deferredfeedback</preferredbehaviour>
+    <canredoquestions>0</canredoquestions>
+    <attempts_number>0</attempts_number>
+    <attemptonlast>0</attemptonlast>
+    <grademethod>1</grademethod>
+    <decimalpoints>2</decimalpoints>
+    <questiondecimalpoints>-1</questiondecimalpoints>
+    <reviewattempt>69888</reviewattempt>
+    <reviewcorrectness>69888</reviewcorrectness>
+    <reviewmaxmarks>69888</reviewmaxmarks>
+    <reviewmarks>69888</reviewmarks>
+    <reviewspecificfeedback>69888</reviewspecificfeedback>
+    <reviewgeneralfeedback>69888</reviewgeneralfeedback>
+    <reviewrightanswer>69888</reviewrightanswer>
+    <reviewoverallfeedback>4352</reviewoverallfeedback>
+    <questionsperpage>1</questionsperpage>
+    <navmethod>free</navmethod>
+    <shuffleanswers>1</shuffleanswers>
+    <sumgrades>${grade.toFixed(5)}</sumgrades>
+    <grade>${grade.toFixed(5)}</grade>
+    <timecreated>${now}</timecreated>
+    <timemodified>${now}</timemodified>
+    <password></password>
+    <subnet></subnet>
+    <browsersecurity>-</browsersecurity>
+    <delay1>0</delay1>
+    <delay2>0</delay2>
+    <showuserpicture>0</showuserpicture>
+    <showblocks>0</showblocks>
+    <completionattemptsexhausted>0</completionattemptsexhausted>
+    <completionminattempts>0</completionminattempts>
+    <allowofflineattempts>0</allowofflineattempts>
+    <subplugin_quizaccess_seb_quiz>
+    </subplugin_quizaccess_seb_quiz>
+    <quiz_grade_items>
+    </quiz_grade_items>
+    <question_instances>
+${instances}
+    </question_instances>
+    <sections>
+      <section id="${alloc()}">
+        <firstslot>1</firstslot>
+        <heading></heading>
+        <shufflequestions>0</shufflequestions>
+      </section>
+    </sections>
+    <feedbacks>
+    </feedbacks>
+    <overrides>
+    </overrides>
+    <grades>
+    </grades>
+    <attempts>
+    </attempts>
+  </quiz>
+</activity>`;
+}
+
+function quizGradesXml(qz: QuizNode, catId: number, now: number): string {
+  const grade = qz.questions.reduce((s, x) => s + (x.mark || 0), 0);
+  return HEAD + `<activity_gradebook>
+  <grade_items>
+    <grade_item id="${qz.gradeItemId}">
+      <categoryid>${catId}</categoryid>
+      <itemname>${esc(qz.title)}</itemname>
+      <itemtype>mod</itemtype>
+      <itemmodule>quiz</itemmodule>
+      <iteminstance>${qz.instanceId}</iteminstance>
+      <itemnumber>0</itemnumber>
+      <iteminfo>${NULL}</iteminfo>
+      <idnumber>${NULL}</idnumber>
+      <calculation>${NULL}</calculation>
+      <gradetype>1</gradetype>
+      <grademax>${(grade > 0 ? grade : 0).toFixed(5)}</grademax>
+      <grademin>0.00000</grademin>
+      <scaleid>${NULL}</scaleid>
+      <outcomeid>${NULL}</outcomeid>
+      <gradepass>0.00000</gradepass>
+      <multfactor>1.00000</multfactor>
+      <plusfactor>0.00000</plusfactor>
+      <aggregationcoef>0.00000</aggregationcoef>
+      <aggregationcoef2>0.00000</aggregationcoef2>
+      <weightoverride>0</weightoverride>
+      <sortorder>2</sortorder>
+      <display>0</display>
+      <decimals>${NULL}</decimals>
+      <hidden>0</hidden>
+      <locked>0</locked>
+      <locktime>0</locktime>
+      <needsupdate>0</needsupdate>
+      <timecreated>${now}</timecreated>
+      <timemodified>${now}</timemodified>
+      <grade_grades>
+      </grade_grades>
+    </grade_item>
+  </grade_items>
+  <grade_letters>
+  </grade_letters>
+</activity_gradebook>`;
+}
+
+function quizInforefXml(qz: QuizNode, categoryId: number): string {
+  return HEAD + `<inforef>
+  <grade_itemref>
+    <grade_item>
+      <id>${qz.gradeItemId}</id>
+    </grade_item>
+  </grade_itemref>
+  <question_categoryref>
+    <question_category>
+      <id>${categoryId}</id>
+    </question_category>
+  </question_categoryref>
+</inforef>`;
+}
+
 /* ----------------------------- Sections ----------------------------- */
 function sectionXml(s: SectionNode, now: number): string {
-  const seq = s.pages.map((p) => p.cmid).join(",");
+  const seq = [...s.pages.map((p) => p.cmid), ...s.quizzes.map((q) => q.cmid)].join(",");
   return HEAD + `<section id="${s.id}">
   <number>${s.number}</number>
   <name>${s.name ? esc(s.name) : NULL}</name>
@@ -152,7 +330,10 @@ function courseXml(c: MbzCourse, courseId: number, ctxId: number, now: number): 
 </course>`;
 }
 
-const COURSE_INFOREF = HEAD + `<inforef>\n  <roleref>\n    <role>\n      <id>${STUDENT_ROLE_ID}</id>\n    </role>\n  </roleref>\n</inforef>`;
+function courseInforef(categoryId: number | null): string {
+  const catRef = categoryId ? `\n  <question_categoryref>\n    <question_category>\n      <id>${categoryId}</id>\n    </question_category>\n  </question_categoryref>` : "";
+  return HEAD + `<inforef>\n  <roleref>\n    <role>\n      <id>${STUDENT_ROLE_ID}</id>\n    </role>\n  </roleref>${catRef}\n</inforef>`;
+}
 const COURSE_ROLES = PAGE_ROLES;
 const COURSE_COMPLETIONDEFAULTS = HEAD + "<course_completion_defaults>\n</course_completion_defaults>";
 const COURSE_CALENDAR = HEAD + "<events>\n</events>";
@@ -303,14 +484,23 @@ const ROOT_SETTINGS: [string, string][] = [
 
 function moodleBackupXml(c: MbzCourse, courseId: number, courseCtx: number, sections: SectionNode[], filename: string, now: number, backupId: string): string {
   const setting = (level: string, name: string, value: string, extra = "") => `      <setting>\n        <level>${level}</level>\n${extra}        <name>${name}</name>\n        <value>${value}</value>\n      </setting>`;
-  const activitiesXml = sections.flatMap((s) => s.pages).map((p) => `        <activity>
+  const pageAct = sections.flatMap((s) => s.pages).map((p) => `        <activity>
           <moduleid>${p.cmid}</moduleid>
           <sectionid>${p.sectionId}</sectionid>
           <modulename>page</modulename>
           <title>${esc(p.title)}</title>
           <directory>activities/page_${p.cmid}</directory>
           <insubsection></insubsection>
-        </activity>`).join("\n");
+        </activity>`);
+  const quizAct = sections.flatMap((s) => s.quizzes).map((q) => `        <activity>
+          <moduleid>${q.cmid}</moduleid>
+          <sectionid>${q.sectionId}</sectionid>
+          <modulename>quiz</modulename>
+          <title>${esc(q.title)}</title>
+          <directory>activities/quiz_${q.cmid}</directory>
+          <insubsection></insubsection>
+        </activity>`);
+  const activitiesXml = [...pageAct, ...quizAct].join("\n");
   const sectionsXml = sections.map((s) => `        <section>
           <sectionid>${s.id}</sectionid>
           <title>${s.name ? esc(s.name) : String(s.number)}</title>
@@ -326,6 +516,10 @@ function moodleBackupXml(c: MbzCourse, courseId: number, courseCtx: number, sect
     for (const p of s.pages) {
       settings.push(setting("activity", `page_${p.cmid}_included`, "1", `        <activity>page_${p.cmid}</activity>\n`));
       settings.push(setting("activity", `page_${p.cmid}_userinfo`, "0", `        <activity>page_${p.cmid}</activity>\n`));
+    }
+    for (const q of s.quizzes) {
+      settings.push(setting("activity", `quiz_${q.cmid}_included`, "1", `        <activity>quiz_${q.cmid}</activity>\n`));
+      settings.push(setting("activity", `quiz_${q.cmid}_userinfo`, "0", `        <activity>quiz_${q.cmid}</activity>\n`));
     }
   }
   return HEAD + `<moodle_backup>
@@ -388,14 +582,34 @@ export function buildCourseMbz(c: MbzCourse, now: number): { filename: string; b
   const backupId = (now.toString(16) + courseId.toString(16) + "00000000000000000000000000000000").slice(0, 32);
 
   // Section générale (0) + sections du cours (1..N)
-  const sections: SectionNode[] = [{ id: nextId(), number: 0, name: null, summary: "", pages: [] }];
+  const sections: SectionNode[] = [{ id: nextId(), number: 0, name: null, summary: "", pages: [], quizzes: [] }];
   c.sections.forEach((s, i) => {
-    const node: SectionNode = { id: nextId(), number: i + 1, name: s.title, summary: s.summary ?? "", pages: [] };
+    const node: SectionNode = { id: nextId(), number: i + 1, name: s.title, summary: s.summary ?? "", pages: [], quizzes: [] };
     for (const p of s.pages) {
       node.pages.push({ cmid: nextId(), instanceId: nextId(), ctxId: nextId(), title: p.title, intro: p.intro ?? "", content: p.content, sectionId: node.id, sectionNumber: node.number });
     }
+    for (const qz of s.quizzes ?? []) {
+      node.quizzes.push({ cmid: nextId(), instanceId: nextId(), ctxId: nextId(), gradeItemId: nextId(), title: qz.title, intro: qz.intro ?? "", sectionId: node.id, sectionNumber: node.number, questions: qz.questions });
+    }
     sections.push(node);
   });
+
+  // Banque de questions partagée (questions.xml) : déduplique par clé sur toutes les questions des quiz.
+  const allQuizzes = sections.flatMap((s) => s.quizzes);
+  const courseGradeCat = nextId();
+  const courseGradeItem = nextId();
+  let questionBankXml = "";
+  let categoryId: number | null = null;
+  const bankEntries = new Map<string, { entryId: number; mark: number }>();
+  if (allQuizzes.length) {
+    categoryId = nextId();
+    const seen = new Set<string>();
+    const uniqueQuestions: { q: MbzQuestion; mark: number; key: string }[] = [];
+    for (const qz of allQuizzes) for (const item of qz.questions) if (!seen.has(item.key)) { seen.add(item.key); uniqueQuestions.push(item); }
+    const bank = buildQuestionBank(uniqueQuestions, categoryId, courseCtx, backupId, now, { next: nextId });
+    questionBankXml = bank.xml;
+    bank.entries.forEach((v, k) => bankEntries.set(k, v));
+  }
 
   const filename = `eduweb-${c.shortname || "cours"}-${now}.mbz`.replace(/[^a-zA-Z0-9._-]/g, "-");
   const entries: { name: string; type: "file" | "dir"; content?: string }[] = [];
@@ -418,12 +632,25 @@ export function buildCourseMbz(c: MbzCourse, now: number): { filename: string; b
       file(`${d}/inforef.xml`, PAGE_INFOREF);
       file(`${d}/module.xml`, moduleXml(p, now));
     }
+    for (const qz of s.quizzes) {
+      const d = `activities/quiz_${qz.cmid}`;
+      dir(d);
+      file(`${d}/quiz.xml`, quizActivityXml(qz, bankEntries, now, nextId));
+      file(`${d}/grades.xml`, quizGradesXml(qz, courseGradeCat, now));
+      file(`${d}/calendar.xml`, PAGE_CALENDAR);
+      file(`${d}/roles.xml`, PAGE_ROLES);
+      file(`${d}/grade_history.xml`, PAGE_GRADE_HISTORY);
+      file(`${d}/filters.xml`, PAGE_FILTERS);
+      file(`${d}/competencies.xml`, PAGE_COMPETENCIES);
+      file(`${d}/inforef.xml`, categoryId ? quizInforefXml(qz, categoryId) : PAGE_INFOREF);
+      file(`${d}/module.xml`, quizModuleXml(qz, now));
+    }
   }
   // Cours
   dir("course");
   file("course/course.xml", courseXml(c, courseId, courseCtx, now));
   file("course/enrolments.xml", courseEnrolments(now, nextId(), nextId(), nextId()));
-  file("course/inforef.xml", COURSE_INFOREF);
+  file("course/inforef.xml", courseInforef(categoryId));
   file("course/roles.xml", COURSE_ROLES);
   file("course/completiondefaults.xml", COURSE_COMPLETIONDEFAULTS);
   file("course/calendar.xml", COURSE_CALENDAR);
@@ -444,7 +671,8 @@ export function buildCourseMbz(c: MbzCourse, now: number): { filename: string; b
   file("outcomes.xml", ROOT_OUTCOMES);
   file("roles.xml", ROOT_ROLES);
   file("groups.xml", ROOT_GROUPS);
-  file("gradebook.xml", gradebookXml(courseId, nextId(), nextId(), now));
+  if (categoryId) file("questions.xml", questionBankXml);
+  file("gradebook.xml", gradebookXml(courseId, courseGradeCat, courseGradeItem, now));
   file("grade_history.xml", ROOT_GRADE_HISTORY);
   file("completion.xml", ROOT_COMPLETION);
   file("badges.xml", ROOT_BADGES);
