@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { RichTextEditor } from "@/components/lms/rich-text-editor";
 import { saveQuestion } from "@/app/actions/lms";
-import type { LmsQuestionType, McqData, TrueFalseData, ShortAnswerData, NumericalData, ClozeData, DragTextData, MatchingData, OrderingData, GapfillData } from "@/lib/lms-questions";
+import { QUESTION_TYPE_LABEL, type LmsQuestionType, type McqData, type TrueFalseData, type ShortAnswerData, type NumericalData, type ClozeData, type DragTextData, type MatchingData, type OrderingData, type GapfillData } from "@/lib/lms-questions";
 
 type AnyData = McqData | TrueFalseData | ShortAnswerData | NumericalData | ClozeData | DragTextData | MatchingData | OrderingData | GapfillData;
 interface Initial { id?: string; name: string; questionText: string; generalFeedback: string; defaultMark: number; data: unknown }
@@ -32,6 +32,7 @@ export function QuestionEditor({ courseId, courseSlug, type, initial }: { course
 
       <div>
         <Label>Réponses & barème</Label>
+        <div className="mb-3 mt-1"><SyntaxHint type={type} /></div>
         {type === "MCQ" && <McqFields data={data as McqData} setData={setData} />}
         {type === "TRUEFALSE" && <TrueFalseFields data={data as TrueFalseData} setData={setData} />}
         {type === "SHORTANSWER" && <ShortAnswerFields data={data as ShortAnswerData} setData={setData} />}
@@ -56,6 +57,28 @@ export function QuestionEditor({ courseId, courseSlug, type, initial }: { course
 const box = "space-y-2 rounded-xl border border-border p-3";
 const gradeCol = "w-24";
 
+/** Aide-mémoire de syntaxe/usage affiché dans la zone d'édition de chaque exerciseur. */
+function SyntaxHint({ type }: { type: LmsQuestionType }) {
+  const c = "rounded bg-secondary px-1 py-0.5 font-mono text-[0.8em]";
+  const body: Record<LmsQuestionType, React.ReactNode> = {
+    MCQ: <>Cochez la (ou les) bonne(s) réponse(s). Activez « Plusieurs bonnes réponses » pour en autoriser plusieurs.</>,
+    TRUEFALSE: <>Indiquez si l'affirmation de l'énoncé est <strong>vraie</strong> ou <strong>fausse</strong>.</>,
+    SHORTANSWER: <>Listez chaque formulation acceptée et son <strong>% de points</strong>. « Sensible à la casse » exige les majuscules exactes.</>,
+    NUMERICAL: <>Valeur attendue + <strong>tolérance ±</strong>. Ex. <span className={c}>3,14</span> avec tolérance <span className={c}>0,01</span> accepte de 3,13 à 3,15.</>,
+    CLOZE: <>Champs intégrés au texte : <span className={c}>{"{1:TYPE:=bonne~mauvaise}"}</span>. Types : <span className={c}>SHORTANSWER</span>, <span className={c}>SHORTANSWER_C</span> (casse), <span className={c}>NUMERICAL</span> (<span className={c}>{"=4:0.5"}</span> = valeur:tolérance), <span className={c}>MULTICHOICE</span>. Crédit partiel <span className={c}>%50%</span>, retour <span className={c}>#texte</span>.</>,
+    DRAGTEXT: <>Placez les trous dans le texte avec <span className={c}>[[1]]</span>, <span className={c}>[[2]]</span>… La <strong>réponse n°k</strong> ci-dessous correspond au trou <span className={c}>[[k]]</span>. Les « intrus » sont des étiquettes en trop.</>,
+    MATCHING: <>Une ligne = un <strong>élément</strong> + sa <strong>correspondance</strong>. Les correspondances (et les intrus) sont proposées mélangées dans une liste déroulante.</>,
+    ORDERING: <>Saisissez les éléments dans le <strong>bon ordre</strong> ; ils seront <strong>mélangés</strong> pour l'apprenant, qui devra les réordonner (glisser ou flèches).</>,
+    GAPFILL: <>Écrivez le texte et mettez les mots à cacher <strong>entre crochets</strong> : <span className={c}>[Paris]</span>. Réponses alternatives : <span className={c}>[Paris|Lutèce]</span>. Casse et accents tolérés sauf « réponse stricte ».</>,
+  };
+  return (
+    <div className="flex gap-2 rounded-xl border border-advanced-fg/30 bg-advanced/5 p-3 text-sm text-foreground">
+      <Info className="mt-0.5 size-4 shrink-0 text-advanced-fg" />
+      <p><span className="font-semibold">Aide-mémoire — {QUESTION_TYPE_LABEL[type] ?? type}.</span> {body[type]}</p>
+    </div>
+  );
+}
+
 function McqFields({ data, setData }: { data: McqData; setData: (d: McqData) => void }) {
   const setOpt = (i: number, patch: Partial<McqData["options"][number]>) => setData({ ...data, options: data.options.map((o, j) => (j === i ? { ...o, ...patch } : o)) });
   const setCorrect = (i: number, val: boolean) => {
@@ -73,7 +96,6 @@ function McqFields({ data, setData }: { data: McqData; setData: (d: McqData) => 
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, options: [...data.options, { text: "", correct: false }] })}><Plus className="size-4" /> Ajouter une proposition</Button>
-      <p className="text-xs text-muted-foreground">Cochez la (ou les) bonne(s) réponse(s).</p>
     </div>
   );
 }
@@ -101,7 +123,6 @@ function ShortAnswerFields({ data, setData }: { data: ShortAnswerData; setData: 
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, answers: [...data.answers, { text: "", grade: 100 }] })}><Plus className="size-4" /> Ajouter une réponse acceptée</Button>
-      <p className="text-xs text-muted-foreground">Indiquez chaque formulation acceptée et le pourcentage de points attribué.</p>
     </div>
   );
 }
@@ -120,7 +141,6 @@ function NumericalFields({ data, setData }: { data: NumericalData; setData: (d: 
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, answers: [...data.answers, { value: 0, tolerance: 0, grade: 100 }] })}><Plus className="size-4" /> Ajouter une valeur acceptée</Button>
-      <p className="text-xs text-muted-foreground">Ex. valeur 3,14 avec tolérance 0,01 accepte de 3,13 à 3,15.</p>
     </div>
   );
 }
@@ -129,7 +149,6 @@ function ClozeFields({ data, setData }: { data: ClozeData; setData: (d: ClozeDat
   return (
     <div className={box}>
       <Textarea value={data.clozeText} onChange={(e) => setData({ clozeText: e.target.value })} rows={6} className="font-mono text-xs" placeholder={"La capitale de la Côte d'Ivoire est {1:SHORTANSWER:=Yamoussoukro}. 2 + 2 = {1:NUMERICAL:=4}."} />
-      <p className="text-xs text-muted-foreground">Format Moodle « Cloze » : champs intégrés <code>{"{note:TYPE:=bonne réponse~mauvaise}"}</code> — types <code>SHORTANSWER</code>/<code>SHORTANSWER_C</code> (sensible à la casse), <code>NUMERICAL</code> (<code>{"=4:0.5"}</code> pour la tolérance), <code>MULTICHOICE</code> (liste déroulante). Crédit partiel avec <code>%50%</code>, retour avec <code>#…</code>. Auto‑corrigé dans le Quiz.</p>
     </div>
   );
 }
@@ -140,7 +159,6 @@ function DragTextFields({ data, setData }: { data: DragTextData; setData: (d: Dr
   return (
     <div className={box}>
       <Textarea value={data.text} onChange={(e) => setData({ ...data, text: e.target.value })} rows={4} className="font-mono text-xs" placeholder={"Le soleil est une [[1]] et la Terre une [[2]]."} />
-      <p className="text-xs text-muted-foreground">Insérez les trous avec <code>[[1]]</code>, <code>[[2]]</code>… La <strong>réponse n°<i>k</i></strong> ci-dessous correspond au trou <code>[[<i>k</i>]]</code>.</p>
       <p className="text-sm font-medium">Réponses (ordre des trous)</p>
       {data.answers.map((a, i) => (
         <div key={i} className="flex items-center gap-2">
@@ -184,7 +202,6 @@ function MatchingFields({ data, setData }: { data: MatchingData; setData: (d: Ma
         </div>
       ))}
       <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, extraRights: [...data.extraRights, ""] })}><Plus className="size-4" /> Ajouter un intrus</Button>
-      <p className="text-xs text-muted-foreground">L'apprenant choisit, pour chaque élément, la bonne correspondance dans une liste déroulante (mélangée).</p>
     </div>
   );
 }
@@ -193,7 +210,6 @@ function GapfillFields({ data, setData }: { data: GapfillData; setData: (d: Gapf
   return (
     <div className={box}>
       <Textarea value={data.text} onChange={(e) => setData({ ...data, text: e.target.value })} rows={4} placeholder={"La capitale de la Côte d'Ivoire est [Yamoussoukro]. Le fleuve est le [Bandama|fleuve Bandama]."} />
-      <p className="text-xs text-muted-foreground">Écrivez votre texte et placez les mots à cacher <strong>entre crochets</strong> : <code>[Paris]</code>. Plusieurs réponses acceptées : <code>[Paris|Lutèce]</code>. L'apprenant saisit les mots manquants.</p>
       <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={data.caseSensitive} onChange={(e) => setData({ ...data, caseSensitive: e.target.checked })} className="size-4" /> Réponse stricte (respecter la casse et les accents)</label>
     </div>
   );
@@ -203,7 +219,6 @@ function OrderingFields({ data, setData }: { data: OrderingData; setData: (d: Or
   const setItem = (i: number, v: string) => setData({ items: data.items.map((a, j) => (j === i ? v : a)) });
   return (
     <div className={box}>
-      <p className="text-xs text-muted-foreground">Saisissez les éléments dans le <strong>bon ordre</strong> ; ils seront mélangés pour l'apprenant.</p>
       {data.items.map((a, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="w-8 shrink-0 text-center text-xs font-bold text-muted-foreground">{i + 1}</span>
