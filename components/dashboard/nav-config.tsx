@@ -64,6 +64,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Salles multimédias", href: "/dashboard/rooms", icon: MonitorPlay, permission: "resources.read" },
       { label: "Mes réservations", href: "/dashboard/bookings/my", icon: CalendarCheck2, permission: "bookings.read_own" },
       { label: "Sport cérébral", href: "/dashboard/sport-cerebral", icon: Brain },
+      { label: "Espace formation", href: "/formation", icon: GraduationCap },
       { label: "Mon compte", href: "/dashboard/account", icon: UserCog },
     ],
   },

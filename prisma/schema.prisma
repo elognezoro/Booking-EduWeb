@@ -811,3 +811,133 @@ model BrainSportQuestion {
 
   @@index([gameSlug, level, active])
 }
+
+// ===========================================================================
+// ESPACE FORMATION (LMS) — sous-système cloisonné, modèle Moodle, export .mbz.
+// Aucune relation avec les modèles EduWeb Booking ci-dessus (connexion partagée
+// uniquement : on référence User.id par `userId` sans relation Prisma croisée).
+// ===========================================================================
+
+// Rôle au niveau du site formation (création/gestion de cours).
+model LmsRole {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String // MANAGER | TEACHER
+  createdAt DateTime @default(now())
+
+  @@unique([userId, role])
+  @@index([userId])
+}
+
+model LmsCourse {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  summary     String? // HTML
+  level       String? // niveau/parcours (ex. « Niveau 1 »)
+  visible     Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sections   LmsSection[]
+  questions  LmsQuestion[]
+  enrolments LmsEnrolment[]
+}
+
+model LmsSection {
+  id       String  @id @default(cuid())
+  courseId String
+  title    String
+  summary  String? // HTML
+  position Int     @default(0)
+
+  course     LmsCourse     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  activities LmsActivity[]
+
+  @@index([courseId])
+}
+
+// Activité/ressource d'une section : PAGE (texte enrichi) | URL (média par lien) | QUIZ.
+model LmsActivity {
+  id          String  @id @default(cuid())
+  sectionId   String
+  type        String // PAGE | URL | QUIZ
+  title       String
+  intro       String? // HTML (description affichée)
+  position    Int     @default(0)
+  visible     Boolean @default(true)
+  content     String? // PAGE : HTML
+  externalUrl String? // URL : lien média
+  quizConfig  String? // QUIZ : JSON (tentatives, méthode de note, options de relecture/corrigé, mélange, durée)
+
+  section       LmsSection        @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  quizQuestions LmsQuizQuestion[]
+  attempts      LmsAttempt[]
+
+  @@index([sectionId])
+}
+
+// Banque de questions, portée par cours.
+model LmsQuestion {
+  id              String   @id @default(cuid())
+  courseId        String
+  type            String // MCQ | TRUEFALSE | SHORTANSWER | NUMERICAL | CLOZE
+  name            String
+  questionText    String // HTML
+  generalFeedback String? // HTML (corrigé/feedback général)
+  defaultMark     Float    @default(1)
+  data            String // JSON spécifique au type (options, bonnes réponses, tolérance…)
+  createdById     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  course   LmsCourse         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quizUses LmsQuizQuestion[]
+
+  @@index([courseId])
+}
+
+model LmsQuizQuestion {
+  id         String @id @default(cuid())
+  activityId String
+  questionId String
+  position   Int    @default(0)
+  mark       Float?
+
+  activity LmsActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  question LmsQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, questionId])
+  @@index([activityId])
+}
+
+model LmsEnrolment {
+  id        String   @id @default(cuid())
+  courseId  String
+  userId    String
+  role      String // TEACHER | STUDENT
+  createdAt DateTime @default(now())
+
+  course LmsCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, userId])
+  @@index([userId])
+}
+
+// Tentative d'un étudiant sur un quiz.
+model LmsAttempt {
+  id          String    @id @default(cuid())
+  activityId  String
+  userId      String
+  state       String    @default("inprogress") // inprogress | finished
+  answers     String? // JSON des réponses
+  score       Float?
+  maxScore    Float?
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  activity LmsActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@index([activityId, userId])
+}
