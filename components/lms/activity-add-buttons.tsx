@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { FilePlus, Link2, ListChecks, ClipboardList, MessageSquare, NotebookText, ClipboardCheck } from "lucide-react";
+import { FilePlus, Link2, ListChecks, ClipboardList, MessageSquare, NotebookText, ClipboardCheck, Shapes } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { createActivity } from "@/app/actions/lms";
 
 /** Boutons d'ajout de contenu : Page, Média (URL), Quiz, Devoir, Forum, Wiki ou Atelier. */
 export function ActivityAddButtons({ sectionId }: { sectionId: string }) {
-  const [modal, setModal] = React.useState<null | "PAGE" | "URL" | "QUIZ" | "DEVOIR" | "FORUM" | "WIKI" | "WORKSHOP">(null);
+  const [modal, setModal] = React.useState<null | "PAGE" | "URL" | "QUIZ" | "DEVOIR" | "FORUM" | "WIKI" | "WORKSHOP" | "GEOGEBRA">(null);
   return (
     <>
       <div className="flex flex-wrap gap-2">
@@ -22,7 +22,19 @@ export function ActivityAddButtons({ sectionId }: { sectionId: string }) {
         <Button type="button" variant="outline" size="sm" onClick={() => setModal("FORUM")}><MessageSquare className="size-4" /> Forum</Button>
         <Button type="button" variant="outline" size="sm" onClick={() => setModal("WIKI")}><NotebookText className="size-4" /> Wiki</Button>
         <Button type="button" variant="outline" size="sm" onClick={() => setModal("WORKSHOP")}><ClipboardCheck className="size-4" /> Atelier</Button>
+        <Button type="button" variant="outline" size="sm" onClick={() => setModal("GEOGEBRA")}><Shapes className="size-4" /> GeoGebra</Button>
       </div>
+
+      <Modal open={modal === "GEOGEBRA"} onClose={() => setModal(null)} title="Nouvel applet GeoGebra" description="Intégrez un applet interactif depuis geogebra.org (géométrie, fonctions…).">
+        <form action={createActivity} className="space-y-3">
+          <input type="hidden" name="sectionId" value={sectionId} />
+          <input type="hidden" name="type" value="GEOGEBRA" />
+          <div><Label htmlFor="gg-title" required>Titre</Label><Input id="gg-title" name="title" required placeholder="Ex. Cercle trigonométrique" /></div>
+          <div><Label htmlFor="gg-url" required>Identifiant ou URL GeoGebra</Label><Input id="gg-url" name="externalUrl" required placeholder="Ex. abcd1234 ou https://www.geogebra.org/m/abcd1234" /></div>
+          <div><Label htmlFor="gg-intro">Consigne (facultatif)</Label><Textarea id="gg-intro" name="intro" rows={2} /></div>
+          <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setModal(null)}>Annuler</Button><SubmitButton pendingLabel="Création…">Intégrer</SubmitButton></div>
+        </form>
+      </Modal>
 
       <Modal open={modal === "WORKSHOP"} onClose={() => setModal(null)} title="Nouvel atelier (évaluation par les pairs)" description="Les apprenants remettent un travail, puis évaluent ceux de leurs pairs selon des critères.">
         <form action={createActivity} className="space-y-3">

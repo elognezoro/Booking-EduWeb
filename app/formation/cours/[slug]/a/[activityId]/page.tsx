@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Trash2, Play, Eye, Download, Clock, CheckCircle2, Pin, Lock, MessageSquare, NotebookText, Home } from "lucide-react";
 import { getLmsAccess, canEditCourse, getCourseRole, lmsDisplayNames } from "@/lib/lms";
 import { prisma } from "@/lib/prisma";
-import { detectMedia } from "@/lib/lms-media";
+import { detectMedia, geogebraEmbed } from "@/lib/lms-media";
 import { parseQuizConfig, canSeeCorrige, correctAnswerText, gradeOne, CORRIGE_LABEL } from "@/lib/lms-quiz";
 import { parseAssignConfig, isLate, type AssignConfig } from "@/lib/lms-assign";
 import { parseForumConfig } from "@/lib/lms-forum";
@@ -32,7 +32,7 @@ function fmtDate(iso: string | Date): string {
 
 export const dynamic = "force-dynamic";
 
-const AUTO_TYPES = ["MCQ", "TRUEFALSE", "SHORTANSWER", "NUMERICAL", "CLOZE"];
+const AUTO_TYPES = ["MCQ", "TRUEFALSE", "SHORTANSWER", "NUMERICAL", "CLOZE", "DRAGTEXT", "MATCHING", "ORDERING"];
 
 function MediaBlock({ url, intro }: { url: string; intro: string | null }) {
   const m = detectMedia(url);
@@ -369,6 +369,19 @@ export default async function ActivityPage({ params }: { params: { slug: string;
       {activity.type === "FORUM" && <ForumSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, forumConfig: activity.forumConfig }} courseSlug={course.slug} canEdit={canEdit} role={role} />}
       {activity.type === "WIKI" && <WikiSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, wikiConfig: activity.wikiConfig }} courseSlug={course.slug} canEdit={canEdit} role={role} />}
       {activity.type === "WORKSHOP" && <WorkshopSection activity={{ id: activity.id, title: activity.title, intro: activity.intro, workshopConfig: activity.workshopConfig }} courseSlug={course.slug} canEdit={canEdit} userId={access.userId} role={role} />}
+      {activity.type === "GEOGEBRA" && (() => {
+        const src = geogebraEmbed(activity.externalUrl ?? "");
+        return (
+          <Card><CardContent className="py-5">
+            {activity.intro && <div className="mb-3"><RichContent html={activity.intro} /></div>}
+            {src ? (
+              <div className="overflow-hidden rounded-xl border border-border"><iframe src={src} className="h-[600px] w-full" title="GeoGebra" allow="autoplay; fullscreen; clipboard-write" referrerPolicy="no-referrer-when-downgrade" /></div>
+            ) : (
+              <p className="text-sm text-unavailable-fg">Lien GeoGebra invalide. Indiquez un identifiant de matériel ou une URL <code>geogebra.org</code>.</p>
+            )}
+          </CardContent></Card>
+        );
+      })()}
     </div>
   );
 }

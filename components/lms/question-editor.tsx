@@ -8,9 +8,9 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { RichTextEditor } from "@/components/lms/rich-text-editor";
 import { saveQuestion } from "@/app/actions/lms";
-import type { LmsQuestionType, McqData, TrueFalseData, ShortAnswerData, NumericalData, ClozeData } from "@/lib/lms-questions";
+import type { LmsQuestionType, McqData, TrueFalseData, ShortAnswerData, NumericalData, ClozeData, DragTextData, MatchingData, OrderingData } from "@/lib/lms-questions";
 
-type AnyData = McqData | TrueFalseData | ShortAnswerData | NumericalData | ClozeData;
+type AnyData = McqData | TrueFalseData | ShortAnswerData | NumericalData | ClozeData | DragTextData | MatchingData | OrderingData;
 interface Initial { id?: string; name: string; questionText: string; generalFeedback: string; defaultMark: number; data: unknown }
 
 export function QuestionEditor({ courseId, courseSlug, type, initial }: { courseId: string; courseSlug: string; type: LmsQuestionType; initial: Initial }) {
@@ -37,6 +37,9 @@ export function QuestionEditor({ courseId, courseSlug, type, initial }: { course
         {type === "SHORTANSWER" && <ShortAnswerFields data={data as ShortAnswerData} setData={setData} />}
         {type === "NUMERICAL" && <NumericalFields data={data as NumericalData} setData={setData} />}
         {type === "CLOZE" && <ClozeFields data={data as ClozeData} setData={setData} />}
+        {type === "DRAGTEXT" && <DragTextFields data={data as DragTextData} setData={setData} />}
+        {type === "MATCHING" && <MatchingFields data={data as MatchingData} setData={setData} />}
+        {type === "ORDERING" && <OrderingFields data={data as OrderingData} setData={setData} />}
       </div>
 
       <div><Label>Feedback général (corrigé / explication)</Label><RichTextEditor name="generalFeedback" initialHtml={initial.generalFeedback} /></div>
@@ -126,6 +129,78 @@ function ClozeFields({ data, setData }: { data: ClozeData; setData: (d: ClozeDat
     <div className={box}>
       <Textarea value={data.clozeText} onChange={(e) => setData({ clozeText: e.target.value })} rows={6} className="font-mono text-xs" placeholder={"La capitale de la Côte d'Ivoire est {1:SHORTANSWER:=Yamoussoukro}. 2 + 2 = {1:NUMERICAL:=4}."} />
       <p className="text-xs text-muted-foreground">Format Moodle « Cloze » : champs intégrés <code>{"{note:TYPE:=bonne réponse~mauvaise}"}</code> — types <code>SHORTANSWER</code>/<code>SHORTANSWER_C</code> (sensible à la casse), <code>NUMERICAL</code> (<code>{"=4:0.5"}</code> pour la tolérance), <code>MULTICHOICE</code> (liste déroulante). Crédit partiel avec <code>%50%</code>, retour avec <code>#…</code>. Auto‑corrigé dans le Quiz.</p>
+    </div>
+  );
+}
+
+function DragTextFields({ data, setData }: { data: DragTextData; setData: (d: DragTextData) => void }) {
+  const setAns = (i: number, v: string) => setData({ ...data, answers: data.answers.map((a, j) => (j === i ? v : a)) });
+  const setDis = (i: number, v: string) => setData({ ...data, distractors: data.distractors.map((a, j) => (j === i ? v : a)) });
+  return (
+    <div className={box}>
+      <Textarea value={data.text} onChange={(e) => setData({ ...data, text: e.target.value })} rows={4} className="font-mono text-xs" placeholder={"Le soleil est une [[1]] et la Terre une [[2]]."} />
+      <p className="text-xs text-muted-foreground">Insérez les trous avec <code>[[1]]</code>, <code>[[2]]</code>… La <strong>réponse n°<i>k</i></strong> ci-dessous correspond au trou <code>[[<i>k</i>]]</code>.</p>
+      <p className="text-sm font-medium">Réponses (ordre des trous)</p>
+      {data.answers.map((a, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="w-8 shrink-0 text-center text-xs font-bold text-muted-foreground">[{i + 1}]</span>
+          <Input value={a} onChange={(e) => setAns(i, e.target.value)} placeholder={`Mot du trou ${i + 1}`} className="flex-1" />
+          <Button type="button" variant="ghost" size="icon-sm" onClick={() => setData({ ...data, answers: data.answers.filter((_, j) => j !== i) })} disabled={data.answers.length <= 1} aria-label="Retirer"><Trash2 className="size-4" /></Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, answers: [...data.answers, ""] })}><Plus className="size-4" /> Ajouter un trou</Button>
+      <p className="mt-2 text-sm font-medium">Intrus (étiquettes en trop, facultatif)</p>
+      {data.distractors.map((a, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <Input value={a} onChange={(e) => setDis(i, e.target.value)} placeholder={`Intrus ${i + 1}`} className="flex-1" />
+          <Button type="button" variant="ghost" size="icon-sm" onClick={() => setData({ ...data, distractors: data.distractors.filter((_, j) => j !== i) })} aria-label="Retirer"><Trash2 className="size-4" /></Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, distractors: [...data.distractors, ""] })}><Plus className="size-4" /> Ajouter un intrus</Button>
+    </div>
+  );
+}
+
+function MatchingFields({ data, setData }: { data: MatchingData; setData: (d: MatchingData) => void }) {
+  const setPair = (i: number, patch: Partial<MatchingData["pairs"][number]>) => setData({ ...data, pairs: data.pairs.map((p, j) => (j === i ? { ...p, ...patch } : p)) });
+  const setExtra = (i: number, v: string) => setData({ ...data, extraRights: data.extraRights.map((a, j) => (j === i ? v : a)) });
+  return (
+    <div className={box}>
+      <div className="grid grid-cols-[1fr_1fr_auto] items-center gap-2 text-xs font-semibold text-muted-foreground"><span>Élément</span><span>Correspondance</span><span /></div>
+      {data.pairs.map((p, i) => (
+        <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+          <Input value={p.left} onChange={(e) => setPair(i, { left: e.target.value })} placeholder={`Élément ${i + 1}`} />
+          <Input value={p.right} onChange={(e) => setPair(i, { right: e.target.value })} placeholder={`Réponse ${i + 1}`} />
+          <Button type="button" variant="ghost" size="icon-sm" onClick={() => setData({ ...data, pairs: data.pairs.filter((_, j) => j !== i) })} disabled={data.pairs.length <= 2} aria-label="Retirer"><Trash2 className="size-4" /></Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, pairs: [...data.pairs, { left: "", right: "" }] })}><Plus className="size-4" /> Ajouter une paire</Button>
+      <p className="mt-2 text-sm font-medium">Correspondances intruses (facultatif)</p>
+      {data.extraRights.map((a, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <Input value={a} onChange={(e) => setExtra(i, e.target.value)} placeholder={`Intrus ${i + 1}`} className="flex-1" />
+          <Button type="button" variant="ghost" size="icon-sm" onClick={() => setData({ ...data, extraRights: data.extraRights.filter((_, j) => j !== i) })} aria-label="Retirer"><Trash2 className="size-4" /></Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => setData({ ...data, extraRights: [...data.extraRights, ""] })}><Plus className="size-4" /> Ajouter un intrus</Button>
+      <p className="text-xs text-muted-foreground">L'apprenant choisit, pour chaque élément, la bonne correspondance dans une liste déroulante (mélangée).</p>
+    </div>
+  );
+}
+
+function OrderingFields({ data, setData }: { data: OrderingData; setData: (d: OrderingData) => void }) {
+  const setItem = (i: number, v: string) => setData({ items: data.items.map((a, j) => (j === i ? v : a)) });
+  return (
+    <div className={box}>
+      <p className="text-xs text-muted-foreground">Saisissez les éléments dans le <strong>bon ordre</strong> ; ils seront mélangés pour l'apprenant.</p>
+      {data.items.map((a, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="w-8 shrink-0 text-center text-xs font-bold text-muted-foreground">{i + 1}</span>
+          <Input value={a} onChange={(e) => setItem(i, e.target.value)} placeholder={`Élément ${i + 1}`} className="flex-1" />
+          <Button type="button" variant="ghost" size="icon-sm" onClick={() => setData({ items: data.items.filter((_, j) => j !== i) })} disabled={data.items.length <= 2} aria-label="Retirer"><Trash2 className="size-4" /></Button>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => setData({ items: [...data.items, ""] })}><Plus className="size-4" /> Ajouter un élément</Button>
     </div>
   );
 }

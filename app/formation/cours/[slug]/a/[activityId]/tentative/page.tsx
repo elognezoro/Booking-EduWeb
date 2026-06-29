@@ -2,8 +2,9 @@ import { notFound, redirect } from "next/navigation";
 import { getLmsAccess } from "@/lib/lms";
 import { prisma } from "@/lib/prisma";
 import { QuizRunner, type RunnerQuestion } from "@/components/lms/quiz-runner";
-import type { McqData } from "@/lib/lms-questions";
+import type { McqData, DragTextData, MatchingData, OrderingData } from "@/lib/lms-questions";
 import { clozeRenderSegments } from "@/lib/lms-cloze";
+import { dragTextRender, matchingRender, orderingRender } from "@/lib/lms-exercises";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,15 @@ export default async function AttemptPage({ params }: { params: { slug: string; 
     }
     if (l.question.type === "CLOZE") {
       try { const d = JSON.parse(l.question.data) as { clozeText?: string }; return { ...base, cloze: clozeRenderSegments(d.clozeText ?? "") }; } catch { return base; }
+    }
+    if (l.question.type === "DRAGTEXT") {
+      try { return { ...base, dragText: dragTextRender(JSON.parse(l.question.data) as DragTextData) }; } catch { return base; }
+    }
+    if (l.question.type === "MATCHING") {
+      try { return { ...base, matching: matchingRender(JSON.parse(l.question.data) as MatchingData) }; } catch { return base; }
+    }
+    if (l.question.type === "ORDERING") {
+      try { return { ...base, ordering: orderingRender(JSON.parse(l.question.data) as OrderingData).items }; } catch { return base; }
     }
     return base;
   });

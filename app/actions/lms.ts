@@ -10,6 +10,7 @@ import { normalizeData } from "@/lib/lms-questions";
 import { DEFAULT_QUIZ_CONFIG, parseQuizConfig, gradeAttempt, type QuizConfig } from "@/lib/lms-quiz";
 import { DEFAULT_ASSIGN_CONFIG, parseAssignConfig, ASSIGN_MAX_FILE_MB, dataUrlBytes, isAllowedFile, type AssignConfig } from "@/lib/lms-assign";
 import { DEFAULT_FORUM_CONFIG, parseForumConfig, type ForumConfig } from "@/lib/lms-forum";
+import { geogebraEmbed } from "@/lib/lms-media";
 import { DEFAULT_WIKI_CONFIG, parseWikiConfig, type WikiConfig } from "@/lib/lms-wiki";
 import { DEFAULT_WORKSHOP_CONFIG, parseWorkshopConfig, type WorkshopConfig, type WorkshopCriterion, type WorkshopPhase, PHASE_ORDER } from "@/lib/lms-workshop";
 import { slugify } from "@/lib/utils";
@@ -151,6 +152,11 @@ export async function createActivity(formData: FormData) {
   if (type === "WORKSHOP") {
     data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
     data.workshopConfig = JSON.stringify(DEFAULT_WORKSHOP_CONFIG);
+  }
+  if (type === "GEOGEBRA") {
+    data.externalUrl = String(formData.get("externalUrl") || "").trim();
+    if (!geogebraEmbed(data.externalUrl)) redirect(`${BASE}/cours/${section.course.slug}`); // identifiant/URL GeoGebra invalide
+    data.intro = sanitizeRich(String(formData.get("intro") || "")) || null;
   }
   const act = await prisma.lmsActivity.create({ data, select: { id: true } });
   if (type === "WIKI") {

@@ -1,5 +1,6 @@
-import type { McqData, TrueFalseData, ShortAnswerData, NumericalData } from "./lms-questions";
+import type { McqData, TrueFalseData, ShortAnswerData, NumericalData, DragTextData, MatchingData, OrderingData } from "./lms-questions";
 import { gradeCloze, clozeCorrectText } from "./lms-cloze";
+import { gradeDragText, dragTextCorrect, gradeMatching, matchingCorrect, gradeOrdering, orderingCorrect } from "./lms-exercises";
 
 /** Réglages d'un quiz + correction automatique + conditions de visibilité du corrigé. Module neutre. */
 export interface QuizConfig {
@@ -72,6 +73,12 @@ export function gradeOne(type: string, dataJson: string, answer: unknown): numbe
     }
     case "CLOZE":
       return gradeCloze((data as { clozeText?: string }).clozeText ?? "", answer);
+    case "DRAGTEXT":
+      return gradeDragText(data as DragTextData, answer);
+    case "MATCHING":
+      return gradeMatching(data as MatchingData, answer);
+    case "ORDERING":
+      return gradeOrdering(data as OrderingData, answer);
     default:
       return 0;
   }
@@ -105,6 +112,9 @@ export function correctAnswerText(type: string, dataJson: string): string {
     case "SHORTANSWER": { const d = data as ShortAnswerData; const best = d.answers.filter((a) => a.grade >= 100).map((a) => a.text); return (best.length ? best : d.answers.map((a) => a.text)).join(" ; ") || "—"; }
     case "NUMERICAL": { const d = data as NumericalData; return d.answers.map((a) => (a.tolerance ? `${a.value} (± ${a.tolerance})` : `${a.value}`)).join(" ; ") || "—"; }
     case "CLOZE": return clozeCorrectText((data as { clozeText?: string }).clozeText ?? "");
+    case "DRAGTEXT": return dragTextCorrect(data as DragTextData);
+    case "MATCHING": return matchingCorrect(data as MatchingData);
+    case "ORDERING": return orderingCorrect(data as OrderingData);
     default: return "(voir l'énoncé)";
   }
 }
