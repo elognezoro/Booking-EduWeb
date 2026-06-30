@@ -17,7 +17,7 @@ export const TRAINING_CONTENT: TrainingContent = {
       },
       {
         "titre": "Périmètre fonctionnel",
-        "texte": "La barre latérale organise les fonctions en grandes catégories. La section « Principal » regroupe « Accueil », « Tableau de bord », « Calendrier », « Salles multimédias », « Mes réservations », « Sport cérébral » et « Mon compte ». La section « Gestion » couvre les « Ressources », les « Catégories », les « Réservations », l'écran « À valider », les « Statistiques », les « Rapports » et les « Compétitions » (ces dernières réservées au Super Administrateur et à l'Administrateur d'organisation). La section « Bibliothèque » réunit « Bibliothèque », « Explorer », « Déposer », « Documents », « À vérifier », « Réservations doc. », « Emprunts », « Statistiques doc. », « Collections » et « Domaines ». La section « Administration » permet de configurer l'« Organisation », les « Sites & services », les « Utilisateurs », les « Demandes de comptes », les « Rôles & permissions », les « Paramètres » et l'« Abonnement ». La section « Plateforme », réservée au Super Administrateur, donne accès à « Supervision EduWeb », « Gouvernement & ministères », « Établissements » et « Réglages des jeux ». Enfin, la section « Aide » propose « Support » et « Centre d'aide » (avec téléchargement du guide en PDF). Les jeux et compétitions du « Sport cérébral » sont accessibles à tous, y compris, selon le verrouillage par abonnement, à certains visiteurs anonymes."
+        "texte": "La barre latérale organise les fonctions en grandes catégories. La section « Principal » regroupe « Accueil », « Tableau de bord », « Calendrier », « Salles multimédias », « Mes réservations », « Sport cérébral », « Formation CERTEL » et « Mon compte ». La section « Gestion » couvre les « Ressources », les « Catégories », les « Réservations », l'écran « À valider », les « Statistiques », les « Rapports » et les « Compétitions » (ces dernières réservées au Super Administrateur et à l'Administrateur d'organisation). La section « Bibliothèque » réunit « Bibliothèque », « Explorer », « Déposer », « Documents », « À vérifier », « Réservations doc. », « Emprunts », « Statistiques doc. », « Collections » et « Domaines ». La section « Administration » permet de configurer l'« Organisation », les « Sites & services », les « Utilisateurs », les « Demandes de comptes », les « Rôles & permissions », les « Paramètres » et l'« Abonnement ». La section « Plateforme », réservée au Super Administrateur, donne accès à « Supervision EduWeb », « Gouvernement & ministères », « Établissements » et « Réglages des jeux ». Enfin, la section « Aide » propose « Support » et « Centre d'aide » (avec téléchargement du guide en PDF). Les jeux et compétitions du « Sport cérébral » sont accessibles à tous, y compris, selon le verrouillage par abonnement, à certains visiteurs anonymes."
       },
       {
         "titre": "Hiérarchie Gouvernement, ministères et établissements",
@@ -26,6 +26,10 @@ export const TRAINING_CONTENT: TrainingContent = {
       {
         "titre": "Abonnements et accès",
         "texte": "L'accès de chaque établissement repose sur un abonnement géré par le Super Administrateur. Quatre formules existent : « Pilote », « Standard », « Premium » et « National ». Le « Statut abonnement » peut être « Actif », « Suspendu » ou « Résilié » ; l'accès complet — notamment à l'ensemble des jeux — est réservé aux abonnements « Actif ». L'abonnement précise également le « Ministère de tutelle », le nombre de « Comptes autorisés » (utilisateurs permis) et la date de « Renouvellement ». Du côté du Super Administrateur, le verrouillage de l'espace Sport cérébral par abonnement se règle dans « Réglages des jeux » (case « Activer le verrouillage par abonnement ») ; le « Défi du jour » reste toujours jouable. Côté établissement, l'« Administrateur d'organisation » suit sa formule, son statut, ses comptes autorisés et son usage dans le menu « Abonnement »."
+      },
+      {
+        "titre": "Formation certifiante CERTEL",
+        "texte": "EduWeb Booking intègre CERTEL, une formation certifiante au numérique et à l'intelligence artificielle accessible à tout utilisateur connecté, depuis le tableau de bord (section « Principal » → « Formation CERTEL ») ou depuis le menu public « CERTEL ». Le parcours débute par un diagnostic de niveau gratuit qui oriente l'apprenant vers l'un des trois niveaux. Chaque niveau se compose de six modules interactifs : leçons illustrées avec lecture audio des contenus narratifs, exercices auto-corrigés à vérification immédiate et évaluations chronométrées. Le niveau s'achève par une évaluation certifiante — projet de synthèse, examen dont les corrigés s'affichent à la fin et mise en situation — qui, en cas de réussite, donne lieu à un certificat au format PDF paysage. L'inscription est payante par niveau, via Mobile Money (Wave, Orange Money, MTN, Moov) ou carte bancaire ; elle reste gratuite tant qu'aucun prix n'a été défini. Le super administrateur règle les tarifs et les remises ainsi que le comportement des évaluations (mode formatif = vérification immédiate ; mode sommatif = corrigés affichés à la fin) et dispose d'un accès complet sans paiement. Sur le plan de l'accessibilité, les textes s'affichent dans une police d'au moins 13 px et un lecteur audio accompagne les contenus narratifs."
       }
     ],
     "perimetre": [
@@ -37,6 +41,7 @@ export const TRAINING_CONTENT: TrainingContent = {
       "Organisation du fonds : « Collections » et « Domaines » ; pilotage via « Statistiques doc. ».",
       "Espace public « Sport cérébral » : jeux à trois niveaux (Débutant, Intermédiaire, Avancé), consignes écrites et audio, scores, badges et « Défi du jour ».",
       "« Compétitions » : création, partage du « Code de session », pilotage de l'état (« Ouvrir (inscriptions) », « Démarrer », « Clore ») et suivi du classement en direct.",
+      "Formation certifiante « CERTEL » : diagnostic de niveau gratuit, trois niveaux de six modules interactifs (leçons illustrées avec lecture audio, exercices auto-corrigés à vérification immédiate, évaluations chronométrées), évaluation certifiante (projet de synthèse, examen et mise en situation) et certificat de réussite en PDF ; inscription payante par niveau via Mobile Money ou carte bancaire (gratuite tant qu'aucun prix n'est défini).",
       "Statistiques et rapports de réservation : « Statistiques » et export « Rapports » (CSV ou PDF).",
       "Administration d'établissement : « Organisation », « Sites & services », « Utilisateurs », « Demandes de comptes », « Rôles & permissions », « Paramètres », « Abonnement ».",
       "Supervision de la plateforme (Super Administrateur) : « Supervision EduWeb », « Gouvernement & ministères », « Établissements », « Réglages des jeux » et sélecteur d'institution.",
@@ -156,6 +161,14 @@ export const TRAINING_CONTENT: TrainingContent = {
         "definition": "Code (ou lien) communiqué par l'organisateur d'une compétition. Chaque compétiteur le saisit dans le champ « CODE » puis clique sur « Rejoindre » pour participer et faire remonter son score au classement."
       },
       {
+        "terme": "CERTEL",
+        "definition": "Formation certifiante au numérique et à l'intelligence artificielle, accessible à tout utilisateur connecté depuis « Formation CERTEL » (section « Principal » du tableau de bord) ou le menu public « CERTEL ». Elle comprend un diagnostic de niveau gratuit, trois niveaux de six modules interactifs (leçons illustrées avec lecture audio, exercices auto-corrigés à vérification immédiate, évaluations chronométrées), une évaluation certifiante (projet de synthèse, examen et mise en situation) et un certificat de réussite en PDF. L'inscription est payante par niveau (gratuite tant qu'aucun prix n'est défini) ; le super administrateur règle tarifs, remises et comportement des évaluations et dispose d'un accès complet sans paiement."
+      },
+      {
+        "terme": "Mobile Money",
+        "definition": "Moyen de paiement par téléphone mobile proposé pour l'inscription payante aux niveaux CERTEL : « Wave », « Orange Money », « MTN » et « Moov », en alternative à la carte bancaire. Le paiement n'est requis que lorsqu'un prix a été défini par le super administrateur."
+      },
+      {
         "terme": "FCFA (paiement simulé)",
         "definition": "Monnaie utilisée pour le « Prix de téléchargement (FCFA · 0 = gratuit) » des documents. Les paiements (« Payer et débloquer ») sont simulés dans un cadre de démonstration ; aucun flux financier réel n'a lieu."
       },
@@ -166,13 +179,14 @@ export const TRAINING_CONTENT: TrainingContent = {
     ]
   },
   "syllabus": {
-    "intitule": "Prise en main d'EduWeb Booking — Réserver des ressources, exploiter la bibliothèque numérique et animer l'espace « Sport cérébral »",
+    "intitule": "Prise en main d'EduWeb Booking et accès à la formation certifiante CERTEL — Réserver des ressources, exploiter la bibliothèque numérique, animer l'espace « Sport cérébral » et se former au numérique et à l'intelligence artificielle",
     "publicCible": [
       "Famille « Demande & usage » : utilisateurs demandeurs (« Utilisateur demandeur »), validateurs hiérarchiques (« Validateur hiérarchique »), techniciens / agents d'appui (« Technicien / agent d'appui ») et visiteurs externes (« Visiteur externe »).",
       "Famille « Ressources & validation » : responsables de ressource (« Responsable de ressource ») chargés du parc de salles, salles multimédias, matériels et services.",
       "Famille « Bibliothèque numérique » : bibliothécaires / documentalistes (« Bibliothécaire / Documentaliste »), déposants (« Déposant »), validateurs scientifiques (« Validateur scientifique ») et lecteurs internes (« Lecteur interne »).",
       "Famille « Administration » : administrateurs d'organisation (« Administrateur d'organisation ») pilotant un établissement.",
       "Famille « Supervision plateforme » : super administrateurs EduWeb (« Super Administrateur EduWeb ») supervisant gouvernement, ministères, établissements et abonnements.",
+      "Tout utilisateur connecté souhaitant suivre la formation certifiante CERTEL au numérique et à l'intelligence artificielle, quel que soit son rôle.",
       "Établissement pilote : personnels et étudiants de l'ENS d'Abidjan (Côte d'Ivoire)."
     ],
     "prerequis": [
@@ -181,12 +195,13 @@ export const TRAINING_CONTENT: TrainingContent = {
       "Maîtriser les manipulations de base : connexion, glisser-déposer de fichiers, saisie dans des formulaires.",
       "Connaître le rôle qui vous a été attribué dans votre établissement (parmi les 11 rôles de la plateforme).",
       "Pour les parcours « Administration » et « Supervision plateforme » : disposer respectivement des droits d'administrateur d'organisation ou de super administrateur.",
-      "Avoir reçu le mot de passe initial « password123 » (à remplacer dès la première connexion)."
+      "Avoir reçu le mot de passe initial « password123 » (à remplacer dès la première connexion).",
+      "Pour la formation certifiante CERTEL : être connecté à la plateforme (aucun prérequis de niveau ; un diagnostic de niveau gratuit oriente vers le niveau adapté) et, lorsqu'un tarif est défini par le super administrateur, s'être acquitté de l'inscription au niveau visé par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte bancaire."
     ],
-    "finalite": "À l'issue de la formation, chaque participant est autonome dans l'usage d'EduWeb Booking pour les missions relevant de son rôle : réserver et gérer des ressources (salles, équipements, salles multimédias avec plan de postes), participer à la chaîne de validation des réservations, exploiter et alimenter la bibliothèque numérique (dépôt, validation documentaire, consultation, téléchargement, réservation et emprunt), s'exercer sur l'espace public « Sport cérébral », rejoindre ou — pour les profils habilités — organiser une compétition, et, pour les rôles concernés, administrer un établissement ou superviser l'ensemble de la plateforme multi-établissements (Gouvernement → Ministères → Établissements, abonnements et formules). La formation vise une utilisation conforme, tracée et sécurisée de l'application.",
+    "finalite": "À l'issue de la formation, chaque participant est autonome dans l'usage d'EduWeb Booking pour les missions relevant de son rôle : réserver et gérer des ressources (salles, équipements, salles multimédias avec plan de postes), participer à la chaîne de validation des réservations, exploiter et alimenter la bibliothèque numérique (dépôt, validation documentaire, consultation, téléchargement, réservation et emprunt), s'exercer sur l'espace public « Sport cérébral », rejoindre ou — pour les profils habilités — organiser une compétition, et, pour les rôles concernés, administrer un établissement ou superviser l'ensemble de la plateforme multi-établissements (Gouvernement → Ministères → Établissements, abonnements et formules). Tout utilisateur connecté peut en outre accéder à la formation certifiante CERTEL au numérique et à l'intelligence artificielle (tableau de bord → « Principal » → « Formation CERTEL », ou menu public « CERTEL ») : après un diagnostic de niveau gratuit, il suit l'un des trois niveaux de six modules — leçons illustrées avec lecture audio, exercices auto-corrigés à vérification immédiate et évaluations chronométrées — puis présente l'évaluation certifiante (projet de synthèse, examen dont les corrigés s'affichent à la fin et mise en situation) pour obtenir, en cas de réussite, un certificat au format PDF paysage. La formation vise une utilisation conforme, tracée, sécurisée et accessible de l'application, ainsi que la montée en compétences numériques et en intelligence artificielle des utilisateurs.",
     "objectifsGeneraux": [
       {
-        "objectif": "Identifier l'architecture multi-établissements (Gouvernement → Ministères → Établissements), les 11 rôles, la structure « Organisation › Site › Service › Ressources » et l'organisation de la barre latérale (« Principal », « Gestion », « Bibliothèque », « Administration », « Plateforme », « Aide »).",
+        "objectif": "Identifier l'architecture multi-établissements (Gouvernement → Ministères → Établissements), les 11 rôles, la structure « Organisation › Site › Service › Ressources » et l'organisation de la barre latérale (« Principal », « Gestion », « Bibliothèque », « Administration », « Plateforme », « Aide »), y compris l'accès à la « Formation CERTEL » depuis la section « Principal ».",
         "niveauBloom": "Connaître"
       },
       {
@@ -214,12 +229,24 @@ export const TRAINING_CONTENT: TrainingContent = {
         "niveauBloom": "Créer"
       },
       {
+        "objectif": "S'orienter dans la formation certifiante CERTEL en passant le diagnostic de niveau gratuit, en s'inscrivant le cas échéant à un niveau (paiement par Mobile Money — Wave, Orange Money, MTN, Moov — ou carte bancaire, gratuit tant qu'aucun prix n'est défini) et en distinguant évaluations formatives (vérification immédiate) et sommatives (corrigés affichés à la fin).",
+        "niveauBloom": "Comprendre"
+      },
+      {
+        "objectif": "Suivre un niveau CERTEL de six modules en exploitant les leçons illustrées avec lecture audio, en réussissant les exercices auto-corrigés à vérification immédiate et les évaluations chronométrées au numérique et à l'intelligence artificielle.",
+        "niveauBloom": "Appliquer"
+      },
+      {
+        "objectif": "Réussir l'évaluation certifiante CERTEL d'un niveau (projet de synthèse, examen chronométré dont les corrigés s'affichent à la fin, mise en situation) afin d'obtenir le certificat de réussite au format PDF paysage.",
+        "niveauBloom": "Créer"
+      },
+      {
         "objectif": "Sécuriser son accès en remplaçant le mot de passe initial « password123 » depuis « Mon compte » et mobiliser les ressources d'aide (« Centre d'aide », « Télécharger en PDF », « Support »).",
         "niveauBloom": "Appliquer"
       }
     ],
     "competences": [
-      "Naviguer dans le tableau de bord et repérer, selon son rôle, les menus et fonctions accessibles.",
+      "Naviguer dans le tableau de bord et repérer, selon son rôle, les menus et fonctions accessibles, dont l'accès à la « Formation CERTEL ».",
       "Réserver une ressource et des postes en salle multimédia, puis suivre et gérer ses réservations (« Je suis arrivé », « Activité terminée », « Annuler la réservation »).",
       "Traiter les demandes de réservation soumises à validation de manière conforme, motivée et tracée.",
       "Créer et paramétrer des ressources et leurs règles (« Mode », « Durée max. (minutes) », « Préavis min. (heures) », validation, plan de postes) et gérer leur « Statut » (« En maintenance », « Hors service », « Indisponible »).",
@@ -227,14 +254,16 @@ export const TRAINING_CONTENT: TrainingContent = {
       "Conduire la chaîne de traitement documentaire : dépôt, validation, codification, publication, archivage, gestion des « Collections » et « Domaines », « Réservations doc. » et « Emprunts ».",
       "Émettre un avis scientifique motivé (« Favorable » / « Réservé ») sur un dépôt de son institution.",
       "Administrer un établissement : organisation, sites et services, comptes utilisateurs (unitaires et import CSV), demandes de comptes, paramètres et abonnement.",
-      "Superviser la plateforme : gouvernement et ministères, inscription et abonnements des établissements, réglages et banque de questions du Sport cérébral, sélecteur d'institution.",
+      "Superviser la plateforme : gouvernement et ministères, inscription et abonnements des établissements, réglages et banque de questions du Sport cérébral, sélecteur d'institution, et, pour CERTEL, réglage des tarifs, des remises et du comportement des évaluations (formatif / sommatif).",
+      "Se former au numérique et à l'intelligence artificielle via CERTEL : passer le diagnostic de niveau, s'inscrire et payer (Mobile Money ou carte bancaire), suivre les leçons illustrées avec lecture audio, réussir les exercices auto-corrigés à vérification immédiate et les évaluations chronométrées.",
+      "Présenter l'évaluation certifiante CERTEL (projet de synthèse, examen avec corrigés affichés à la fin, mise en situation) et obtenir son certificat de réussite au format PDF paysage.",
       "Organiser et arbitrer une compétition, ou la rejoindre via un code de session.",
       "Sécuriser son compte et mobiliser de façon autonome les ressources d'aide de la plateforme."
     ],
-    "duree": "2 jours (14 heures), répartis en un tronc commun et des parcours différenciés par famille de rôles.",
+    "duree": "2 jours (14 heures) pour le tronc commun et les parcours par famille de rôles, complétés par la formation certifiante CERTEL suivie en autonomie (trois niveaux de six modules, à son rythme).",
     "volumeHoraire": [
       {
-        "label": "Tronc commun (tous publics) : connexion, navigation, sécurisation du compte, Sport cérébral, aide",
+        "label": "Tronc commun (tous publics) : connexion, navigation, sécurisation du compte, Sport cérébral, aide et accès à la « Formation CERTEL »",
         "valeur": "3 h 30"
       },
       {
@@ -254,12 +283,16 @@ export const TRAINING_CONTENT: TrainingContent = {
         "valeur": "3 h 00"
       },
       {
-        "label": "Parcours « Supervision plateforme » (Super Administrateur EduWeb) : gouvernement/ministères, établissements et abonnements, sélecteur d'institution, réglages des jeux et banque de questions",
+        "label": "Parcours « Supervision plateforme » (Super Administrateur EduWeb) : gouvernement/ministères, établissements et abonnements, sélecteur d'institution, réglages des jeux et banque de questions, tarifs et réglages des évaluations CERTEL",
         "valeur": "3 h 00"
       },
       {
         "label": "Évaluation sommative et bilan (mise en situation + quiz)",
         "valeur": "1 h 30"
+      },
+      {
+        "label": "Formation certifiante CERTEL (en autonomie) : diagnostic de niveau + trois niveaux de six modules (leçons audio, exercices à vérification immédiate, évaluations chronométrées) + évaluation certifiante (projet de synthèse, examen, mise en situation)",
+        "valeur": "À son rythme"
       }
     ],
     "modalites": [
@@ -267,14 +300,16 @@ export const TRAINING_CONTENT: TrainingContent = {
       "Tronc commun en groupe complet, puis parcours par famille de rôles (sous-groupes ou ateliers parallèles).",
       "Démonstration du formateur sur vidéoprojecteur à partir de l'application réelle.",
       "Ateliers pratiques individuels sur des comptes de démonstration (un rôle par stagiaire).",
-      "Mises en situation collaboratives, notamment pour le couple demandeur / validateur et l'animation d'une compétition « Sport cérébral »."
+      "Mises en situation collaboratives, notamment pour le couple demandeur / validateur et l'animation d'une compétition « Sport cérébral ».",
+      "Formation certifiante CERTEL en autoformation tutorée : parcours interactifs en ligne accessibles à tout utilisateur connecté, à son rythme, avec lecture audio des contenus narratifs et évaluations chronométrées."
     ],
     "methodes": [
       "Méthode expositive : présentation de l'architecture, des rôles, des permissions et des parcours d'usage.",
       "Méthode démonstrative : le formateur exécute pas à pas une procédure (assistant de réservation, assistant de dépôt) que les stagiaires reproduisent.",
       "Méthode active : exercices guidés et résolution de cas concrets directement dans l'application.",
       "Pédagogie par les pairs : jeux de rôle demandeur / validateur / responsable de ressource, et compétition « Sport cérébral » entre stagiaires.",
-      "Apprentissage par l'erreur : exploitation des messages de l'application (créneau indisponible, motif de refus obligatoire, doublons potentiels) comme supports d'apprentissage."
+      "Apprentissage par l'erreur : exploitation des messages de l'application (créneau indisponible, motif de refus obligatoire, doublons potentiels) comme supports d'apprentissage.",
+      "Pour CERTEL : pédagogie interactive et multimodale (leçons illustrées avec lecture audio), apprentissage actif par exercices auto-corrigés à vérification immédiate, évaluation formative chronométrée et évaluation certifiante (projet de synthèse, examen avec corrigés affichés à la fin, mise en situation)."
     ],
     "moyens": [
       "Postes informatiques connectés à Internet (un par stagiaire) équipés d'un navigateur récent.",
@@ -284,20 +319,22 @@ export const TRAINING_CONTENT: TrainingContent = {
       "Vidéoprojecteur et tableau pour la démonstration et la synthèse.",
       "Guides par rôle intégrés au « Centre d'aide » et téléchargeables via « Télécharger en PDF » (support de référence).",
       "Modèles CSV fournis par l'application (import d'utilisateurs, d'établissements, de ministères et de questions).",
+      "Plateforme de formation certifiante CERTEL : diagnostic de niveau gratuit, parcours interactifs (leçons illustrées avec lecteur audio, exercices auto-corrigés, évaluations chronométrées), certificat de réussite au format PDF paysage, et inscription en ligne par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte bancaire (gratuite tant qu'aucun prix n'est défini).",
+      "Accessibilité des contenus : police d'au moins 13 px et lecteur audio sur les contenus narratifs.",
       "Assistance : « Support » (e-mail support@eduweb.ci, téléphone) et « Questions fréquentes »."
     ],
     "evaluation": [
       {
         "type": "Diagnostique",
-        "description": "En ouverture : tour de table et court questionnaire de positionnement sur le rôle de chacun, son expérience des outils de réservation et de bibliothèque, et ses attentes, afin d'orienter vers le bon parcours et d'adapter le rythme."
+        "description": "En ouverture : tour de table et court questionnaire de positionnement sur le rôle de chacun, son expérience des outils de réservation et de bibliothèque, et ses attentes, afin d'orienter vers le bon parcours et d'adapter le rythme. Pour la formation certifiante CERTEL : un diagnostic de niveau gratuit, corrigé automatiquement, situe l'utilisateur (N1, N2 ou N3) et l'oriente vers le niveau adapté."
       },
       {
         "type": "Formative",
-        "description": "Tout au long des ateliers : observation du formateur lors des exercices guidés, vérification de la réussite de chaque procédure via les messages de confirmation de l'application (« Votre demande de réservation a été enregistrée. », « Votre dépôt a été enregistré et soumis à validation. », « Mot de passe modifié avec succès. », « Capacité mise à jour. »), questions-réponses et reformulation par les pairs."
+        "description": "Tout au long des ateliers : observation du formateur lors des exercices guidés, vérification de la réussite de chaque procédure via les messages de confirmation de l'application (« Votre demande de réservation a été enregistrée. », « Votre dépôt a été enregistré et soumis à validation. », « Mot de passe modifié avec succès. », « Capacité mise à jour. »), questions-réponses et reformulation par les pairs. Dans CERTEL : exercices auto-corrigés à vérification immédiate intégrés aux leçons et évaluations formatives chronométrées, permettant à l'apprenant de mesurer sa progression en temps réel."
       },
       {
         "type": "Sommative",
-        "description": "En clôture : mise en situation complète selon le rôle (par exemple, réaliser une réservation de postes en salle multimédia et la faire valider ; déposer puis valider et publier un document ; créer une ressource ou administrer un établissement ; organiser une compétition), complétée par un quiz portant sur les rôles, les statuts, les libellés clés des menus et les bonnes pratiques de sécurité."
+        "description": "En clôture : mise en situation complète selon le rôle (par exemple, réaliser une réservation de postes en salle multimédia et la faire valider ; déposer puis valider et publier un document ; créer une ressource ou administrer un établissement ; organiser une compétition), complétée par un quiz portant sur les rôles, les statuts, les libellés clés des menus et les bonnes pratiques de sécurité. Pour CERTEL : évaluation certifiante d'un niveau associant un projet de synthèse, un examen chronométré dont les corrigés s'affichent à la fin et une mise en situation, conditionnant la délivrance du certificat de réussite (PDF paysage)."
       }
     ],
     "criteresReussite": [
@@ -307,9 +344,10 @@ export const TRAINING_CONTENT: TrainingContent = {
       "Pour les responsables de ressource : créer une ressource paramétrée (mode, durée, préavis, validation) et ajuster la capacité d'une salle multimédia jusqu'au message « Capacité mise à jour. ».",
       "Pour la bibliothèque : déposer un document via l'assistant en sept étapes, puis (selon le rôle) le valider et le publier, ou émettre un avis scientifique « Favorable » / « Réservé ».",
       "Pour les administrateurs : créer un compte utilisateur ou importer une cohorte par CSV, et traiter une demande de compte (« Valider » / « Refuser »).",
-      "Pour le super administrateur : inscrire un établissement, paramétrer son abonnement (formule, statut, comptes autorisés) et basculer de contexte via le sélecteur d'institution.",
+      "Pour le super administrateur : inscrire un établissement, paramétrer son abonnement (formule, statut, comptes autorisés), basculer de contexte via le sélecteur d'institution, et régler les tarifs, remises et le comportement des évaluations CERTEL.",
       "Avoir remplacé le mot de passe initial « password123 » depuis « Mon compte » (nouveau mot de passe d'au moins 8 caractères).",
       "Obtenir un score d'au moins 80 % au quiz sommatif portant sur les rôles, les statuts et les libellés de l'interface.",
+      "Pour la formation certifiante CERTEL : passer le diagnostic de niveau, suivre un niveau complet (six modules avec leçons audio et exercices à vérification immédiate) et réussir l'évaluation certifiante (projet de synthèse, examen chronométré avec corrigés affichés à la fin, mise en situation) afin d'obtenir le certificat de réussite au format PDF paysage.",
       "Savoir localiser et télécharger son guide depuis le « Centre d'aide » et identifier le canal de « Support »."
     ]
   },
@@ -575,6 +613,99 @@ export const TRAINING_CONTENT: TrainingContent = {
           "Question : quels sont les canaux de contact proposés sur la page « Support » ? (Réponse : e-mail support@eduweb.ci, téléphone (+225) 07 0985 8042 et « Centre d'aide ».)",
           "Mise en situation : la page affiche « Une erreur est survenue » — quelle est la première action à effectuer ? (Réponse : recharger la page, la base pouvant être momentanément en veille.)",
           "Vérification pratique : l'apprenant ouvre son guide, le télécharge en PDF et localise une « Question fréquente » sans aide."
+        ]
+      },
+      {
+        "code": "T4",
+        "titre": "Se former et se certifier avec CERTEL",
+        "public": "Tous les utilisateurs connectés, quel que soit leur rôle, souhaitant développer et certifier leurs compétences en informatique, numérique et intelligence artificielle. Le diagnostic de niveau et le programme sont également consultables par les visiteurs depuis le menu public « CERTEL ».",
+        "duree": "1 h 00",
+        "prerequis": [
+          "Être connecté à son espace EduWeb Booking (module T1 « Prise en main » conseillé au préalable) ; le diagnostic de niveau reste toutefois consultable sans connexion.",
+          "Disposer d'un navigateur web à jour, avec le son activé pour profiter de la lecture audio des leçons, et d'une connexion internet.",
+          "Pour une inscription payante : disposer d'un compte Mobile Money (Wave, Orange Money, MTN ou Moov) ou d'une carte bancaire. Aucun paiement n'est requis tant qu'aucun prix n'est défini par le super administrateur."
+        ],
+        "objectifs": [
+          "Accéder à la formation certifiante CERTEL depuis le tableau de bord (section « Principal » › « Formation CERTEL ») ou depuis le menu public « CERTEL ».",
+          "Réaliser le « diagnostic de niveau » gratuit (environ 10 min) pour se positionner sur le Niveau 1, 2 ou 3.",
+          "S'inscrire à un niveau via le paiement par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte bancaire, ou accéder gratuitement lorsque aucun prix n'est défini.",
+          "Suivre les leçons illustrées d'un module en s'appuyant sur la « lecture audio » du contenu narratif.",
+          "Réaliser les exercices auto-corrigés à « vérification immédiate » et les évaluations « chronométrées » de chaque module.",
+          "Passer l'« évaluation certifiante » du niveau (projet de synthèse, examen et mise en situation) et générer son « certificat de réussite » au format PDF paysage."
+        ],
+        "competences": [
+          "Auto-positionnement par le diagnostic et choix éclairé du niveau de formation adapté.",
+          "Inscription autonome à un niveau par paiement Mobile Money ou carte bancaire (paiement sécurisé via CinetPay), ou accès libre lorsque le niveau est gratuit.",
+          "Apprentissage en autonomie : lecture des leçons illustrées, écoute du contenu audio et auto-évaluation immédiate.",
+          "Gestion d'une évaluation chronométrée et préparation à l'évaluation certifiante du niveau.",
+          "Obtention et téléchargement de son certificat de réussite nominatif."
+        ],
+        "deroule": [
+          {
+            "titre": "Accéder à la formation CERTEL",
+            "points": [
+              "Utilisateur connecté : dans la section « Principal » de la barre latérale, ouvrez « Formation CERTEL » pour rejoindre la page « Formation certifiante CERTEL ».",
+              "Visiteur : la même page est accessible depuis le menu public « CERTEL ».",
+              "La page présente un parcours certifiant en 3 niveaux de 3 mois chacun (du socle bureautique à l'ingénierie numérique et l'IA), avec, pour chaque niveau, son public cible, ses prérequis, ses compétences visées et ses thématiques & syllabus.",
+              "CERTEL est une formation certifiante au numérique et à l'intelligence artificielle, accessible à tout utilisateur connecté."
+            ]
+          },
+          {
+            "titre": "Se positionner avec le diagnostic de niveau",
+            "points": [
+              "Cliquez sur « Faire le test de niveau » (ou « Faire le test de niveau gratuit » en bas de page) pour ouvrir le diagnostic gratuit, d'une durée d'environ 10 minutes.",
+              "Le diagnostic est corrigé automatiquement côté serveur et vous oriente vers le bon niveau (Niveau 1, 2 ou 3) et un programme adapté.",
+              "Le diagnostic est gratuit et ne nécessite aucun paiement ; il peut être réalisé avant toute inscription à un niveau."
+            ]
+          },
+          {
+            "titre": "S'inscrire à un niveau (Mobile Money ou carte bancaire)",
+            "points": [
+              "Sur la fiche d'un niveau, cliquez sur « Accéder à la formation interactive du Niveau … » : si une inscription est requise, vous êtes dirigé vers la page « Inscription au Niveau … ».",
+              "La page affiche les « Frais d'inscription » (ou la mention « Ce niveau est actuellement gratuit. » lorsque aucun prix n'est défini), une éventuelle remise étant indiquée par un pourcentage barré.",
+              "Sous « Opérateurs acceptés », choisissez un « Moyen de paiement » parmi « Tous », « Mobile Money » (Wave, Orange Money, MTN, Moov), « Wave » ou « Carte », puis cliquez sur « Payer … et m'inscrire ».",
+              "Le paiement est sécurisé via CinetPay : vous êtes redirigé puis ramené sur la page d'inscription après confirmation ; une fois l'accès accordé, le message « Vous êtes inscrit … » s'affiche avec le bouton « Accéder aux modules ».",
+              "Lorsque le niveau est gratuit, aucun paiement n'est demandé et l'accès aux modules est immédiat. Le super administrateur dispose d'un accès complet sans paiement."
+            ]
+          },
+          {
+            "titre": "Suivre les leçons illustrées et écouter l'audio",
+            "points": [
+              "Chaque niveau comporte « 6 modules » interactifs à suivre dans l'ordre ; chaque module présente sa « Finalité », ses « Objectifs pédagogiques » et ses « Compétences visées ».",
+              "Les leçons sont illustrées (infographies) et accompagnées d'une « lecture audio » du contenu narratif, pour une meilleure accessibilité.",
+              "Pour le confort de lecture, le texte des contenus narratifs respecte une taille de police d'au moins 13 px et un lecteur audio est disponible sur les passages narratifs."
+            ]
+          },
+          {
+            "titre": "S'exercer : vérification immédiate et évaluations chronométrées",
+            "points": [
+              "Les exercices des modules sont auto-corrigés à « vérification immédiate » : la correction s'affiche dès votre réponse (comportement formatif réglé par le super administrateur).",
+              "Chaque module se termine par une évaluation auto-corrigée ; les évaluations sont « chronométrées » afin de vous placer en conditions réelles.",
+              "Le super administrateur règle le comportement des évaluations : « formatif » (vérification immédiate) ou « sommatif » (corrigés affichés uniquement à la fin)."
+            ]
+          },
+          {
+            "titre": "Passer l'évaluation certifiante et obtenir son certificat",
+            "points": [
+              "Au bas du niveau, ouvrez « Évaluation certifiante du Niveau … » : elle combine un projet de synthèse, un examen final mixte (QCM et questions) et une mise en situation pratique ; le seuil de certification est une moyenne ≥ 60/100 avec projet validé.",
+              "En mode sommatif, les corrigés de l'examen s'affichent à la « fin » de l'épreuve.",
+              "Une fois le niveau réussi, ouvrez « Mon certificat de réussite » : votre « certificat de réussite » nominatif est généré au format PDF paysage, avec sa référence, et peut être téléchargé."
+            ]
+          }
+        ],
+        "atelier": [
+          "Ouvrir « Formation CERTEL » depuis le tableau de bord, puis réaliser le « diagnostic de niveau » gratuit et relever le niveau recommandé.",
+          "Sur la fiche d'un niveau, ouvrir la page « Inscription au Niveau … », repérer les « Frais d'inscription » (ou la mention de gratuité) et identifier les moyens de paiement « Mobile Money » (Wave, Orange Money, MTN, Moov) et « Carte ».",
+          "Ouvrir un module, lire une leçon illustrée et utiliser la « lecture audio » du contenu narratif.",
+          "Réaliser un exercice auto-corrigé et constater la « vérification immédiate » de la réponse, puis lancer une évaluation « chronométrée ».",
+          "Localiser « Évaluation certifiante du Niveau … » puis « Mon certificat de réussite » et décrire la procédure d'obtention du certificat PDF paysage."
+        ],
+        "evaluation": [
+          "QCM : le diagnostic de niveau CERTEL est-il payant ? (Réponse : non, le diagnostic de niveau est gratuit.)",
+          "Question : citez les moyens de paiement proposés pour s'inscrire à un niveau payant. (Réponse : Mobile Money — Wave, Orange Money, MTN, Moov — ou carte bancaire, via CinetPay.)",
+          "Question : quelle est la différence entre une évaluation « formative » et « sommative » telle que réglée par le super administrateur ? (Réponse : formative = vérification immédiate des réponses ; sommative = corrigés affichés à la fin.)",
+          "Mise en situation : décrivez le parcours complet, de l'accès à « Formation CERTEL » jusqu'à l'obtention du « certificat de réussite » en PDF paysage (diagnostic › inscription › modules avec audio et vérification immédiate › évaluation certifiante › certificat).",
+          "Vérification pratique : l'apprenant accède à un niveau (gratuit ou après paiement), suit une leçon avec audio, réussit un exercice à vérification immédiate et localise son certificat sans aide."
         ]
       }
     ]
@@ -1410,6 +1541,77 @@ export const TRAINING_CONTENT: TrainingContent = {
             "justification": "Le guide précise que la « Banque de questions » et les « Réglages des jeux » relèvent du super administrateur et ne sont pas accessibles à l'administrateur d'organisation ; « Réglages des jeux » exige d'ailleurs la permission platform.manage (lib/guides.ts, ORG_ADMIN et SUPER_ADMIN ; components/dashboard/nav-config.tsx)."
           }
         ]
+      },
+      {
+        "theme": "CERTEL — formation certifiante",
+        "questions": [
+          {
+            "enonce": "Comment un utilisateur connecté accède-t-il à la formation certifiante au numérique et à l'intelligence artificielle ?",
+            "options": [
+              "Uniquement sur invitation du super administrateur",
+              "Par l'entrée « Formation CERTEL » de la section « Principal » du tableau de bord, ou par le menu public « CERTEL »",
+              "Par la section « Plateforme », réservée à l'administration",
+              "En important un fichier CSV depuis « Administration »"
+            ],
+            "bonneReponse": 1,
+            "justification": "L'entrée « Formation CERTEL » (href /certel) figure dans la section « Principal » de la barre latérale ; la formation est également ouverte depuis le menu public « CERTEL » (components/dashboard/nav-config.tsx, NAV_SECTIONS « Principal »)."
+          },
+          {
+            "enonce": "Comment est structuré le parcours interactif de CERTEL ?",
+            "options": [
+              "Un module unique commun à tous",
+              "Trois niveaux comportant chacun six modules",
+              "Six niveaux d'un module chacun",
+              "Deux niveaux de douze modules"
+            ],
+            "bonneReponse": 1,
+            "justification": "CERTEL propose trois niveaux interactifs (N1, N2, N3), chacun composé de six modules de leçons illustrées (lib/certel/pricing.ts, CERTEL_LEVELS ; lib/certel/niveau1 à niveau3, six modules par niveau)."
+          },
+          {
+            "enonce": "Dans l'évaluation certifiante d'un niveau, à quel moment les corrigés de l'examen de connaissances s'affichent-ils ?",
+            "options": [
+              "Immédiatement après chaque question",
+              "À la fin de l'examen (mode sommatif)",
+              "Jamais, seul le score est communiqué",
+              "Uniquement sur demande au super administrateur"
+            ],
+            "bonneReponse": 1,
+            "justification": "Les examens des évaluations certifiantes sont sommatifs : à la fin de l'examen, le score et les bonnes réponses commentées sont affichés, tandis que les exercices de module sont formatifs, à vérification immédiate (app/dashboard/platform/evaluations/page.tsx ; lib/certel/evaluation)."
+          },
+          {
+            "enonce": "Sous quelle forme est délivré le certificat de réussite CERTEL ?",
+            "options": [
+              "Un fichier PDF au format A4 paysage",
+              "Une simple page web non imprimable",
+              "Un fichier Excel",
+              "Un badge affiché uniquement dans le profil"
+            ],
+            "bonneReponse": 0,
+            "justification": "Le certificat de réussite s'imprime automatiquement en A4 paysage et s'enregistre au format PDF depuis la fenêtre d'impression (components/certel/n1/certificate-view.tsx)."
+          },
+          {
+            "enonce": "Quels moyens de paiement sont proposés pour l'inscription payante à un niveau CERTEL ?",
+            "options": [
+              "Chèque ou virement bancaire uniquement",
+              "Mobile Money (Wave, Orange Money, MTN MoMo, Moov Money) ou carte bancaire (Visa / Mastercard)",
+              "Espèces remises au formateur",
+              "Aucun : l'accès est toujours payant en interne"
+            ],
+            "bonneReponse": 1,
+            "justification": "L'inscription accepte le Mobile Money (Wave, Orange Money, MTN MoMo, Moov Money) et la carte bancaire (Visa / Mastercard) via CinetPay (components/certel/payment-operators.tsx, PAYMENT_OPERATORS)."
+          },
+          {
+            "enonce": "Qui règle les tarifs, les remises et le comportement des évaluations, et accède à toute la formation sans paiement ?",
+            "options": [
+              "Chaque utilisateur, pour son propre compte",
+              "L'administrateur d'organisation, dans son établissement",
+              "Le super administrateur",
+              "Le responsable de ressource"
+            ],
+            "bonneReponse": 2,
+            "justification": "Le super administrateur fixe les tarifs et remises (« Tarifs CERTEL ») et le comportement formatif/sommatif des évaluations (« Évaluations ») ; un niveau reste gratuit tant qu'aucun prix n'est défini (montant 0) et le super administrateur accède à tout sans paiement (lib/certel/pricing.ts ; app/dashboard/platform/certel-tarifs et evaluations)."
+          }
+        ]
       }
     ]
   },
@@ -1549,6 +1751,14 @@ export const TRAINING_CONTENT: TrainingContent = {
       {
         "probleme": "Le mot de passe « password123 » est-il sûr ?",
         "solution": "Non : il s'agit uniquement d'un mot de passe initial de démonstration. Tout utilisateur doit le remplacer dès la première connexion via « Mon compte » › « Changer mon mot de passe » (au moins 8 caractères). En administration technique, « npm run set-password » permet de générer un mot de passe fort."
+      },
+      {
+        "probleme": "Comment s'inscrire à un niveau CERTEL, et que faire si le paiement échoue ou si l'accès n'est pas débloqué après avoir payé ?",
+        "solution": "Ouvrez « Formation CERTEL » (tableau de bord › « Principal ») ou le menu public « CERTEL », puis la page d'inscription du niveau souhaité. Si un prix est défini, cliquez sur « Payer <montant> FCFA et m'inscrire » et réglez par Mobile Money (« Wave », « Orange Money », « MTN », « Moov ») ou « Carte » bancaire via CinetPay. L'accès aux modules s'ouvre dès le paiement confirmé (le bouton « Accéder aux modules » apparaît alors). Si le paiement n'aboutit pas, vérifiez votre solde/plafond et le numéro de l'opérateur, puis réessayez ; le compte n'est débité qu'en cas de confirmation. Si vous avez payé mais que l'accès reste bloqué, patientez quelques instants puis rechargez la page : le déblocage suit la notification de l'opérateur. Tant qu'aucun prix n'est fixé, le niveau est « actuellement gratuit » et accessible directement. Si le message « Le paiement en ligne est en cours d'activation » s'affiche (clés CinetPay non configurées), contactez l'administration : le super administrateur peut accorder l'accès manuellement depuis « Plateforme » › « Tarifs & inscriptions CERTEL »."
+      },
+      {
+        "probleme": "Qui fixe les tarifs CERTEL, le comportement des évaluations, et le super administrateur doit-il payer pour accéder aux niveaux ?",
+        "solution": "Le super administrateur règle tout depuis « Plateforme ». Sur « Tarifs & inscriptions CERTEL » (« Tarifs & inscriptions CERTEL »), il définit le prix et la remise de chaque niveau (un prix à « 0 » laisse le niveau gratuit), suit les inscriptions et paiements, et peut accorder un accès manuellement (paiement hors-ligne ou bourse). Sur « Évaluations » (« Comportement des évaluations »), il choisit le fonctionnement appliqué à toute la plateforme : évaluations formatives à « vérification immédiate » (le corrigé commenté s'affiche après chaque réponse) et évaluations sommatives dont les « corrigés à la fin » ne sont rendus visibles qu'au terme de la série. Le super administrateur dispose d'un accès complet à tous les niveaux CERTEL, sans aucun paiement."
       }
     ],
     "ficheFormateur": {
@@ -1579,6 +1789,11 @@ export const TRAINING_CONTENT: TrainingContent = {
           "activite": "Parcourir « Statistiques », « Rapports » (export CSV ou PDF) et « Abonnement ». Explorer la bibliothèque numérique : dépôt d'un document (assistant en sept étapes), validation et publication, consultation et téléchargement selon le niveau d'accès."
         },
         {
+          "phase": "Se former et se certifier avec CERTEL",
+          "duree": "30 min",
+          "activite": "Ouvrir « Formation CERTEL » (tableau de bord › « Principal ») ou le menu public « CERTEL ». Faire passer le diagnostic de niveau gratuit, puis parcourir un niveau interactif : leçons illustrées avec « Écouter » (lecture audio), exercices auto-corrigés à vérification immédiate, évaluations chronométrées. Présenter l'inscription payante par niveau (Mobile Money — Wave, Orange Money, MTN, Moov — ou carte bancaire via CinetPay ; gratuite tant qu'aucun prix n'est défini), l'évaluation certifiante (projet de synthèse + examen dont les corrigés s'affichent à la fin + mise en situation) et le certificat de réussite en PDF paysage. Montrer côté super administrateur le réglage des tarifs/remises (« Plateforme » › « Tarifs & inscriptions CERTEL ») et du comportement des évaluations (« Plateforme » › « Évaluations »)."
+        },
+        {
           "phase": "Détente et compétition : Sport cérébral",
           "duree": "20 min",
           "activite": "Faire jouer au « Défi du jour » et à un jeu au choix (consigne écrite + audio via « Écouter »). Démontrer une compétition : création (« Nouvelle compétition »), partage du « Code de session », pilotage du « Classement » en direct, et participation des joueurs via le champ « CODE » puis « Rejoindre »."
@@ -1586,7 +1801,7 @@ export const TRAINING_CONTENT: TrainingContent = {
         {
           "phase": "Questions, dépannage et clôture",
           "duree": "20 min",
-          "activite": "Traiter la FAQ et les cas de dépannage (page Neon en veille, imports ignorés, statut d'abonnement, postes réservés). Rappeler le « Support » (support@eduweb.ci) et le « Centre d'aide ». Faire formuler à chaque participant une action à mettre en œuvre dès le retour au poste."
+          "activite": "Traiter la FAQ et les cas de dépannage (page Neon en veille, imports ignorés, statut d'abonnement, postes réservés, inscription et paiement CERTEL). Rappeler le « Support » (support@eduweb.ci) et le « Centre d'aide ». Faire formuler à chaque participant une action à mettre en œuvre dès le retour au poste."
         }
       ],
       "conseils": [
@@ -1595,6 +1810,7 @@ export const TRAINING_CONTENT: TrainingContent = {
         "Faire manipuler en parallèle : annoncer un libellé exact (entre guillemets), le faire localiser à l'écran, puis exécuter l'action ensemble.",
         "Préparer en amont un jeu de données de démonstration (un petit CSV d'utilisateurs, un établissement test) pour des ateliers sans risque sur des données réelles.",
         "Insister sur la sécurité : remplacer « password123 » dès la première connexion ; rappeler que les paiements sont simulés et que l'environnement est une démonstration.",
+        "Pour CERTEL, faire passer le diagnostic gratuit avant tout achat et démontrer l'inscription sur un niveau laissé gratuit (prix à « 0 ») afin d'éviter un paiement réel pendant la formation ; rappeler que le super administrateur dispose d'un accès complet sans paiement.",
         "Anticiper la latence de la base Neon : si une page renvoie une erreur, faire recharger plutôt que multiplier les clics.",
         "Clore par un temps de jeu « Sport cérébral » pour ancrer l'apprentissage dans une note positive et fédératrice."
       ],
@@ -1604,7 +1820,8 @@ export const TRAINING_CONTENT: TrainingContent = {
         "Les identifiants de connexion de chaque participant (mot de passe initial « password123 »).",
         "Au moins un compte super administrateur et un compte administrateur d'organisation pour les ateliers d'administration.",
         "Les modèles CSV téléchargés au préalable (utilisateurs, et selon le public ministères et établissements) et un fichier d'exemple à importer.",
-        "Des enceintes ou un casque pour écouter les consignes audio des jeux du « Sport cérébral ».",
+        "Des enceintes ou un casque pour écouter les consignes audio des jeux du « Sport cérébral » et la lecture audio des leçons CERTEL (« Écouter »).",
+        "Pour la démonstration CERTEL, un niveau laissé gratuit (prix à « 0 ») ou un compte super administrateur, afin de présenter l'inscription sans paiement réel.",
         "Le guide par rôle imprimé ou disponible en PDF via le « Centre d'aide », et le présent support de formation.",
         "Une connexion d'appoint (partage 4G) en cas de coupure réseau, l'application étant hébergée en ligne."
       ]

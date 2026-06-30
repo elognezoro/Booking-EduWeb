@@ -27,7 +27,7 @@ export interface RoleTraining {
 export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
   "SUPER_ADMIN": {
     "title": "Formation à la prise en main — Administrateur Système (Super Administrateur EduWeb)",
-    "intro": "Cette formation s'adresse à l'Administrateur Système d'EduWeb Booking (clé SUPER_ADMIN), le seul rôle disposant de l'ensemble des permissions de la plateforme. À l'issue de ce parcours, vous saurez superviser toute la plateforme, enregistrer le gouvernement et ses ministères, inscrire et administrer les établissements et leurs abonnements, affecter les comptes en attente, régler la sécurité et la matrice des permissions, configurer l'espace Sport cérébral et CERTEL, et basculer dans le contexte de n'importe quel établissement pour y intervenir. Suivez les modules dans l'ordre : ils reproduisent fidèlement les menus et boutons réels de l'application.",
+    "intro": "Cette formation s'adresse à l'Administrateur Système d'EduWeb Booking (clé SUPER_ADMIN), le seul rôle disposant de l'ensemble des permissions de la plateforme. À l'issue de ce parcours, vous saurez superviser toute la plateforme, enregistrer le gouvernement et ses ministères, inscrire et administrer les établissements et leurs abonnements, affecter les comptes en attente, régler la sécurité et la matrice des permissions, configurer l'espace Sport cérébral et la formation certifiante CERTEL, et basculer dans le contexte de n'importe quel établissement pour y intervenir. Suivez les modules dans l'ordre : ils reproduisent fidèlement les menus et boutons réels de l'application. Pour le confort de lecture, les textes narratifs sont affichés dans une police d'au moins 13 px et dotés d'un lecteur audio « Écouter ».",
     "modules": [
       {
         "title": "Superviser la plateforme et son écosystème gouvernemental",
@@ -75,6 +75,18 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Depuis « Sport cérébral » (section « Principal »), cliquez « Banque de questions » (réservé au super administrateur) pour ajouter des questions (« Nouvelle question » ou « Importer les questions » par CSV) et les activer/désactiver/supprimer ; via « Gestion des jeux », utilisez « Publier » / « Masquer », les flèches d'ordre, « Enregistrer la consigne » et « Déposer » un audio.",
           "Ouvrez « Plateforme » › « Diagnostics CERTEL » : lisez les cartes (total des tests et répartition N1/N2/N3) et parcourez le journal (participant, profil, score sur 100, niveau, date) ; cliquez « Voir » pour le détail.",
           "Pour purger, cochez une ou plusieurs lignes (ou « Tout sélectionner »), cliquez « Supprimer la sélection » et confirmez : la suppression est définitive."
+        ]
+      },
+      {
+        "title": "Piloter la formation certifiante CERTEL et ses tarifs",
+        "objective": "Comprendre le parcours CERTEL ouvert à tout utilisateur connecté, accéder librement aux contenus en tant que super administrateur, et régler les tarifs et évaluations depuis la section « Plateforme ».",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'IA, accessible à tout utilisateur CONNECTÉ : depuis le tableau de bord via la section « Principal » › « Formation CERTEL », ou depuis le menu public « CERTEL ».",
+          "Le parcours comprend un DIAGNOSTIC GRATUIT puis 3 niveaux interactifs ; chaque niveau réunit 6 modules avec leçons audio, exercices auto-corrigés à VÉRIFICATION IMMÉDIATE et une évaluation CHRONOMÉTRÉE.",
+          "L'évaluation certifiante de fin de niveau ne dévoile les corrigés de l'examen qu'À LA FIN ; la réussite donne droit à un CERTIFICAT PDF au format paysage.",
+          "L'inscription à CERTEL est PAYANTE par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; tant qu'aucun prix n'est défini, l'accès reste GRATUIT.",
+          "En tant que super administrateur, vous bénéficiez d'un ACCÈS COMPLET à tous les niveaux et évaluations SANS PAIEMENT, ce qui vous permet de contrôler les contenus avant publication.",
+          "Depuis la section « Plateforme », réglez les TARIFS d'inscription et les paramètres des ÉVALUATIONS CERTEL ; complétez ce suivi avec « Plateforme » › « Diagnostics CERTEL » pour consulter le journal des tests passés."
         ]
       },
       {
@@ -158,6 +170,28 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "explanation": "L'accès complet, notamment à tous les jeux, est réservé aux abonnements dont le « Statut abonnement » est « Actif »."
       },
       {
+        "question": "En tant que super administrateur, comment accédez-vous à la formation CERTEL et à ses contenus ?",
+        "options": [
+          "Vous devez d'abord régler l'inscription par Mobile Money ou carte comme tout utilisateur",
+          "Vous bénéficiez d'un accès complet à tous les niveaux et évaluations sans paiement, et vous réglez les tarifs et évaluations sous « Plateforme »",
+          "CERTEL n'est accessible qu'aux visiteurs anonymes depuis le menu public",
+          "Vous y accédez uniquement après avoir réussi le diagnostic gratuit"
+        ],
+        "answer": 1,
+        "explanation": "Le super administrateur dispose d'un accès complet à CERTEL sans paiement et règle les tarifs d'inscription ainsi que les paramètres des évaluations depuis la section « Plateforme » ; l'inscription est sinon payante (Wave, Orange Money, MTN, Moov ou carte), et gratuite tant qu'aucun prix n'est défini."
+      },
+      {
+        "question": "Comment se déroule l'évaluation certifiante d'un niveau CERTEL ?",
+        "options": [
+          "Les corrigés s'affichent après chaque question, sans limite de temps",
+          "Il s'agit d'une évaluation chronométrée dont les corrigés de l'examen ne sont dévoilés qu'à la fin, avec un certificat PDF paysage à la clé",
+          "Elle est facultative et ne donne lieu à aucun certificat",
+          "Elle remplace le diagnostic gratuit d'entrée"
+        ],
+        "answer": 1,
+        "explanation": "Chaque niveau CERTEL se conclut par une évaluation chronométrée dont les corrigés de l'examen ne sont dévoilés qu'à la fin ; la réussite donne droit à un certificat PDF au format paysage. À ne pas confondre avec les exercices des modules, eux à vérification immédiate."
+      },
+      {
         "question": "Comment basculez-vous dans le contexte d'un établissement pour agir comme son administrateur, puis revenez-vous à la plateforme ?",
         "options": [
           "En vous déconnectant puis en vous reconnectant avec le compte de l'établissement",
@@ -183,7 +217,7 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
   },
   "ORG_ADMIN": {
     "title": "Formation à la prise en main — Administrateur d'organisation",
-    "intro": "Cette formation vous prépare à votre rôle d'« Administrateur d'organisation » dans EduWeb Booking. Vous pilotez votre établissement de bout en bout : son identité et son logo, sa structure en sites et services, ses comptes utilisateurs et leurs rôles, ses ressources et réservations, sa bibliothèque, ses certificats et ses paramètres. Le parcours est progressif et concret : chaque module vous renvoie aux menus et boutons réels de l'interface, depuis la configuration initiale de l'organisation jusqu'au pilotage statistique. À l'issue de cette formation, vous serez pleinement autonome sur les actions permises à votre rôle. Note : la section « Plateforme » (Supervision EduWeb, Gouvernement & ministères, Établissements, Réglages des jeux, Diagnostics CERTEL, Sécurité & sessions) reste réservée à l'administrateur système. Terminez par l'auto-évaluation (QCM) pour vérifier votre compréhension.",
+    "intro": "Cette formation vous prépare à votre rôle d'« Administrateur d'organisation » dans EduWeb Booking. Vous pilotez votre établissement de bout en bout : son identité et son logo, sa structure en sites et services, ses comptes utilisateurs et leurs rôles, ses ressources et réservations, sa bibliothèque, ses certificats et ses paramètres. Le parcours est progressif et concret : chaque module vous renvoie aux menus et boutons réels de l'interface, depuis la configuration initiale de l'organisation jusqu'au pilotage statistique. À l'issue de cette formation, vous serez pleinement autonome sur les actions permises à votre rôle. Bon à savoir pour le confort de lecture : les textes narratifs des formations et des guides s'affichent avec une police d'au moins 13 px et offrent un lecteur audio « Écouter » pour suivre le contenu à l'oreille. Note : la section « Plateforme » (Supervision EduWeb, Gouvernement & ministères, Établissements, Réglages des jeux, Diagnostics CERTEL, Sécurité & sessions) reste réservée à l'administrateur système. Terminez par l'auto-évaluation (QCM) pour vérifier votre compréhension.",
     "modules": [
       {
         "title": "Configurer l'identité et la structure de l'organisation",
@@ -242,6 +276,18 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Dans la section « Bibliothèque », utilisez « Explorer » pour rechercher, « Déposer » pour ajouter un document, et « À vérifier » pour contrôler et publier les dépôts en attente (un badge en signale le nombre).",
           "Organisez le fonds via « Collections » et « Domaines », suivez la circulation dans « Réservations doc. » et « Emprunts », et pilotez l'usage avec « Statistiques doc. ».",
           "Dans « Gestion » › « Compétitions », créez une compétition (« Intitulé », « Jeu », « Niveau »), partagez le « Code de session », pilotez son déroulé et suivez le « Classement » ; sécurisez enfin votre accès via « Mon compte »."
+        ]
+      },
+      {
+        "title": "Se former et certifier ses compétences avec CERTEL",
+        "objective": "Vous saurez accéder à CERTEL, situer votre niveau, suivre les modules interactifs et obtenir un certificat ; vous saurez aussi orienter votre personnel vers ce parcours.",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'intelligence artificielle, accessible à tout utilisateur connecté : depuis votre tableau de bord, ouvrez la section « Principal » › « Formation CERTEL » (ou, hors connexion, le menu public « CERTEL »).",
+          "Commencez par le « Diagnostic de niveau » : il est gratuit et corrigé automatiquement, et vous oriente vers le niveau adapté (N1, N2 ou N3).",
+          "Suivez votre niveau parmi les 3 niveaux interactifs (6 modules chacun) : leçons illustrées avec lecture audio, exercices auto-corrigés à vérification immédiate et évaluation chronométrée.",
+          "Passez l'évaluation certifiante : l'examen ne révèle les corrigés qu'à la fin ; en cas de réussite, vous obtenez un certificat PDF au format paysage.",
+          "Concernant l'accès : l'inscription est payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; elle reste gratuite tant qu'aucun prix n'a été défini. La fixation des tarifs et le réglage des évaluations relèvent du seul administrateur système (super admin), sous la section « Plateforme », qui dispose par ailleurs d'un accès complet sans paiement.",
+          "En tant qu'administrateur d'établissement, encouragez votre personnel à passer le diagnostic gratuit puis à monter en compétence sur CERTEL ; vous pouvez ensuite valoriser ces acquis via le module « Certificats » de votre établissement."
         ]
       }
     ],
@@ -333,12 +379,34 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         ],
         "answer": 0,
         "explanation": "En tant qu'admin délégué, vous personnalisez la matrice pour le seul personnel de votre établissement ; vous ne pouvez pas modifier le rôle Super Administrateur ni votre propre rôle, ni accorder un droit que vous ne détenez pas vous-même, et vos changements n'affectent pas les autres institutions."
+      },
+      {
+        "question": "Comment accédez-vous à la formation certifiante CERTEL une fois connecté au tableau de bord ?",
+        "options": [
+          "Dans la section « Plateforme », réservée à l'administrateur système",
+          "Dans « Administration » › « Organisation »",
+          "Dans la section « Principal », via « Formation CERTEL »",
+          "Uniquement depuis le module « Certificats »"
+        ],
+        "answer": 2,
+        "explanation": "CERTEL est accessible à tout utilisateur connecté depuis la section « Principal » › « Formation CERTEL » du tableau de bord (ou via le menu public « CERTEL » hors connexion). Le diagnostic de niveau y est gratuit."
+      },
+      {
+        "question": "Concernant l'accès payant à CERTEL, quelle affirmation est exacte ?",
+        "options": [
+          "L'inscription est toujours payante, sans exception",
+          "L'inscription est payante (Mobile Money ou carte) mais reste gratuite tant qu'aucun prix n'est défini ; le super admin fixe les tarifs",
+          "Seul l'administrateur d'établissement peut fixer les tarifs CERTEL",
+          "Le paiement se règle exclusivement par carte bancaire"
+        ],
+        "answer": 1,
+        "explanation": "L'inscription est payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte, mais elle demeure gratuite tant qu'aucun prix n'a été défini. La fixation des tarifs et des évaluations relève du seul administrateur système (super admin), qui dispose en outre d'un accès complet sans paiement."
       }
     ]
   },
   "RESOURCE_MANAGER": {
     "title": "Formation à la prise en main — Responsable de ressource",
-    "intro": "Cette formation vous prépare à tenir le rôle de « Responsable de ressource » (RESOURCE_MANAGER) dans EduWeb Booking. Vous êtes en charge du parc de ressources de votre établissement : salles, salles multimédias, matériels et services. À l'issue du parcours, vous saurez créer et paramétrer vos ressources, gérer les postes des salles multimédias, rendre une ressource indisponible puis la rouvrir, traiter les demandes de réservation soumises à validation, et suivre l'activité grâce au calendrier, aux statistiques et aux rapports. Bon à savoir avant de commencer : votre rôle est centré sur la gestion de vos ressources et la décision sur les demandes associées. Vous pouvez créer et modifier des ressources mais pas les supprimer ni gérer les catégories (cela relève de l'administrateur) ; vous n'administrez pas l'établissement (organisation, sites, utilisateurs, rôles, abonnement) ; côté bibliothèque, vous pouvez consulter et télécharger les documents autorisés, mais pas en déposer. Chaque module renvoie aux menus et boutons exacts de l'application.",
+    "intro": "Cette formation vous prépare à tenir le rôle de « Responsable de ressource » (RESOURCE_MANAGER) dans EduWeb Booking. Vous êtes en charge du parc de ressources de votre établissement : salles, salles multimédias, matériels et services. À l'issue du parcours, vous saurez créer et paramétrer vos ressources, gérer les postes des salles multimédias, rendre une ressource indisponible puis la rouvrir, traiter les demandes de réservation soumises à validation, et suivre l'activité grâce au calendrier, aux statistiques et aux rapports. Vous découvrirez aussi CERTEL, la formation certifiante au numérique et à l'intelligence artificielle, ouverte à tout utilisateur connecté pour monter en compétences. Bon à savoir avant de commencer : votre rôle est centré sur la gestion de vos ressources et la décision sur les demandes associées. Vous pouvez créer et modifier des ressources mais pas les supprimer ni gérer les catégories (cela relève de l'administrateur) ; vous n'administrez pas l'établissement (organisation, sites, utilisateurs, rôles, abonnement) ; côté bibliothèque, vous pouvez consulter et télécharger les documents autorisés, mais pas en déposer. Chaque module renvoie aux menus et boutons exacts de l'application. Pour le confort de lecture, les textes des formations et des guides s'affichent dans une police d'au moins 13 px et disposent d'un lecteur audio « Écouter » qui vous permet d'en suivre la narration à l'oral.",
     "modules": [
       {
         "title": "Module 1 — Créer et paramétrer une ressource",
@@ -397,6 +465,19 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Ouvrez « Rapports » pour produire un export : choisissez le périmètre (par période, par ressource, par catégorie, par site / service, par utilisateur ou par statut), puis exportez au format CSV ou PDF.",
           "Appuyez-vous sur ces indicateurs pour ajuster les règles, le statut et la capacité de vos ressources.",
           "Pour sécuriser votre accès, ouvrez « Mon compte » et, dans l'encart « Changer mon mot de passe », saisissez votre mot de passe actuel puis un nouveau mot de passe (au moins 8 caractères) avant de cliquer sur « Mettre à jour le mot de passe »."
+        ]
+      },
+      {
+        "title": "Module 6 — Vous former et vous certifier avec CERTEL",
+        "objective": "Vous saurez accéder à CERTEL, évaluer votre niveau, suivre les modules interactifs et obtenir votre certificat au numérique et à l'IA.",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'intelligence artificielle, ouverte à tout utilisateur connecté. Depuis votre tableau de bord, ouvrez la section « Principal » puis « Formation CERTEL » ; vous pouvez aussi y accéder par le menu public « CERTEL ».",
+          "Commencez par le « Diagnostic de niveau », gratuit : il évalue automatiquement vos acquis et vous oriente vers le niveau adapté (Niveau 1, 2 ou 3).",
+          "Le parcours compte 3 niveaux interactifs ; chaque niveau comprend 6 modules associant des leçons illustrées avec lecture audio, des exercices auto-corrigés à vérification immédiate, et une évaluation chronométrée pour vous entraîner en conditions réelles.",
+          "Passez l'évaluation certifiante du niveau : à la différence des exercices d'entraînement, l'examen ne dévoile les corrigés qu'à la fin, pour garantir une évaluation fidèle de vos compétences.",
+          "En cas de réussite, vous obtenez un certificat au format PDF paysage, attestant de votre niveau.",
+          "L'inscription à CERTEL peut être payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte bancaire ; elle reste gratuite tant qu'aucun prix n'a été défini pour le niveau concerné.",
+          "Le super administrateur dispose d'un accès complet sans paiement et règle les tarifs ainsi que les évaluations depuis la section « Plateforme »."
         ]
       }
     ],
@@ -480,12 +561,32 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         ],
         "answer": 1,
         "explanation": "Depuis « Explorer » et « Documents », vous pouvez consulter et télécharger les documents dont le niveau d'accès le permet, mais le dépôt de nouveaux documents n'est pas accessible à votre rôle."
+      },
+      {
+        "question": "Comment accédez-vous à la formation certifiante CERTEL et que vous permet-elle d'abord d'évaluer gratuitement ?",
+        "options": [
+          "Via « Plateforme » uniquement, réservée au super administrateur",
+          "Via « Formation CERTEL » (section « Principal » du tableau de bord) ou le menu public « CERTEL », en commençant par le « Diagnostic de niveau » gratuit",
+          "Via « Rapports », après avoir produit un export PDF"
+        ],
+        "answer": 1,
+        "explanation": "CERTEL est ouverte à tout utilisateur connecté : on y accède par « Formation CERTEL » (section « Principal ») ou par le menu public « CERTEL ». Le « Diagnostic de niveau » est gratuit et vous oriente vers le niveau adapté. La section « Plateforme » sert au super administrateur pour régler tarifs et évaluations."
+      },
+      {
+        "question": "Dans CERTEL, qu'est-ce qui distingue l'évaluation certifiante des exercices d'entraînement ?",
+        "options": [
+          "Elle ne révèle les corrigés qu'à la fin de l'examen, alors que les exercices d'entraînement sont à vérification immédiate",
+          "Elle se fait sans limite de temps et sans certificat",
+          "Elle est réservée aux ressources et salles multimédias"
+        ],
+        "answer": 0,
+        "explanation": "Les exercices des modules sont auto-corrigés à vérification immédiate, tandis que l'évaluation certifiante ne dévoile les corrigés qu'à la fin pour mesurer fidèlement vos compétences. En cas de réussite, un certificat PDF paysage est délivré."
       }
     ]
   },
   "VALIDATOR": {
     "title": "Formation à la prise en main — Validateur hiérarchique",
-    "intro": "Cette formation vous prépare à exercer le rôle de « Validateur hiérarchique » dans EduWeb Booking. En tant que responsable de service ou chef de département, vous êtes chargé d'approuver, de refuser ou de suivre les demandes de réservation soumises à validation. À l'issue de ce parcours, vous saurez accéder aux demandes en attente, les examiner en détail, vous prononcer de façon tracée et justifiée, suivre l'activité de réservation et les statistiques de pilotage, et gérer vos propres réservations comme votre compte. Point essentiel à retenir dès maintenant : votre rôle est centré sur la décision (vous consultez ressources, calendrier et statistiques en lecture seule, sans les administrer), et vous ne pouvez jamais valider une demande que vous avez vous-même déposée — elle sera traitée par un autre validateur. Suivez les modules dans l'ordre, puis validez vos acquis avec l'auto-évaluation finale.",
+    "intro": "Cette formation vous prépare à exercer le rôle de « Validateur hiérarchique » dans EduWeb Booking. En tant que responsable de service ou chef de département, vous êtes chargé d'approuver, de refuser ou de suivre les demandes de réservation soumises à validation. À l'issue de ce parcours, vous saurez accéder aux demandes en attente, les examiner en détail, vous prononcer de façon tracée et justifiée, suivre l'activité de réservation et les statistiques de pilotage, gérer vos propres réservations comme votre compte, et tirer parti de la formation certifiante CERTEL au numérique et à l'IA accessible à tout utilisateur connecté. Point essentiel à retenir dès maintenant : votre rôle est centré sur la décision (vous consultez ressources, calendrier et statistiques en lecture seule, sans les administrer), et vous ne pouvez jamais valider une demande que vous avez vous-même déposée — elle sera traitée par un autre validateur. Bon à savoir pour le confort de lecture : les contenus de formation et les guides s'affichent avec une police d'au moins 13 px et offrent un lecteur audio « Écouter » sur les textes narratifs. Suivez les modules dans l'ordre, puis validez vos acquis avec l'auto-évaluation finale.",
     "modules": [
       {
         "title": "Accéder aux demandes à traiter",
@@ -539,8 +640,21 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Suivez vos demandes dans « Mes réservations » (catégorie « Principal »), réparties entre « À venir » et « Historique ».",
           "Une fois votre réservation validée et le créneau venu, ouvrez sa fiche et cliquez sur « Je suis arrivé », puis sur « Activité terminée » à la fin de l'activité ; pour renoncer, cliquez sur « Annuler la réservation » et confirmez.",
           "Ouvrez « Mon compte » pour vérifier vos informations, puis utilisez « Changer mon mot de passe » (mot de passe actuel, nouveau d'au moins 8 caractères, confirmation, puis « Mettre à jour le mot de passe »).",
-          "Dans « Centre d'aide » (catégorie « Aide »), téléchargez ce guide via « Mon guide (PDF) » ou « Mon guide (Word) », et ouvrez « Support » en cas de difficulté.",
+          "Dans « Centre d'aide » (catégorie « Aide »), téléchargez ce guide via « Mon guide (PDF) » ou « Mon guide (Word) », et ouvrez « Support » en cas de difficulté ; les textes narratifs des guides s'affichent en police d'au moins 13 px avec un lecteur audio « Écouter ».",
           "Si un avertissement de déconnexion automatique apparaît, choisissez « Rester connecté » pour ne pas perdre une décision en cours."
+        ]
+      },
+      {
+        "title": "Vous former et vous certifier avec CERTEL",
+        "objective": "Vous saurez accéder à la formation certifiante CERTEL au numérique et à l'IA, suivre les niveaux interactifs et obtenir votre certificat.",
+        "content": [
+          "Depuis votre tableau de bord, ouvrez « Formation CERTEL » dans la section « Principal » ; depuis le site public, passez par le menu « CERTEL ». La formation est accessible à tout utilisateur connecté, indépendamment de votre rôle de validateur.",
+          "Commencez par le « Diagnostic de niveau » : il est GRATUIT, corrigé automatiquement, et vous oriente vers le niveau adapté (Niveau 1, 2 ou 3).",
+          "Progressez dans les 3 niveaux interactifs, composés chacun de 6 modules : leçons illustrées avec LECTURE AUDIO, exercices auto-corrigés à VÉRIFICATION IMMÉDIATE, et évaluation CHRONOMÉTRÉE.",
+          "Passez l'évaluation certifiante : à la différence des exercices d'entraînement, l'examen ne révèle les corrigés QU'À LA FIN. En cas de réussite, vous obtenez un CERTIFICAT PDF au format paysage.",
+          "Notez le modèle d'accès : l'INSCRIPTION est PAYANTE par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; elle reste GRATUITE tant qu'aucun prix n'a été défini.",
+          "Retenez que le SUPER ADMIN dispose d'un accès complet sans paiement et règle les tarifs et les évaluations depuis la section « Plateforme ».",
+          "Profitez des mêmes facilités d'accessibilité que dans vos guides : police d'au moins 13 px et lecteur audio « Écouter » sur les textes narratifs des leçons."
         ]
       }
     ],
@@ -623,21 +737,32 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "explanation": "Le « Taux de validation » mesure la part des demandes approuvées. Le « Taux d'occupation » concerne l'usage des ressources, et le « Taux d'annulation » ou les « Non honorées » mesurent d'autres aspects de l'activité."
       },
       {
-        "question": "Pour retrouver rapidement une réservation précise dans « Réservations », que pouvez-vous faire ?",
+        "question": "Comment accédez-vous à la formation certifiante CERTEL et quel en est le point de départ gratuit ?",
         "options": [
-          "La rechercher par code, motif ou ressource, ou filtrer par statut",
-          "Uniquement parcourir la liste page par page",
-          "Demander à un administrateur de l'extraire pour vous",
-          "Utiliser le calendrier, car « Réservations » n'a pas de recherche"
+          "Elle est réservée aux administrateurs ; aucun accès pour un validateur",
+          "Via « Formation CERTEL » (section « Principal ») ou le menu public « CERTEL », en commençant par le diagnostic de niveau gratuit",
+          "Uniquement depuis « Statistiques », après paiement obligatoire par carte",
+          "En écrivant au support, qui ouvre l'accès manuellement"
+        ],
+        "answer": 1,
+        "explanation": "CERTEL est accessible à tout utilisateur connecté : depuis le tableau de bord via « Formation CERTEL » (section « Principal ») ou via le menu public « CERTEL ». Le « Diagnostic de niveau » est gratuit, corrigé automatiquement, et oriente vers le niveau adapté."
+      },
+      {
+        "question": "Concernant l'évaluation certifiante CERTEL et son modèle d'accès, quelle affirmation est exacte ?",
+        "options": [
+          "L'examen révèle les corrigés à la fin et donne un certificat PDF ; l'inscription est payante par Mobile Money ou carte, mais gratuite tant qu'aucun prix n'est défini",
+          "L'examen affiche chaque corrigé immédiatement, comme les exercices d'entraînement",
+          "La certification est toujours payante, sans aucune exception",
+          "Le certificat est délivré au format portrait et envoyé par courrier"
         ],
         "answer": 0,
-        "explanation": "La page « Réservations » permet de filtrer avec le sélecteur « Tous les statuts » et de rechercher une demande par code, motif ou ressource, ce qui rend la recherche directe et autonome."
+        "explanation": "À la différence des exercices à vérification immédiate, l'examen certifiant ne révèle les corrigés qu'à la fin et délivre un certificat PDF au format paysage. L'inscription est payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte, mais reste gratuite tant qu'aucun prix n'a été défini ; le super admin dispose d'un accès complet sans paiement."
       }
     ]
   },
   "REQUESTER": {
     "title": "Formation à la prise en main — Utilisateur demandeur",
-    "intro": "Bienvenue dans la formation à la prise en main du rôle « Demandeur » d'EduWeb Booking. À l'issue de ce parcours, vous serez pleinement autonome au quotidien : parcourir les ressources et les salles multimédias, créer et suivre vos réservations, lire votre calendrier, exploiter la bibliothèque numérique (consulter, télécharger, réserver, déposer un document) et gérer votre compte. Les modules suivent l'ordre logique d'un usage réel et renvoient aux libellés exacts des menus et des boutons. Bon à savoir : on peut créer un compte sans indiquer d'institution ; c'est alors un administrateur qui vous rattache à votre établissement et à votre service, après quoi tout votre espace de travail s'active. Prenez le temps de réaliser chaque action dans l'application au fur et à mesure, puis validez vos acquis avec l'auto-évaluation finale.",
+    "intro": "Bienvenue dans la formation à la prise en main du rôle « Demandeur » d'EduWeb Booking. À l'issue de ce parcours, vous serez pleinement autonome au quotidien : parcourir les ressources et les salles multimédias, créer et suivre vos réservations, lire votre calendrier, exploiter la bibliothèque numérique (consulter, télécharger, réserver, déposer un document) et gérer votre compte. Vous découvrirez aussi CERTEL, la formation certifiante au numérique et à l'intelligence artificielle ouverte à tout utilisateur connecté. Les modules suivent l'ordre logique d'un usage réel et renvoient aux libellés exacts des menus et des boutons. Bon à savoir : on peut créer un compte sans indiquer d'institution ; c'est alors un administrateur qui vous rattache à votre établissement et à votre service, après quoi tout votre espace de travail s'active. Côté confort de lecture, les textes sont affichés dans une taille d'au moins 13 px et chaque contenu narratif propose un bouton « Écouter » pour une écoute audio. Prenez le temps de réaliser chaque action dans l'application au fur et à mesure, puis validez vos acquis avec l'auto-évaluation finale.",
     "modules": [
       {
         "title": "Module 1 — Découvrir les ressources disponibles",
@@ -696,6 +821,18 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Pour déposer un document, ouvrez « Déposer » : suivez l'assistant en sept étapes (« Type », « Métadonnées », « Auteurs », « Résumé », « Fichier », « Droits », « Vérification »), le fichier étant facultatif à cette étape, puis cliquez sur « Soumettre le dépôt ».",
           "Suivez vos demandes documentaires (consultation, emprunt, accès) depuis « Réservations doc. » : le badge de couleur indique le statut de chaque demande, et la cloche de notifications vous prévient lorsqu'elle est acceptée, refusée ou prête.",
           "Astuce compte : depuis « Mon compte », vous pouvez changer votre mot de passe (au moins 8 caractères) ; depuis le « Centre d'aide » (menu « Aide »), téléchargez ce guide en PDF ou en Word."
+        ]
+      },
+      {
+        "title": "Module 6 — Se former avec CERTEL (numérique et IA)",
+        "objective": "Vous saurez accéder à CERTEL, la formation certifiante au numérique et à l'intelligence artificielle, et comprendre son parcours et ses modalités.",
+        "content": [
+          "CERTEL est une formation certifiante au numérique et à l'IA, accessible à tout utilisateur connecté. Depuis votre tableau de bord, ouvrez la section « Principal » puis « Formation CERTEL » ; depuis le site public, passez par le menu « CERTEL ».",
+          "Commencez par le diagnostic GRATUIT : il évalue votre niveau de départ et vous oriente vers le parcours adapté.",
+          "Le parcours comporte 3 niveaux interactifs, chacun organisé en 6 modules : leçons avec audio « Écouter », exercices auto-corrigés à VÉRIFICATION IMMÉDIATE et évaluation CHRONOMÉTRÉE pour vous mettre en situation.",
+          "Terminez par l'évaluation certifiante : les corrigés de l'examen sont communiqués À LA FIN, et la réussite donne droit à un CERTIFICAT au format PDF paysage.",
+          "Modalités d'accès : l'inscription est PAYANTE par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; tant qu'aucun prix n'est défini, l'accès reste GRATUIT.",
+          "Bon à savoir : le super administrateur dispose d'un accès complet sans paiement et règle les tarifs ainsi que les évaluations depuis la section « Plateforme ». De votre côté, les mêmes conforts d'accessibilité s'appliquent : taille de texte d'au moins 13 px et bouton « Écouter » sur les contenus narratifs."
         ]
       }
     ],
@@ -778,21 +915,32 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "explanation": "Les demandes documentaires se suivent dans « Réservations doc. » (menu « Bibliothèque »), où un badge de couleur indique le statut de chaque demande. « Mes réservations » concerne les réservations de ressources."
       },
       {
-        "question": "Que doit comporter au minimum votre nouveau mot de passe lorsque vous le modifiez depuis « Mon compte » ?",
+        "question": "Comment accédez-vous à la formation CERTEL depuis votre tableau de bord ?",
         "options": [
-          "Au moins 6 caractères",
-          "Au moins 12 caractères",
-          "Au moins 8 caractères",
-          "Aucune longueur minimale n'est imposée"
+          "Par la section « Gestion », via « Ressources »",
+          "Par la section « Principal », via « Formation CERTEL »",
+          "Par le menu « Bibliothèque », via « Explorer »",
+          "CERTEL n'est accessible qu'au super administrateur"
         ],
-        "answer": 2,
-        "explanation": "Sous « Changer mon mot de passe », le nouveau mot de passe doit compter au moins 8 caractères ; vous le confirmez puis cliquez sur « Mettre à jour le mot de passe »."
+        "answer": 1,
+        "explanation": "CERTEL est ouverte à tout utilisateur connecté : depuis le tableau de bord, ouvrez la section « Principal » puis « Formation CERTEL » (ou le menu public « CERTEL »). Seul le super administrateur dispose en plus d'un accès complet sans paiement et du réglage des tarifs."
+      },
+      {
+        "question": "Concernant le parcours CERTEL, quelle affirmation est exacte ?",
+        "options": [
+          "Le diagnostic initial est payant et les 3 niveaux sont gratuits",
+          "Le diagnostic est gratuit, les exercices se corrigent à vérification immédiate et la réussite donne un certificat PDF paysage",
+          "Il n'existe qu'un seul niveau sans évaluation",
+          "Les corrigés de l'examen certifiant sont donnés avant de commencer"
+        ],
+        "answer": 1,
+        "explanation": "Le diagnostic CERTEL est gratuit ; le parcours compte 3 niveaux de 6 modules avec leçons audio, exercices auto-corrigés à vérification immédiate et évaluation chronométrée. Les corrigés de l'examen sont fournis à la fin, et la réussite délivre un certificat PDF au format paysage. L'inscription est payante (Mobile Money ou carte), gratuite tant qu'aucun prix n'est défini."
       }
     ]
   },
   "TECHNICIAN": {
     "title": "Formation à la prise en main — Technicien / agent d'appui",
-    "intro": "Cette formation vous rend autonome dans votre rôle de technicien / agent d'appui (clé TECHNICIAN) sur EduWeb Booking. Votre profil donne un accès en consultation étendu : vous surveillez l'état des ressources, suivez les maintenances planifiées, repérez les incidents, lisez le calendrier d'occupation et l'ensemble des réservations de tout l'établissement, et consultez les salles multimédias et la bibliothèque numérique en lecture, afin de planifier vos interventions au bon moment et sans gêner les usagers. Point important à garder en tête tout au long de la formation : la plateforme ne vous expose pas, à ce jour, d'écran pour saisir vous-même une déclaration, une prise en charge ou une clôture d'incident, ni pour créer ou modifier une fiche de maintenance. Ces enregistrements sont saisis dans l'outil par un responsable de ressource ou un administrateur, à partir de vos constats et comptes rendus de terrain. Vos écrans servent donc à diagnostiquer, repérer, préparer vos interventions, puis vérifier le retour en service. Vous ne pouvez ni créer de réservation, ni modifier la configuration des ressources, ni administrer l'établissement. À la fin du parcours, une auto-évaluation (QCM) vous permettra de vérifier votre compréhension.",
+    "intro": "Cette formation vous rend autonome dans votre rôle de technicien / agent d'appui (clé TECHNICIAN) sur EduWeb Booking. Votre profil donne un accès en consultation étendu : vous surveillez l'état des ressources, suivez les maintenances planifiées, repérez les incidents, lisez le calendrier d'occupation et l'ensemble des réservations de tout l'établissement, et consultez les salles multimédias et la bibliothèque numérique en lecture, afin de planifier vos interventions au bon moment et sans gêner les usagers. Point important à garder en tête tout au long de la formation : la plateforme ne vous expose pas, à ce jour, d'écran pour saisir vous-même une déclaration, une prise en charge ou une clôture d'incident, ni pour créer ou modifier une fiche de maintenance. Ces enregistrements sont saisis dans l'outil par un responsable de ressource ou un administrateur, à partir de vos constats et comptes rendus de terrain. Vos écrans servent donc à diagnostiquer, repérer, préparer vos interventions, puis vérifier le retour en service. Vous ne pouvez ni créer de réservation, ni modifier la configuration des ressources, ni administrer l'établissement. Comme tout utilisateur connecté, vous avez aussi accès à CERTEL, la formation certifiante au numérique et à l'intelligence artificielle, pour monter en compétences. Enfin, pour le confort de lecture, les textes d'aide et de formation respectent une taille de police d'au moins 13 px et un lecteur audio « Écouter » accompagne les contenus narratifs. À la fin du parcours, une auto-évaluation (QCM) vous permettra de vérifier votre compréhension.",
     "modules": [
       {
         "title": "Lire l'état général des ressources depuis le Tableau de bord",
@@ -839,14 +987,26 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         ]
       },
       {
+        "title": "Monter en compétences avec CERTEL (numérique et IA)",
+        "objective": "Vous saurez accéder à CERTEL, en parcourir les niveaux interactifs et comprendre le diagnostic, l'évaluation certifiante, le certificat et les modalités d'inscription.",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'intelligence artificielle, ouverte à tout utilisateur connecté. Depuis votre tableau de bord, ouvrez « Formation CERTEL » dans le menu « Principal » ; sans être connecté, vous y accédez aussi par l'entrée « CERTEL » du menu public.",
+          "Commencez par le diagnostic CERTEL, GRATUIT : il positionne automatiquement votre résultat sur l'un des trois niveaux (N1, N2, N3) pour orienter votre parcours.",
+          "Suivez les trois niveaux interactifs, chacun composé de six modules : leçons avec lecture audio, exercices auto-corrigés à VÉRIFICATION IMMÉDIATE, puis une évaluation CHRONOMÉTRÉE ; l'évaluation certifiante n'affiche les corrigés de l'examen qu'À LA FIN.",
+          "À la réussite, obtenez votre CERTIFICAT au format PDF paysage, justificatif de vos compétences.",
+          "L'inscription est PAYANTE par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte bancaire ; elle reste GRATUITE tant qu'aucun prix n'a été défini. Le super administrateur dispose d'un accès complet sans paiement et règle les tarifs et les évaluations dans le menu « Plateforme ».",
+          "Pour une pause active, ouvrez « Sport cérébral » dans le menu « Principal » et relevez le « Défi du jour » ou lancez une partie avec « Jouer »."
+        ]
+      },
+      {
         "title": "Gérer son compte et trouver de l'aide",
-        "objective": "Vous saurez changer votre mot de passe, retrouver votre guide et utiliser les espaces d'aide, d'évaluation et de détente.",
+        "objective": "Vous saurez changer votre mot de passe, retrouver votre guide et utiliser les espaces d'aide et de support.",
         "content": [
           "Ouvrez « Mon compte » dans le menu « Principal » pour voir vos informations, puis, dans l'encart « Changer mon mot de passe », saisissez votre « Mot de passe actuel », le « Nouveau mot de passe » (au moins 8 caractères) et sa confirmation, avant de cliquer sur « Mettre à jour le mot de passe ».",
           "Si la déconnexion automatique après inactivité est activée, cliquez sur « Rester connecté » lorsque l'avertissement apparaît pour prolonger votre session.",
           "Ouvrez « Centre d'aide » dans le menu « Aide » pour retrouver ce guide, puis cliquez sur « Mon guide (PDF) » ou « Mon guide (Word) » pour l'obtenir en version imprimable ou modifiable.",
           "Ouvrez « Support » pour retrouver l'e-mail support@eduweb.ci, le téléphone et les « Questions fréquentes ».",
-          "Pour vous évaluer, lancez le diagnostic CERTEL depuis le bouton dédié de la page d'accueil ; pour une pause, ouvrez « Sport cérébral » dans le menu « Principal » et relevez le « Défi du jour » ou lancez une partie avec « Jouer »."
+          "Pour le confort de lecture, les écrans d'aide et de formation respectent une taille de police d'au moins 13 px ; sur les contenus narratifs, utilisez le bouton « Écouter » pour en obtenir la lecture audio."
         ]
       }
     ],
@@ -918,32 +1078,32 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "explanation": "Sur le plan des postes, les postes libres apparaissent en vert et les postes occupés en rouge ; survoler un poste rouge indique sa période d'occupation, donc quand il redeviendra disponible."
       },
       {
-        "question": "Dans la bibliothèque numérique, que vous autorise votre rôle de technicien ?",
+        "question": "Où ouvrez-vous CERTEL, la formation certifiante au numérique et à l'IA, depuis votre tableau de bord ?",
         "options": [
-          "Déposer et télécharger des documents",
-          "Réserver des documents pour un usager",
-          "Consulter et explorer le catalogue en lecture à l'écran uniquement",
-          "Modifier les fiches des documents"
+          "Dans le menu « Gestion », via « Ressources »",
+          "Dans le menu « Principal », via « Formation CERTEL »",
+          "Dans le menu « Aide », via « Support »",
+          "Uniquement depuis la fiche d'une ressource"
         ],
-        "answer": 2,
-        "explanation": "Votre rôle est limité à la lecture : vous pouvez consulter la « Bibliothèque » et « Explorer » le catalogue à l'écran, mais ni télécharger, ni déposer, ni réserver de documents."
+        "answer": 1,
+        "explanation": "CERTEL est accessible à tout utilisateur connecté : depuis le tableau de bord, ouvrez « Formation CERTEL » dans le menu « Principal » ; le menu public « CERTEL » y mène également."
       },
       {
-        "question": "Quelle longueur minimale est exigée pour le nouveau mot de passe dans « Mon compte » ?",
+        "question": "Concernant CERTEL, quelle affirmation est exacte ?",
         "options": [
-          "Au moins 8 caractères",
-          "Au moins 4 caractères",
-          "Au moins 12 caractères",
-          "Aucune longueur minimale"
+          "Le diagnostic est gratuit et l'évaluation certifiante n'affiche les corrigés qu'à la fin",
+          "L'inscription est toujours gratuite, sans aucun paiement possible",
+          "Les exercices ne sont corrigés qu'après plusieurs jours",
+          "Le certificat est délivré au format portrait en image"
         ],
         "answer": 0,
-        "explanation": "Dans l'encart « Changer mon mot de passe », le « Nouveau mot de passe » doit comporter au moins 8 caractères, puis être confirmé avant de cliquer sur « Mettre à jour le mot de passe »."
+        "explanation": "Le diagnostic CERTEL est gratuit ; les exercices des modules sont auto-corrigés à vérification immédiate, mais l'évaluation certifiante, chronométrée, n'affiche les corrigés de l'examen qu'à la fin. L'inscription peut être payante (Mobile Money ou carte) et reste gratuite tant qu'aucun prix n'est défini ; le certificat est un PDF paysage."
       }
     ]
   },
   "VISITOR": {
     "title": "Formation à la prise en main - Visiteur externe",
-    "intro": "Bienvenue dans la formation de prise en main du rôle « Visiteur externe » d'EduWeb Booking. En tant que visiteur, vous découvrez la plateforme sans compte complet : vous pouvez explorer l'offre publique de votre établissement, vous exercer librement sur l'espace « Sport cérébral », rejoindre une compétition à l'aide d'un code de session, et savoir comment demander un compte pour accéder aux ressources, aux réservations et à la bibliothèque. À l'issue de ce parcours, vous serez autonome sur toutes les actions ouvertes à votre rôle. Une auto-évaluation (QCM) vous permettra ensuite de vérifier votre compréhension.",
+    "intro": "Bienvenue dans la formation de prise en main du rôle « Visiteur externe » d'EduWeb Booking. En tant que visiteur, vous découvrez la plateforme sans compte complet : vous pouvez explorer l'offre publique de votre établissement, vous exercer librement sur l'espace « Sport cérébral », rejoindre une compétition à l'aide d'un code de session, découvrir l'offre de formation certifiante CERTEL et tester gratuitement votre niveau, et savoir comment demander un compte pour accéder aux ressources, aux réservations et à la bibliothèque. À l'issue de ce parcours, vous serez autonome sur toutes les actions ouvertes à votre rôle. Une auto-évaluation (QCM) vous permettra ensuite de vérifier votre compréhension.",
     "modules": [
       {
         "title": "Découvrir la plateforme depuis le site public",
@@ -952,7 +1112,7 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Ouvrez la page d'accueil publique d'EduWeb Booking pour découvrir la présentation de la plateforme et de ses services.",
           "Parcourez les rubriques publiques (présentation, fonctionnalités, contact) pour comprendre ce que la plateforme propose à votre établissement.",
           "Repérez que certaines fonctions (ressources, réservations, bibliothèque) ne sont pas accessibles sans compte : elles nécessitent une connexion.",
-          "Retenez que, sans compte, deux espaces vous restent ouverts : la découverte publique et l'espace « Sport cérébral »."
+          "Retenez que, sans compte, plusieurs espaces vous restent ouverts : la découverte publique, l'espace « Sport cérébral » et la présentation de la formation certifiante « CERTEL »."
         ]
       },
       {
@@ -978,13 +1138,33 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         ]
       },
       {
-        "title": "Demander un compte complet",
-        "objective": "Vous saurez comment obtenir un compte donnant accès aux ressources, aux réservations et à la bibliothèque.",
+        "title": "Découvrir CERTEL et tester gratuitement votre niveau",
+        "objective": "Vous saurez ce qu'est la formation certifiante CERTEL, où la trouver, et comment évaluer gratuitement votre niveau avant de vous inscrire.",
         "content": [
-          "Pour réserver des ressources, consulter la bibliothèque ou déposer des documents, demandez la création d'un compte auprès de l'administrateur de votre établissement.",
+          "CERTEL est une formation certifiante au numérique et à l'intelligence artificielle. Depuis le site public, ouvrez le menu « CERTEL » pour découvrir son programme : trois niveaux progressifs, chacun composé de six modules.",
+          "Lancez le diagnostic de niveau, entièrement GRATUIT : répondez aux questions, et la plateforme vous oriente automatiquement vers le niveau qui vous convient (N1, N2 ou N3).",
+          "Chaque niveau est interactif : leçons illustrées avec LECTURE AUDIO (bouton « Écouter »), exercices auto-corrigés à VÉRIFICATION IMMÉDIATE, et une évaluation CHRONOMÉTRÉE ; l'examen certifiant ne révèle les corrigés qu'À LA FIN. La réussite donne droit à un CERTIFICAT au format PDF paysage.",
+          "Pour suivre réellement la formation et passer la certification, il faut être CONNECTÉ : vous y accédez alors depuis votre tableau de bord, section « Principal » → « Formation CERTEL ». En tant que visiteur, demandez d'abord un compte (voir le module suivant).",
+          "L'inscription à CERTEL est PAYANTE par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte bancaire ; tant qu'aucun prix n'est défini, l'accès reste gratuit. Le diagnostic de niveau, lui, est toujours gratuit."
+        ]
+      },
+      {
+        "title": "Demander un compte complet",
+        "objective": "Vous saurez comment obtenir un compte donnant accès aux ressources, aux réservations, à la bibliothèque et à la formation CERTEL.",
+        "content": [
+          "Pour réserver des ressources, consulter la bibliothèque, déposer des documents ou suivre la formation CERTEL, demandez la création d'un compte auprès de l'administrateur de votre établissement.",
           "Une fois votre compte créé, vous recevez vos identifiants et un mot de passe initial à changer dès la première connexion.",
-          "Connectez-vous : votre menu s'enrichit alors des fonctions correspondant au rôle qui vous a été attribué.",
+          "Connectez-vous : votre menu s'enrichit alors des fonctions correspondant au rôle qui vous a été attribué, dont l'accès à « Formation CERTEL » dans la section « Principal ».",
           "Retenez que c'est l'administrateur de l'établissement (et non vous) qui crée le compte et attribue le rôle."
+        ]
+      },
+      {
+        "title": "Accessibilité et confort de lecture",
+        "objective": "Vous saurez profiter des aides à la lecture proposées sur les formations et les guides.",
+        "content": [
+          "Les textes des formations et des guides sont affichés dans une police d'au moins 13 px, pour un confort de lecture sur ordinateur comme sur mobile.",
+          "Sur les contenus narratifs des formations et des guides, un lecteur audio « Écouter » vous permet d'entendre le texte au lieu de le lire.",
+          "Utilisez ce bouton « Écouter » aussi bien sur les consignes du « Sport cérébral » que sur les leçons CERTEL : c'est la même aide à l'écoute, disponible partout où un narratif est proposé."
         ]
       }
     ],
@@ -993,12 +1173,12 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "question": "En tant que visiteur externe, à quels espaces pouvez-vous accéder sans aucune connexion ?",
         "options": [
           "À la bibliothèque numérique et aux réservations de salles",
-          "À la découverte publique de la plateforme et à l'espace « Sport cérébral »",
+          "À la découverte publique, à l'espace « Sport cérébral » et à la présentation de CERTEL (dont le diagnostic gratuit)",
           "À tout le tableau de bord, comme un agent",
           "À rien : tout exige un compte"
         ],
         "answer": 1,
-        "explanation": "Sans compte, le visiteur peut découvrir l'offre publique et accéder à l'espace « Sport cérébral ». Les ressources, les réservations et la bibliothèque nécessitent un compte."
+        "explanation": "Sans compte, le visiteur peut découvrir l'offre publique, accéder à l'espace « Sport cérébral » et au menu public « CERTEL » avec son diagnostic gratuit. Les ressources, les réservations, la bibliothèque et le suivi de la formation CERTEL nécessitent un compte."
       },
       {
         "question": "Comment écoutez-vous la consigne d'un jeu du « Sport cérébral » en audio ?",
@@ -1009,7 +1189,7 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "En appelant l'administrateur"
         ],
         "answer": 0,
-        "explanation": "Chaque jeu affiche sa consigne à l'écran ; un bouton « Écouter » permet de l'entendre en audio avant de jouer."
+        "explanation": "Chaque jeu affiche sa consigne à l'écran ; un bouton « Écouter » permet de l'entendre en audio avant de jouer. Ce même lecteur audio est aussi disponible sur les narratifs des formations et des guides."
       },
       {
         "question": "Combien de niveaux de difficulté sont proposés pour chaque jeu, et lesquels ?",
@@ -1045,18 +1225,29 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "explanation": "Vous jouez la partie sur votre appareil ; votre meilleur score est automatiquement retenu et intégré au classement que l'organisateur suit en direct."
       },
       {
-        "question": "Que se passe-t-il pour le « Défi du jour » et les jeux ouverts aux visiteurs si certains jeux sont réservés aux établissements abonnés ?",
+        "question": "Concernant la formation CERTEL, qu'est-ce qui est GRATUIT pour un visiteur, et qu'est-ce qui exige une inscription ?",
         "options": [
-          "Le « Défi du jour » et les jeux ouverts aux visiteurs restent toujours accessibles",
-          "Tout l'espace « Sport cérébral » devient payant",
-          "Le « Défi du jour » disparaît pour les visiteurs",
-          "Il faut un code de session pour jouer au moindre jeu"
+          "Le diagnostic de niveau est gratuit ; suivre la formation et passer la certification demandent une inscription (payante par Mobile Money ou carte, sauf si aucun prix n'est défini)",
+          "Tout est entièrement gratuit, y compris le certificat",
+          "Tout est payant, même le diagnostic de niveau",
+          "Seul le certificat PDF est payant, le reste est libre"
         ],
         "answer": 0,
-        "explanation": "Même si l'accès à certains jeux ou niveaux peut être réservé aux établissements abonnés, les jeux ouverts aux visiteurs et le « Défi du jour » restent toujours accessibles."
+        "explanation": "Le diagnostic de niveau CERTEL est toujours gratuit. Pour suivre la formation et obtenir la certification, il faut un compte et une inscription, payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; l'accès reste gratuit tant qu'aucun prix n'est défini."
       },
       {
-        "question": "Pour réserver des ressources, consulter la bibliothèque ou déposer des documents, que devez-vous faire en tant que visiteur ?",
+        "question": "Comment se déroule l'examen certifiant de CERTEL pour ce qui est des corrigés ?",
+        "options": [
+          "Les corrigés s'affichent après chaque question",
+          "Il n'y a jamais de corrigés",
+          "L'examen est chronométré et les corrigés ne sont révélés qu'à la fin",
+          "Les corrigés sont envoyés par e-mail une semaine plus tard"
+        ],
+        "answer": 2,
+        "explanation": "À la différence des exercices d'entraînement (à vérification immédiate), l'évaluation certifiante est chronométrée et ne révèle les corrigés qu'à la fin de l'examen ; la réussite donne droit à un certificat PDF paysage."
+      },
+      {
+        "question": "Pour réserver des ressources, consulter la bibliothèque, déposer des documents ou suivre la formation CERTEL, que devez-vous faire en tant que visiteur ?",
         "options": [
           "Activer ces fonctions depuis l'espace « Sport cérébral »",
           "Payer un abonnement directement en ligne",
@@ -1064,7 +1255,7 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Saisir un code de session de compétition"
         ],
         "answer": 2,
-        "explanation": "Ces fonctions exigent un compte complet : il faut en demander la création à l'administrateur de votre établissement, qui crée le compte et attribue le rôle."
+        "explanation": "Ces fonctions exigent un compte : il faut en demander la création à l'administrateur de votre établissement, qui crée le compte et attribue le rôle. La formation CERTEL devient alors accessible depuis « Principal » → « Formation CERTEL »."
       },
       {
         "question": "Après la création de votre compte, que devez-vous faire dès la première connexion ?",
@@ -1081,13 +1272,13 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
   },
   "LIBRARIAN": {
     "title": "Formation à la prise en main — Bibliothécaire / Documentaliste",
-    "intro": "Cette formation vous rend autonome dans la chaîne de traitement documentaire d'EduWeb Booking, pour le rôle « Bibliothécaire / Documentaliste » (clé LIBRARIAN), dans le périmètre de votre seul établissement. Vous apprendrez à contrôler et valider les dépôts en attente, à codifier et publier les documents au catalogue, à organiser le fonds (collections et domaines), à traiter les réservations et à suivre les emprunts physiques, et enfin à piloter l'activité par les statistiques. L'essentiel de votre travail se trouve dans la section « Bibliothèque » de votre tableau de bord ; la section « Principal » vous donne aussi accès au « Calendrier » (en consultation), au « Sport cérébral » et à « Mon compte ». Vous ne disposez pas des menus de réservation de salles (« Salles multimédias », « Mes réservations »), ni des sections « Administration » et « Plateforme » : ces espaces ne font pas partie du périmètre du bibliothécaire. Chaque étape ci-dessous cite les libellés exacts de l'application. Terminez par l'auto-évaluation pour vérifier votre compréhension.",
+    "intro": "Cette formation vous rend autonome dans la chaîne de traitement documentaire d'EduWeb Booking, pour le rôle « Bibliothécaire / Documentaliste » (clé LIBRARIAN), dans le périmètre de votre seul établissement. Vous apprendrez à contrôler et valider les dépôts en attente, à codifier et publier les documents au catalogue, à organiser le fonds (collections et domaines), à traiter les réservations et à suivre les emprunts physiques, et enfin à piloter l'activité par les statistiques. L'essentiel de votre travail se trouve dans la section « Bibliothèque » de votre tableau de bord ; la section « Principal » vous donne aussi accès au « Calendrier » (en consultation), au « Sport cérébral », à « Formation CERTEL » (la formation certifiante au numérique et à l'intelligence artificielle, ouverte à tout utilisateur connecté) et à « Mon compte ». Vous ne disposez pas des menus de réservation de salles (« Salles multimédias », « Mes réservations »), ni des sections « Administration » et « Plateforme » : ces espaces ne font pas partie du périmètre du bibliothécaire. Par souci d'accessibilité, les textes narratifs des formations et des guides s'affichent dans une police d'au moins 13 px et sont accompagnés d'un lecteur audio « Écouter ». Chaque étape ci-dessous cite les libellés exacts de l'application. Terminez par l'auto-évaluation pour vérifier votre compréhension.",
     "modules": [
       {
         "title": "Module 1 — Repérer votre espace et vos menus",
         "objective": "Vous saurez naviguer dans votre tableau de bord et lire la vue d'ensemble du fonds.",
         "content": [
-          "Connectez-vous, puis repérez dans la barre latérale la section « Principal » (Accueil, Tableau de bord, Calendrier, Sport cérébral, Mon compte) et surtout la section « Bibliothèque », qui regroupe l'essentiel de votre travail.",
+          "Connectez-vous, puis repérez dans la barre latérale la section « Principal » (Accueil, Tableau de bord, Calendrier, Sport cérébral, Formation CERTEL, Mon compte) et surtout la section « Bibliothèque », qui regroupe l'essentiel de votre travail.",
           "Dans « Bibliothèque », identifiez les dix entrées : « Bibliothèque », « Explorer », « Déposer », « Documents », « À vérifier », « Réservations doc. », « Emprunts », « Statistiques doc. », « Collections » et « Domaines ».",
           "Ouvrez « Bibliothèque » pour la page « Bibliothèque numérique » : lisez les indicateurs clés (« Documents », « En attente de validation », « Consultations », « Téléchargements »), les « Dépôts mensuels », les répartitions par type et par domaine et les « Derniers dépôts ».",
           "Repérez sur cette page l'encadré « dépôt(s) à vérifier » et les « Alertes » (documents sans fichier, métadonnées incomplètes, doublons) qui signalent ce qui demande votre attention.",
@@ -1138,6 +1329,17 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "À la restitution, cliquez sur « Marquer rendu » : la disponibilité physique du document est recréditée et la date de retour enregistrée.",
           "Pour piloter, ouvrez « Statistiques doc. » et suivez les indicateurs (« Documents », « Publiés », « En attente », « Réservations », « Consultations », « Téléchargements », « Emprunts en cours », « Domaines couverts ») ainsi que les répartitions et les « Documents les plus consultés ».",
           "Pour gérer votre compte, ouvrez « Mon compte » puis « Changer mon mot de passe » : saisissez le « Mot de passe actuel », le « Nouveau mot de passe » (au moins 8 caractères) et sa confirmation, puis cliquez sur « Mettre à jour le mot de passe »."
+        ]
+      },
+      {
+        "title": "Module 6 — Vous former et vous certifier avec CERTEL",
+        "objective": "Vous saurez accéder à la formation certifiante CERTEL, évaluer votre niveau et suivre les parcours interactifs jusqu'au certificat.",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'intelligence artificielle, accessible à tout utilisateur connecté : depuis votre tableau de bord, ouvrez « Formation CERTEL » dans la section « Principal » ; depuis le site public, utilisez le menu « CERTEL ».",
+          "Commencez par le « Diagnostic de niveau », gratuit : il vous situe sur l'un des trois niveaux interactifs et vous oriente vers le parcours adapté.",
+          "Chaque niveau comporte six modules : des leçons illustrées avec « Lecture audio » (bouton « Écouter »), des exercices auto-corrigés à vérification immédiate et une évaluation chronométrée.",
+          "Passez l'évaluation certifiante quand vous êtes prêt : c'est un examen dont les corrigés ne sont révélés qu'à la fin, et la réussite donne droit à un certificat PDF au format paysage.",
+          "L'inscription peut être payante (Mobile Money — Wave, Orange Money, MTN, Moov — ou carte) ; tant qu'aucun prix n'est défini, l'accès reste gratuit. Le super administrateur dispose d'un accès complet sans paiement et règle les tarifs et les évaluations dans la section « Plateforme » ; ces réglages tarifaires ne relèvent pas du rôle de bibliothécaire."
         ]
       }
     ],
@@ -1225,25 +1427,48 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "« À vérifier » dans la section « Bibliothèque »",
           "« Salles multimédias », qui n'apparaît pas dans le périmètre du bibliothécaire",
           "« Statistiques doc. » dans la section « Bibliothèque »",
-          "« Calendrier » (en consultation) dans la section « Principal »"
+          "« Formation CERTEL » dans la section « Principal »"
         ],
         "answer": 1,
-        "explanation": "« Salles multimédias » et « Mes réservations », comme les sections « Administration » et « Plateforme », ne font pas partie du périmètre du bibliothécaire et n'apparaissent pas dans sa barre latérale ; celui-ci dispose des entrées « Bibliothèque » et, en « Principal », du « Calendrier » en consultation."
+        "explanation": "« Salles multimédias » et « Mes réservations », comme les sections « Administration » et « Plateforme », ne font pas partie du périmètre du bibliothécaire et n'apparaissent pas dans sa barre latérale ; en revanche « À vérifier », « Statistiques doc. » (section « Bibliothèque ») et « Formation CERTEL » (section « Principal ») lui sont bien accessibles."
+      },
+      {
+        "question": "Comment accédez-vous à la formation certifiante CERTEL et par quoi commencer ?",
+        "options": [
+          "Par la section « Administration » ; elle commence par un paiement obligatoire",
+          "Par « Formation CERTEL » dans la section « Principal » (ou le menu public « CERTEL »), en commençant par le diagnostic de niveau gratuit",
+          "Uniquement par la section « Bibliothèque », réservée au bibliothécaire",
+          "Par « Statistiques doc. », après publication d'un document"
+        ],
+        "answer": 1,
+        "explanation": "CERTEL est ouverte à tout utilisateur connecté : ouvrez « Formation CERTEL » dans la section « Principal » du tableau de bord, ou le menu public « CERTEL ». On débute par le diagnostic de niveau, qui est gratuit et oriente vers le parcours adapté."
+      },
+      {
+        "question": "Concernant les évaluations CERTEL et l'accès à la formation, quelle affirmation est exacte ?",
+        "options": [
+          "L'évaluation certifiante révèle les corrigés à la fin et la réussite donne un certificat PDF paysage ; l'accès est gratuit tant qu'aucun prix n'est défini",
+          "Les corrigés s'affichent après chaque question de l'examen certifiant",
+          "L'inscription est toujours payante, sans aucune exception",
+          "Seul le bibliothécaire peut délivrer le certificat CERTEL"
+        ],
+        "answer": 0,
+        "explanation": "L'évaluation certifiante ne révèle ses corrigés qu'à la fin et la réussite donne droit à un certificat PDF au format paysage. L'inscription peut être payante (Mobile Money ou carte), mais l'accès reste gratuit tant qu'aucun prix n'est défini ; le super administrateur a un accès complet sans paiement et règle tarifs et évaluations sous « Plateforme »."
       }
     ]
   },
   "DEPOSITOR": {
     "title": "Formation à la prise en main — Déposant",
-    "intro": "Bienvenue dans votre parcours de formation au rôle de « Déposant » sur EduWeb Booking. En tant que déposant — enseignant, chercheur, étudiant ou personnel chargé d'alimenter la bibliothèque numérique de votre établissement — vous disposez de quatre actions documentaires : consulter le catalogue autorisé, déposer une ressource, télécharger les documents permis, et réserver ou emprunter un document. Cette formation progressive vous rendra pleinement autonome, en n'utilisant que les fonctions réellement ouvertes à votre rôle. Les fonctions de validation documentaire, de pilotage de la bibliothèque, de gestion du fonds, de réservation de salles et d'administration ne relèvent pas de votre profil : il est normal que ces menus n'apparaissent pas dans votre barre latérale. Chaque module cite les libellés exacts des menus et boutons de l'application. À la fin, une auto-évaluation vous permettra de vérifier vos acquis.",
+    "intro": "Bienvenue dans votre parcours de formation au rôle de « Déposant » sur EduWeb Booking. En tant que déposant — enseignant, chercheur, étudiant ou personnel chargé d'alimenter la bibliothèque numérique de votre établissement — vous disposez de quatre actions documentaires : consulter le catalogue autorisé, déposer une ressource, télécharger les documents permis, et réserver ou emprunter un document. Cette formation progressive vous rendra pleinement autonome, en n'utilisant que les fonctions réellement ouvertes à votre rôle. Les fonctions de validation documentaire, de pilotage de la bibliothèque, de gestion du fonds, de réservation de salles et d'administration ne relèvent pas de votre profil : il est normal que ces menus n'apparaissent pas dans votre barre latérale. Vous accédez en revanche, comme tout utilisateur connecté, à la formation certifiante au numérique et à l'IA « CERTEL ». Chaque module cite les libellés exacts des menus et boutons de l'application. Pour le confort de lecture, les textes des formations et des guides s'affichent dans une police d'au moins 13 pixels et sont accompagnés d'un lecteur audio « Écouter ». À la fin, une auto-évaluation à correction immédiate vous permettra de vérifier vos acquis.",
     "modules": [
       {
         "title": "Module 1 — Découvrir votre espace et repérer vos menus",
         "objective": "À la fin de ce module, vous saurez vous repérer dans votre barre latérale et identifier les cinq entrées de la section « Bibliothèque ».",
         "content": [
-          "Connectez-vous, puis ouvrez « Tableau de bord » dans la section « Principal » de la barre latérale ; cette section vous donne aussi accès à « Accueil », « Sport cérébral » et « Mon compte ».",
+          "Connectez-vous, puis ouvrez « Tableau de bord » dans la section « Principal » de la barre latérale ; cette section vous donne aussi accès à « Accueil », « Sport cérébral », « Formation CERTEL » et « Mon compte ».",
           "Dépliez la section « Bibliothèque » : vous y disposez de cinq entrées — « Bibliothèque », « Explorer », « Déposer », « Documents » et « Réservations doc. ».",
           "Comprenez que les menus de validation (« À vérifier », « Emprunts »), de pilotage (« Statistiques doc. »), de gestion (« Collections », « Domaines »), de réservation de salles (« Calendrier », « Salles multimédias », « Mes réservations ») et la section « Administration » n'apparaissent pas chez vous : ils relèvent d'autres rôles.",
           "Pour une vue d'ensemble du fonds, ouvrez « Bibliothèque » : la page « Bibliothèque numérique » affiche les indicateurs « Documents », « En attente de validation », « Consultations » et « Téléchargements », ainsi que la liste « Derniers dépôts ».",
+          "Pour plus de confort, repérez sur les pages de formation et les guides le bouton « Écouter » qui lit le texte à voix haute, la police étant toujours d'au moins 13 pixels.",
           "Sur téléphone, retrouvez ces mêmes accès via la barre d'onglets en bas de l'écran, le bouton flottant d'action et le menu latéral coulissant."
         ]
       },
@@ -1289,9 +1514,20 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Sur la fiche d'un document, si un exemplaire physique est disponible, cliquez sur « Réserver / Emprunter » : choisissez le « Type de demande » (Consultation sur place ou Emprunt physique), précisez le créneau « Début (sur place) » et « Fin » et un « Motif / note », puis cliquez sur « Envoyer la demande ».",
           "Pour un document restreint ou confidentiel auquel vous n'avez pas accès, cliquez sur « Demander l'accès », ajoutez votre motif et validez : le message « Votre demande a été transmise au documentaliste. » s'affiche.",
           "Suivez l'avancement dans « Réservations doc. » : votre demande passe de « En attente » à « Approuvée » ou « Refusée », et vous êtes notifié de la décision.",
-          "Dans la section « Principal », ouvrez « Sport cérébral » pour suivre scores et badges et relever le « Défi du jour » ; depuis la page d'accueil, lancez le test de niveau certifiant « CERTEL » pour situer votre niveau numérique.",
+          "Dans la section « Principal », ouvrez « Sport cérébral » pour suivre scores et badges et relever le « Défi du jour » ; pour situer et renforcer votre niveau numérique, ouvrez « Formation CERTEL » (voir le module suivant).",
           "Ouvrez « Mon compte » pour vérifier vos informations, puis dans « Changer mon mot de passe » saisissez le « Mot de passe actuel », le « Nouveau mot de passe » (au moins 8 caractères) et sa confirmation avant de cliquer sur « Mettre à jour le mot de passe ».",
           "En cas de difficulté, ouvrez « Support » ou « Centre d'aide » dans la section « Aide » ; le « Centre d'aide » affiche ce guide et permet de le télécharger en PDF ou en Word."
+        ]
+      },
+      {
+        "title": "Module 6 — Se former et se certifier avec CERTEL",
+        "objective": "À la fin de ce module, vous saurez situer votre niveau, suivre les formations CERTEL et obtenir votre certificat, en connaissant les conditions d'accès et de paiement.",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'intelligence artificielle, ouverte à tout utilisateur connecté : depuis le tableau de bord, ouvrez « Formation CERTEL » dans la section « Principal » ; sinon, utilisez l'entrée « CERTEL » du menu public.",
+          "Commencez par le diagnostic de niveau, gratuit : il situe votre profil sur l'un des trois niveaux, chacun étant un parcours interactif de six modules.",
+          "Dans chaque module, suivez les leçons illustrées avec « lecture audio », puis entraînez-vous sur les exercices auto-corrigés à vérification immédiate qui vous indiquent aussitôt si votre réponse est juste.",
+          "Terminez un niveau par son évaluation : l'entraînement est chronométré, et l'examen certifiant ne révèle les corrigés qu'à la fin pour préserver l'équité ; en cas de réussite, vous obtenez un certificat PDF au format paysage.",
+          "L'inscription est payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; tant qu'aucun prix n'est défini, l'accès reste gratuit. Le super administrateur dispose d'un accès complet sans paiement et règle les tarifs et les évaluations dans la section « Plateforme »."
         ]
       }
     ],
@@ -1383,12 +1619,34 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         ],
         "answer": 2,
         "explanation": "Le nouveau mot de passe doit comporter au moins 8 caractères ; vous saisissez aussi le mot de passe actuel et la confirmation avant de cliquer sur « Mettre à jour le mot de passe »."
+      },
+      {
+        "question": "Comment accédez-vous à la formation certifiante « CERTEL » et que coûte le diagnostic de niveau ?",
+        "options": [
+          "Elle est réservée aux administrateurs ; le diagnostic est payant",
+          "Par « Formation CERTEL » dans « Principal » (ou le menu public « CERTEL »), ouverte à tout utilisateur connecté ; le diagnostic de niveau est gratuit",
+          "Uniquement via la page « Déposer » ; le diagnostic coûte un abonnement annuel",
+          "Par la section « Bibliothèque » ; le diagnostic n'existe pas"
+        ],
+        "answer": 1,
+        "explanation": "CERTEL est accessible à tout utilisateur connecté via « Formation CERTEL » dans la section « Principal », ou via l'entrée « CERTEL » du menu public. Le diagnostic de niveau y est gratuit."
+      },
+      {
+        "question": "Comment fonctionnent l'inscription à CERTEL et l'examen certifiant ?",
+        "options": [
+          "L'inscription est toujours gratuite et l'examen affiche les corrigés question par question",
+          "L'inscription est payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte — gratuite tant qu'aucun prix n'est défini — et l'examen certifiant ne révèle les corrigés qu'à la fin",
+          "L'inscription se règle uniquement en espèces au guichet et l'examen n'est pas corrigé",
+          "L'inscription est réservée au super administrateur et l'examen n'est pas chronométré"
+        ],
+        "answer": 1,
+        "explanation": "L'inscription à CERTEL est payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte, et reste gratuite tant qu'aucun prix n'est défini. L'évaluation certifiante ne dévoile les corrigés qu'à la fin ; en cas de réussite, un certificat PDF paysage est délivré."
       }
     ]
   },
   "SCIENTIFIC_VALIDATOR": {
     "title": "Formation et auto-évaluation — Validateur scientifique",
-    "intro": "Bienvenue dans le parcours de prise en main du rôle « Validateur scientifique » d'EduWeb Booking. En tant qu'enseignant-chercheur ou expert disciplinaire, votre mission est d'apporter un regard d'expert sur le FOND d'un mémoire, d'un article ou d'un rapport déposé dans la bibliothèque numérique de votre institution : vous le consultez, vous l'étudiez si besoin hors ligne, puis vous enregistrez un avis scientifique motivé (Favorable ou Réservé). Cette formation vous rend autonome dans cette tâche et clarifie la frontière entre votre expertise scientifique et le contrôle documentaire (vérification, codification, publication, archivage) qui relève du bibliothécaire / documentaliste. Votre menu, volontairement épuré, reflète ce périmètre. Suivez les modules dans l'ordre, puis validez vos acquis avec le QCM final.",
+    "intro": "Bienvenue dans le parcours de prise en main du rôle « Validateur scientifique » d'EduWeb Booking. En tant qu'enseignant-chercheur ou expert disciplinaire, votre mission est d'apporter un regard d'expert sur le FOND d'un mémoire, d'un article ou d'un rapport déposé dans la bibliothèque numérique de votre institution : vous le consultez, vous l'étudiez si besoin hors ligne, puis vous enregistrez un avis scientifique motivé (Favorable ou Réservé). Cette formation vous rend autonome dans cette tâche et clarifie la frontière entre votre expertise scientifique et le contrôle documentaire (vérification, codification, publication, archivage) qui relève du bibliothécaire / documentaliste. Comme tout utilisateur connecté, vous avez aussi accès à la formation certifiante CERTEL au numérique et à l'intelligence artificielle, utile pour consolider vos compétences d'expertise documentaire numérique. Suivez les modules dans l'ordre, puis validez vos acquis avec le QCM final.",
     "modules": [
       {
         "title": "Comprendre votre rôle et votre périmètre",
@@ -1396,7 +1654,7 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "content": [
           "Votre rôle est l'expertise scientifique : vous portez un avis sur le fond d'un document, sans gérer son cycle documentaire.",
           "La validation documentaire proprement dite (vérification des métadonnées, génération du code définitif, demande de correction, publication, archivage ou rejet) relève du bibliothécaire / documentaliste, pas de vous.",
-          "Dans la barre latérale, votre menu se limite à « Principal » (Accueil, Tableau de bord, Sport cérébral, Mon compte), à « Bibliothèque » (Bibliothèque, Explorer, Documents) et à « Aide » (Support, Centre d'aide) : c'est normal et conforme à votre mission.",
+          "Dans la barre latérale, votre menu se limite à « Principal » (Accueil, Tableau de bord, Formation CERTEL, Sport cérébral, Mon compte), à « Bibliothèque » (Bibliothèque, Explorer, Documents) et à « Aide » (Support, Centre d'aide) : c'est normal et conforme à votre mission.",
           "Vous pouvez consulter les documents et télécharger ceux qui l'autorisent, mais vous ne pouvez ni déposer un document, ni le réserver ou l'emprunter : les écrans Calendrier, Salles multimédias ou Mes réservations ne figurent pas dans votre menu.",
           "Votre avis ne peut porter que sur les documents de votre PROPRE institution : c'est une exigence du contrôle d'accès, et le bouton d'avis n'apparaît que dans ce cas."
         ]
@@ -1419,7 +1677,8 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Sur la fiche, lisez d'abord le « Résumé », puis le bloc « Métadonnées » (auteur principal, co-auteurs, directeur, année, langue, niveau, institution, bibliothèque…) et les « Mots-clés ».",
           "Dans l'encadré « Accès au document », cliquez sur « Consulter » pour lire le texte intégral à l'écran lorsque la consultation est autorisée.",
           "Si le téléchargement est autorisé, utilisez le bouton « Télécharger » pour étudier le document hors ligne avant de formuler votre avis.",
-          "Parcourez l'encadré « Historique & avis » pour voir les décisions et avis déjà enregistrés ; il n'apparaît que si au moins un avis ou une décision existe déjà."
+          "Parcourez l'encadré « Historique & avis » pour voir les décisions et avis déjà enregistrés ; il n'apparaît que si au moins un avis ou une décision existe déjà.",
+          "Pour votre confort de lecture, les textes narratifs de la plateforme sont affichés dans une police d'au moins 13 px et un lecteur audio « Écouter » permet d'en faire la lecture à voix haute, un appui appréciable lors de longues sessions d'expertise."
         ]
       },
       {
@@ -1431,6 +1690,17 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
           "Saisissez votre appréciation dans le champ « Commentaire » pour motiver et argumenter votre avis : ce commentaire est facultatif, mais vivement recommandé.",
           "Cliquez sur « Enregistrer l'avis » pour valider ; le bouton « Annuler » vous permet de renoncer sans rien enregistrer.",
           "Votre avis apparaît aussitôt dans l'« Historique & avis » sous la mention « Avis scientifique favorable » ou « Avis scientifique réservé », à votre nom et daté."
+        ]
+      },
+      {
+        "title": "Monter en compétences avec la formation CERTEL",
+        "objective": "Découvrir la formation certifiante au numérique et à l'IA, ouverte à tout utilisateur connecté.",
+        "content": [
+          "CERTEL est une formation certifiante au numérique et à l'intelligence artificielle, accessible à tout utilisateur connecté : depuis le tableau de bord, ouvrez la section « Principal » puis « Formation CERTEL » ; le menu public « CERTEL » y conduit également.",
+          "Commencez par le diagnostic GRATUIT, qui situe votre niveau ; le parcours comprend ensuite 3 niveaux interactifs (6 modules chacun) avec leçons audio, exercices auto-corrigés à VÉRIFICATION IMMÉDIATE et une évaluation CHRONOMÉTRÉE.",
+          "L'évaluation certifiante de fin de niveau présente les corrigés de l'examen À LA FIN, puis délivre un CERTIFICAT au format PDF paysage.",
+          "L'inscription est PAYANTE par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte bancaire ; tant qu'aucun prix n'a été défini, l'accès reste gratuit.",
+          "Le Super administrateur dispose d'un accès complet sans paiement et règle les tarifs ainsi que les évaluations depuis la section « Plateforme »."
         ]
       },
       {
@@ -1525,12 +1795,32 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         ],
         "answer": 2,
         "explanation": "L'avis apparaît aussitôt dans l'« Historique & avis » du document sous la mention « Avis scientifique favorable » ou « Avis scientifique réservé », à votre nom et daté."
+      },
+      {
+        "question": "Comment accédez-vous à la formation CERTEL et que propose-t-elle d'abord gratuitement ?",
+        "options": [
+          "Uniquement sur invitation du documentaliste ; elle commence par l'examen certifiant",
+          "Depuis « Principal » › « Formation CERTEL » (ou le menu public « CERTEL ») ; elle commence par un diagnostic gratuit",
+          "Par la page « Mes réservations » ; tout y est payant dès le départ"
+        ],
+        "answer": 1,
+        "explanation": "CERTEL est ouverte à tout utilisateur connecté via « Principal » › « Formation CERTEL » ou le menu public « CERTEL », et débute par un diagnostic GRATUIT avant les 3 niveaux interactifs."
+      },
+      {
+        "question": "Comment se déroulent les exercices et l'examen certifiant de CERTEL ?",
+        "options": [
+          "Exercices auto-corrigés à vérification immédiate ; corrigés de l'examen certifiant affichés à la fin, avec un certificat PDF paysage",
+          "Tous les corrigés, exercices comme examen, sont donnés immédiatement",
+          "Aucune correction n'est fournie et aucun certificat n'est délivré"
+        ],
+        "answer": 0,
+        "explanation": "Les exercices proposent une VÉRIFICATION IMMÉDIATE, l'évaluation est chronométrée, les corrigés de l'examen certifiant apparaissent À LA FIN, puis un CERTIFICAT PDF paysage est délivré."
       }
     ]
   },
   "READER": {
     "title": "Formation à la prise en main — Lecteur interne",
-    "intro": "Cette formation vous prépare à utiliser EduWeb Booking avec le rôle « Lecteur interne » (clé READER). En tant que lecteur, vous consultez le fonds documentaire autorisé de votre établissement : vous explorez le catalogue, consultez et téléchargez les documents auxquels vous avez droit, demandez l'accès aux ressources restreintes, réservez un exemplaire physique ou une consultation sur place, et suivez l'état de vos demandes. Vous pouvez aussi vous entraîner sur l'espace « Sport cérébral », situer votre niveau avec le test CERTEL et gérer la sécurité de votre compte. Important : vous consultez les ressources, vous ne déposez pas et ne validez pas de documents (ces actions relèvent du déposant et du documentaliste). À l'issue de cette formation, vous serez autonome sur l'ensemble de ces actions, puis vous validerez vos acquis avec une auto-évaluation.",
+    "intro": "Cette formation vous prépare à utiliser EduWeb Booking avec le rôle « Lecteur interne » (clé READER). En tant que lecteur, vous consultez le fonds documentaire autorisé de votre établissement : vous explorez le catalogue, consultez et téléchargez les documents auxquels vous avez droit, demandez l'accès aux ressources restreintes, réservez un exemplaire physique ou une consultation sur place, et suivez l'état de vos demandes. Vous pouvez aussi vous entraîner sur l'espace « Sport cérébral », suivre la formation certifiante CERTEL (numérique et IA), situer votre niveau avec le diagnostic CERTEL et gérer la sécurité de votre compte. Important : vous consultez les ressources, vous ne déposez pas et ne validez pas de documents (ces actions relèvent du déposant et du documentaliste). Pour le confort de lecture, les contenus de formation et les guides s'affichent avec une police d'au moins 13 px et un bouton « Écouter » qui lit les passages narratifs à voix haute. À l'issue de cette formation, vous serez autonome sur l'ensemble de ces actions, puis vous validerez vos acquis avec une auto-évaluation.",
     "modules": [
       {
         "title": "Module 1 — Explorer le catalogue documentaire",
@@ -1569,27 +1859,37 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         ]
       },
       {
-        "title": "Module 4 — Sport cérébral et test de niveau CERTEL",
-        "objective": "Vous saurez vous entraîner sur le Sport cérébral, rejoindre une compétition et évaluer votre niveau avec CERTEL.",
+        "title": "Module 4 — Sport cérébral et compétitions",
+        "objective": "Vous saurez vous entraîner sur le Sport cérébral et rejoindre une compétition.",
         "content": [
           "Dans la section « Principal », ouvrez « Sport cérébral » pour consulter vos scores, votre progression, vos badges et le « Défi du jour ».",
           "Cliquez sur « Jouer » (ou « Relever le défi ») pour accéder à l'espace des jeux, choisissez un jeu et un niveau (Débutant, Intermédiaire ou Avancé), puis suivez la consigne affichée à l'écran ou via le bouton « Écouter ».",
           "Pour rejoindre une compétition, repérez l'encadré « Compétition », saisissez le code de session dans le champ « CODE » puis cliquez sur « Rejoindre » ; votre score est pris en compte dans le classement de l'organisateur.",
-          "Depuis la page d'accueil publique, cliquez sur le bouton flottant violet « Test de niveau · CERTEL · gratuit ».",
-          "Renseignez votre profil, répondez aux questions sur le numérique et l'IA, puis validez pour lire votre niveau conseillé (N1, N2 ou N3) calculé automatiquement.",
-          "Pour découvrir les thèmes et contenus par niveau, consultez la page du programme CERTEL accessible depuis l'accueil."
+          "Les consignes des jeux et les contenus de formation s'affichent en police d'au moins 13 px ; utilisez le bouton « Écouter » pour en obtenir la lecture audio."
         ]
       },
       {
-        "title": "Module 5 — Mobile, compte, sécurité et aide",
+        "title": "Module 5 — Se former et se certifier avec CERTEL",
+        "objective": "Vous saurez situer votre niveau, suivre la formation certifiante CERTEL au numérique et à l'IA, et obtenir votre certificat.",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'intelligence artificielle, accessible à tout utilisateur connecté : depuis le tableau de bord, section « Principal », ouvrez « Formation CERTEL » ; sans connexion, le menu public « CERTEL » reste disponible.",
+          "Commencez par le « Diagnostic de niveau » GRATUIT : renseignez votre profil, répondez aux questions sur le numérique et l'IA, puis validez pour lire votre niveau conseillé (N1, N2 ou N3), calculé automatiquement par la plateforme.",
+          "Suivez ensuite le niveau adapté : chaque niveau comprend 6 modules de leçons illustrées avec lecture audio, des exercices auto-corrigés à vérification immédiate, et une évaluation chronométrée.",
+          "Passez l'évaluation certifiante quand vous vous sentez prêt : c'est un examen chronométré qui ne révèle les corrigés qu'à la fin, afin d'attester votre niveau de façon fiable.",
+          "En cas de réussite, téléchargez votre certificat au format PDF paysage, à votre nom.",
+          "L'inscription à un niveau peut être payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte bancaire ; elle reste gratuite tant qu'aucun prix n'est défini pour ce niveau. Le super administrateur dispose d'un accès complet sans paiement et règle les tarifs et les évaluations dans la section « Plateforme »."
+        ]
+      },
+      {
+        "title": "Module 6 — Mobile, compte, sécurité et aide",
         "objective": "Vous saurez naviguer sur mobile, gérer votre mot de passe et obtenir de l'aide.",
         "content": [
           "Sur téléphone, utilisez la barre d'onglets en bas de l'écran : « Accueil » (votre tableau de bord) et « Biblio » (la bibliothèque), et touchez « Explorer » pour rechercher un document.",
-          "Le bouton flottant central porte le libellé « Jouer » et ouvre l'espace Sport cérébral ; touchez « Menu » pour retrouver « Documents », « Réservations doc. » et « Mon compte ».",
+          "Le bouton flottant central porte le libellé « Jouer » et ouvre l'espace Sport cérébral ; touchez « Menu » pour retrouver « Documents », « Réservations doc. », « Formation CERTEL » et « Mon compte ».",
           "Dans « Principal », ouvrez « Mon compte » pour vérifier vos informations : nom, e-mail (et fonction le cas échéant), établissement et rôle.",
           "Dans l'encadré « Changer mon mot de passe », renseignez « Mot de passe actuel », « Nouveau mot de passe » (au moins 8 caractères) et « Confirmer le nouveau mot de passe », puis cliquez sur « Mettre à jour le mot de passe ».",
           "Si la déconnexion automatique après inactivité est activée, la fenêtre « Toujours là ? » s'affiche : cliquez sur « Rester connecté » pour prolonger votre session.",
-          "Ouvrez « Centre d'aide » pour relire ce guide ou le télécharger en PDF ou en Word, et « Support » pour contacter l'assistance."
+          "Ouvrez « Centre d'aide » pour relire ce guide ou le télécharger en PDF ou en Word, et « Support » pour contacter l'assistance ; les passages narratifs des guides peuvent être lus à voix haute grâce au bouton « Écouter »."
         ]
       }
     ],
@@ -1650,15 +1950,37 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "explanation": "La page « Réservations documentaires », ouverte via « Bibliothèque » › « Réservations doc. », affiche chaque demande avec son type et son statut ; vous pouvez rouvrir la fiche en cliquant sur le titre."
       },
       {
-        "question": "Comment rejoignez-vous une compétition organisée dans l'espace Sport cérébral ?",
+        "question": "Depuis le tableau de bord, comment accédez-vous à la formation certifiante CERTEL au numérique et à l'IA ?",
         "options": [
-          "En saisissant le code de session dans le champ « CODE » de l'encadré « Compétition », puis en cliquant sur « Rejoindre »",
-          "En cliquant sur « Défi du jour »",
-          "En envoyant une demande au documentaliste",
-          "En téléchargeant une application séparée"
+          "Par la section « Principal » › « Formation CERTEL »",
+          "Par « Bibliothèque » › « Explorer »",
+          "Par « Mon compte » › « Sécurité »",
+          "La formation CERTEL n'est pas accessible aux lecteurs"
         ],
         "answer": 0,
-        "explanation": "L'encadré « Compétition » permet de saisir le code de session dans le champ « CODE » puis de cliquer sur « Rejoindre » ; votre score compte ensuite dans le classement de l'organisateur."
+        "explanation": "CERTEL est accessible à tout utilisateur connecté : depuis le tableau de bord, section « Principal » › « Formation CERTEL » (ou le menu public « CERTEL » sans connexion)."
+      },
+      {
+        "question": "Comment se déroule l'évaluation certifiante de CERTEL ?",
+        "options": [
+          "Elle affiche la bonne réponse après chaque question",
+          "C'est un examen chronométré qui ne révèle les corrigés qu'à la fin ; en cas de réussite, vous obtenez un certificat PDF paysage",
+          "Elle est notée manuellement par le documentaliste",
+          "Elle n'est accessible qu'au super administrateur"
+        ],
+        "answer": 1,
+        "explanation": "L'examen certifiant est chronométré et ne dévoile les corrigés qu'à la fin, pour attester le niveau de façon fiable ; la réussite donne droit à un certificat au format PDF paysage."
+      },
+      {
+        "question": "À propos de l'inscription à un niveau CERTEL, quelle affirmation est exacte ?",
+        "options": [
+          "Elle est toujours gratuite pour tout le monde",
+          "Seul le paiement par carte bancaire est accepté",
+          "Elle peut être payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte, et reste gratuite tant qu'aucun prix n'est défini",
+          "Elle nécessite l'accord préalable du documentaliste"
+        ],
+        "answer": 2,
+        "explanation": "L'inscription peut être payante par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; tant qu'aucun prix n'est fixé pour le niveau, l'accès reste gratuit. Le super administrateur règle les tarifs sous « Plateforme » et dispose d'un accès complet sans paiement."
       },
       {
         "question": "Quelle est la longueur minimale exigée pour un nouveau mot de passe dans « Mon compte » ?",
