@@ -13,7 +13,7 @@ export default async function GuidePrintPage() {
   const guides = roles.length ? roles : [];
 
   return (
-    <div className="mx-auto max-w-3xl p-8">
+    <div className="formation-scope mx-auto max-w-3xl p-8">
       <div className="mb-6 flex items-start justify-between border-b border-border pb-5">
         <div>
           <BrandLogo />

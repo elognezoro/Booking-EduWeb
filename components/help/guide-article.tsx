@@ -1,6 +1,7 @@
 import { BookOpenCheck, CircleCheck, ListChecks, Target } from "lucide-react";
 import type { RoleGuide } from "@/lib/guides";
 import { ACCOUNT_SECTION } from "@/lib/guide-account-section";
+import { AudioReader } from "@/components/certel/n1/audio-reader";
 
 /**
  * Rendu didactique d'un guide d'utilisation (Centre d'aide + version PDF) :
@@ -9,6 +10,10 @@ import { ACCOUNT_SECTION } from "@/lib/guide-account-section";
  */
 export function GuideArticle({ guide, roleLabel }: { guide: RoleGuide; roleLabel?: string }) {
   const sections = [...guide.sections, ACCOUNT_SECTION];
+  const speech = [
+    guide.title + ".", guide.intro, "Ce que vous pouvez faire.", ...guide.can,
+    "Démarche pas à pas.", ...sections.flatMap((s) => [s.title + ".", ...s.steps]),
+  ].join(" ");
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card break-inside-avoid">
       <header className="border-b border-border bg-secondary/40 px-5 py-4 sm:px-6">
@@ -16,7 +21,10 @@ export function GuideArticle({ guide, roleLabel }: { guide: RoleGuide; roleLabel
           <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-foreground">
             <BookOpenCheck className="size-5 shrink-0 text-primary" /> {guide.title}
           </h2>
-          {roleLabel && <span className="rounded-full bg-advanced-soft px-2.5 py-1 text-xs font-bold text-advanced-fg">{roleLabel}</span>}
+          <div className="flex items-center gap-2">
+            <span className="no-print"><AudioReader text={speech} label="Écouter le guide" /></span>
+            {roleLabel && <span className="rounded-full bg-advanced-soft px-2.5 py-1 text-xs font-bold text-advanced-fg">{roleLabel}</span>}
+          </div>
         </div>
       </header>
 

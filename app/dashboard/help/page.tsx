@@ -19,7 +19,7 @@ export default async function HelpPage() {
   const allRoles = (ROLES as readonly RoleKey[]).filter((r) => r in ROLE_GUIDES);
 
   return (
-    <div className="space-y-6">
+    <div className="formation-scope space-y-6">
       <PageHeader
         title="Centre d'aide"
         description="Votre guide d'utilisation, adapté à votre rôle — consultable en ligne et téléchargeable en PDF."

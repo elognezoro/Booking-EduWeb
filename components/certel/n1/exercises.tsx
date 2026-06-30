@@ -1,11 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, X, RotateCcw, ChevronUp, ChevronDown, Lightbulb, CircleHelp, Trophy, Send } from "lucide-react";
+import { Check, X, RotateCcw, ChevronUp, ChevronDown, Lightbulb, CircleHelp, Trophy, Send, Clock } from "lucide-react";
 import type { N1Exercise } from "@/lib/certel/niveau1/types";
 import { AudioReader } from "./audio-reader";
 
 const N1 = "var(--certel-accent, #0891B2)"; // accent du niveau (défini par .certel-level sur la page)
+
+/** Durée écoulée formatée : "m:ss" (ou "h:mm:ss" au-delà d'une heure). */
+function fmtDuration(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const ss = s % 60;
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}` : `${m}:${String(ss).padStart(2, "0")}`;
+}
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -310,6 +319,21 @@ export function ExercisePlayer({ exercises, onComplete, immediateFeedback = true
   const pct = total ? Math.round((score / total) * 100) : 0;
   const progressDone = deferred ? (finished ? total : answeredCount) : doneF;
 
+  // ——— Chronomètre : démarre dès l'affichage du test, gelé à la fin ———
+  const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(0);
+  const [finishedAt, setFinishedAt] = useState<number | null>(null);
+  useEffect(() => { const t = Date.now(); setStartedAt(t); setNow(t); }, []);
+  useEffect(() => {
+    if (startedAt == null || finishedAt != null) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [startedAt, finishedAt]);
+  useEffect(() => {
+    if (finishedAll && finishedAt == null && startedAt != null) setFinishedAt(Date.now());
+  }, [finishedAll, finishedAt, startedAt]);
+  const elapsedMs = startedAt != null ? (finishedAt ?? now) - startedAt : 0;
+
   const onCompleteRef = useRef(onComplete);
   useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
   useEffect(() => {
@@ -335,6 +359,9 @@ export function ExercisePlayer({ exercises, onComplete, immediateFeedback = true
             <div className="h-full rounded-full transition-all" style={{ width: `${total ? (progressDone / total) * 100 : 0}%`, backgroundColor: N1 }} />
           </div>
         </div>
+        <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-bold tabular-nums text-foreground" title="Temps écoulé depuis le début du test">
+          <Clock className="size-3.5" style={{ color: N1 }} /> {startedAt != null ? fmtDuration(elapsedMs) : "0:00"}
+        </span>
         {finishedAll && total > 0 && (
           <span className={`rounded-full px-3 py-1 text-sm font-extrabold ${pct >= 60 ? "bg-available-soft text-available-fg" : "bg-pending-soft text-pending-fg"}`}>{pct}%</span>
         )}
@@ -366,6 +393,7 @@ export function ExercisePlayer({ exercises, onComplete, immediateFeedback = true
         <div className={`rounded-2xl border p-5 text-center ${pct >= 60 ? "border-available/40 bg-available-soft/40" : "border-pending/40 bg-pending-soft/40"}`}>
           <Trophy className={`mx-auto size-8 ${pct >= 60 ? "text-available-fg" : "text-pending-fg"}`} />
           <p className="mt-2 text-lg font-extrabold text-foreground">{deferred ? "Examen terminé" : "Évaluation terminée"} — {pct}%</p>
+          <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground"><Clock className="size-4" style={{ color: N1 }} /> Temps : {fmtDuration(elapsedMs)}</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {pct >= 60 ? "Le seuil de réussite (60 %) est atteint." : "Le seuil de réussite est de 60 %. Reprenez les questions à revoir, puis réessayez."}
             {deferred && !revealAtEnd && " Les bonnes réponses ne sont pas affichées pour cette évaluation."}

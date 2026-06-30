@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { BrandLogo } from "@/components/brand/logo";
+import { AudioReader } from "@/components/certel/n1/audio-reader";
 import { ROLE_GUIDES } from "@/lib/guides";
 import { ROLE_META, type RoleKey } from "@/lib/enums";
 import { ROLE_PERMISSIONS, PERMISSION_LABELS, PERMISSIONS, type Permission } from "@/lib/permissions";
@@ -229,6 +230,7 @@ export function TrainingManual({ content, generatedOn }: { content: TrainingCont
 
       {/* ---------- Partie I — Présentation & cadre ---------- */}
       <Part n={1} id="partie-1" title={partTitles[0]} subtitle="Contexte, périmètre et vocabulaire de la plateforme" icon={Presentation}>
+        <div className="no-print -mt-2"><AudioReader text={apercu.presentation.map((b) => `${b.titre}. ${b.texte}`).join(" ")} label="Écouter la présentation" /></div>
         {apercu.presentation.map((b, i) => (
           <div key={i} className="break-inside-avoid">
             <h3 className="mb-1.5 text-base font-bold text-foreground">{b.titre}</h3>
@@ -406,6 +408,7 @@ export function TrainingManual({ content, generatedOn }: { content: TrainingCont
               evaluation={w.evaluation}
             >
               <Block title="Déroulé détaillé" icon={BookOpenCheck}>
+                <div className="no-print mb-2"><AudioReader text={`${guide.intro} ${guide.sections.map((s) => `${s.title}. ${s.steps.join(" ")}`).join(" ")}`} label="Écouter le module" /></div>
                 <p className="mb-2 text-sm leading-relaxed text-muted-foreground">{guide.intro}</p>
                 <ol className="space-y-3">
                   {guide.sections.map((s, j) => (
