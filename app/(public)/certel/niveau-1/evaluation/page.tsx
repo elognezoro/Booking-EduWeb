@@ -4,11 +4,14 @@ import { ArrowLeft, Award } from "lucide-react";
 import { getCertelEvaluation } from "@/lib/certel/evaluation";
 import { EvaluationPlayer } from "@/components/certel/n1/evaluation-player";
 import { N1_ACCENT } from "@/lib/certel/niveau1";
+import { getEvaluationConfig } from "@/lib/platform/settings";
 
 export const metadata: Metadata = { title: "Évaluation certifiante · CERTEL Niveau 1" };
+export const dynamic = "force-dynamic";
 
-export default function CertelN1EvaluationPage() {
+export default async function CertelN1EvaluationPage() {
   const ev = getCertelEvaluation("N1")!;
+  const evalCfg = await getEvaluationConfig();
   return (
     <div className="formation-scope section py-10 sm:py-12" style={{ ["--certel-accent" as string]: N1_ACCENT }}>
       <Link href="/certel/niveau-1" className="mb-5 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:underline"><ArrowLeft className="size-4" /> Niveau 1</Link>
@@ -20,7 +23,7 @@ export default function CertelN1EvaluationPage() {
           <p className="mt-1.5 max-w-2xl text-muted-foreground">Projet de synthèse, examen de connaissances auto-corrigé et mise en situation pratique.</p>
         </div>
       </header>
-      <EvaluationPlayer evaluation={ev} certHref="/certel/niveau-1/certificat" />
+      <EvaluationPlayer evaluation={ev} certHref="/certel/niveau-1/certificat" summativeRevealAnswers={evalCfg.summativeRevealAnswers} />
     </div>
   );
 }

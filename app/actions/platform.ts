@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { slugify } from "@/lib/utils";
 import { provisionInstitution } from "@/lib/platform/provision";
-import { setGamesGating, setInactivityLogoutMinutes, setCertelCertConfig, getCertelCertConfig } from "@/lib/platform/settings";
+import { setGamesGating, setInactivityLogoutMinutes, setCertelCertConfig, getCertelCertConfig, setEvaluationConfig } from "@/lib/platform/settings";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import { CI_MINISTRIES } from "@/lib/ci-ministries";
 
@@ -14,7 +14,20 @@ const ORG_PATH = "/dashboard/platform/organizations";
 const GAMES_PATH = "/dashboard/platform/jeux";
 const SECURITY_PATH = "/dashboard/platform/securite";
 const CERTEL_PATH = "/dashboard/platform/certel";
+const EVAL_PATH = "/dashboard/platform/evaluations";
 const PLANS = ["PILOTE", "STANDARD", "PREMIUM", "NATIONAL"];
+
+/** Règle le comportement des évaluations (formatif : vérif. immédiate ; sommatif : corrigés à la fin). Super admin. */
+export async function saveEvaluationConfig(formData: FormData) {
+  await requirePermission("platform.manage");
+  await setEvaluationConfig({
+    formativeImmediateFeedback: formData.get("formativeImmediateFeedback") === "on",
+    summativeRevealAnswers: formData.get("summativeRevealAnswers") === "on",
+  });
+  revalidatePath(EVAL_PATH);
+  revalidatePath("/certel", "layout");
+  redirect(`${EVAL_PATH}?saved=1`);
+}
 
 /** Règle le délai d'inactivité avant déconnexion automatique (minutes, 0 = désactivé). Super admin. */
 export async function saveInactivityLogout(formData: FormData) {

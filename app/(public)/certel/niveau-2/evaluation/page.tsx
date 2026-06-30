@@ -4,11 +4,14 @@ import { ArrowLeft, Award } from "lucide-react";
 import { getCertelEvaluation } from "@/lib/certel/evaluation";
 import { EvaluationPlayer } from "@/components/certel/n1/evaluation-player";
 import { N2_ACCENT } from "@/lib/certel/niveau2";
+import { getEvaluationConfig } from "@/lib/platform/settings";
 
 export const metadata: Metadata = { title: "Évaluation certifiante · CERTEL Niveau 2" };
+export const dynamic = "force-dynamic";
 
-export default function CertelN2EvaluationPage() {
+export default async function CertelN2EvaluationPage() {
   const ev = getCertelEvaluation("N2")!;
+  const evalCfg = await getEvaluationConfig();
   return (
     <div className="formation-scope section py-10 sm:py-12" style={{ ["--certel-accent" as string]: N2_ACCENT }}>
       <Link href="/certel/niveau-2" className="mb-5 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:underline"><ArrowLeft className="size-4" /> Niveau 2</Link>
@@ -20,7 +23,7 @@ export default function CertelN2EvaluationPage() {
           <p className="mt-1.5 max-w-2xl text-muted-foreground">Projet fil rouge, examen de connaissances auto-corrigé et mise en situation pratique.</p>
         </div>
       </header>
-      <EvaluationPlayer evaluation={ev} certHref="/certel/niveau-2/certificat" />
+      <EvaluationPlayer evaluation={ev} certHref="/certel/niveau-2/certificat" summativeRevealAnswers={evalCfg.summativeRevealAnswers} />
     </div>
   );
 }

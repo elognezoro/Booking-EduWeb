@@ -4,11 +4,14 @@ import { ArrowLeft, Award } from "lucide-react";
 import { getCertelEvaluation } from "@/lib/certel/evaluation";
 import { EvaluationPlayer } from "@/components/certel/n1/evaluation-player";
 import { N3_ACCENT } from "@/lib/certel/niveau3";
+import { getEvaluationConfig } from "@/lib/platform/settings";
 
 export const metadata: Metadata = { title: "Évaluation certifiante · CERTEL Niveau 3" };
+export const dynamic = "force-dynamic";
 
-export default function CertelN3EvaluationPage() {
+export default async function CertelN3EvaluationPage() {
   const ev = getCertelEvaluation("N3")!;
+  const evalCfg = await getEvaluationConfig();
   return (
     <div className="formation-scope section py-10 sm:py-12" style={{ ["--certel-accent" as string]: N3_ACCENT }}>
       <Link href="/certel/niveau-3" className="mb-5 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:underline"><ArrowLeft className="size-4" /> Niveau 3</Link>
@@ -20,7 +23,7 @@ export default function CertelN3EvaluationPage() {
           <p className="mt-1.5 max-w-2xl text-muted-foreground">Projet capstone, examen de connaissances auto-corrigé, mise en situation et soutenance.</p>
         </div>
       </header>
-      <EvaluationPlayer evaluation={ev} certHref="/certel/niveau-3/certificat" />
+      <EvaluationPlayer evaluation={ev} certHref="/certel/niveau-3/certificat" summativeRevealAnswers={evalCfg.summativeRevealAnswers} />
     </div>
   );
 }

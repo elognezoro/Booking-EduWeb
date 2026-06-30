@@ -4,10 +4,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, Target, Lock, ListChecks, Wrench } from "lucide-react";
 import { getN1Module, N1_MODULES_META, N1_ACCENT } from "@/lib/certel/niveau1";
 import { LessonPlayer } from "@/components/certel/n1/lesson-player";
+import { getEvaluationConfig } from "@/lib/platform/settings";
 
-export function generateStaticParams() {
-  return N1_MODULES_META.map((m) => ({ module: m.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export function generateMetadata({ params }: { params: { module: string } }): Metadata {
   const meta = N1_MODULES_META.find((m) => m.slug === params.module);
@@ -18,10 +17,11 @@ const COMPETENCE_ICON: Record<string, React.ComponentType<{ className?: string }
   Techniques: Wrench, Organisationnelles: ListChecks, Sécurité: Target, Transversales: Target,
 };
 
-export default function CertelN1ModulePage({ params }: { params: { module: string } }) {
+export default async function CertelN1ModulePage({ params }: { params: { module: string } }) {
   const meta = N1_MODULES_META.find((m) => m.slug === params.module);
   if (!meta) notFound();
   const mod = getN1Module(params.module);
+  const evalCfg = await getEvaluationConfig();
 
   // Module non encore disponible : page « à venir ».
   if (!mod) {
@@ -81,7 +81,7 @@ export default function CertelN1ModulePage({ params }: { params: { module: strin
       </header>
 
       <div className="mt-8">
-        <LessonPlayer module={mod} />
+        <LessonPlayer module={mod} formativeImmediateFeedback={evalCfg.formativeImmediateFeedback} />
       </div>
     </div>
   );

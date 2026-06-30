@@ -61,6 +61,42 @@ export async function setInactivityLogoutMinutes(minutes: number): Promise<void>
   });
 }
 
+// ——— Comportement des évaluations (réglé par le super admin, pour toutes les formations) ———
+export interface EvaluationConfig {
+  /** Évaluations FORMATIVES (exercices de module) : autoriser la vérification de chaque réponse avant de passer à la suivante. */
+  formativeImmediateFeedback: boolean;
+  /** Évaluations SOMMATIVES (examens certifiants) : révéler les bonnes réponses à la fin (sinon, seul le score est affiché). */
+  summativeRevealAnswers: boolean;
+}
+const EVAL_KEY = "evaluation_behavior";
+export const EVALUATION_DEFAULTS: EvaluationConfig = { formativeImmediateFeedback: true, summativeRevealAnswers: true };
+
+export async function getEvaluationConfig(): Promise<EvaluationConfig> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: EVAL_KEY } });
+  if (!row) return EVALUATION_DEFAULTS;
+  try {
+    const v = JSON.parse(row.value);
+    return {
+      formativeImmediateFeedback: typeof v.formativeImmediateFeedback === "boolean" ? v.formativeImmediateFeedback : EVALUATION_DEFAULTS.formativeImmediateFeedback,
+      summativeRevealAnswers: typeof v.summativeRevealAnswers === "boolean" ? v.summativeRevealAnswers : EVALUATION_DEFAULTS.summativeRevealAnswers,
+    };
+  } catch {
+    return EVALUATION_DEFAULTS;
+  }
+}
+
+export async function setEvaluationConfig(c: EvaluationConfig): Promise<void> {
+  const clean: EvaluationConfig = {
+    formativeImmediateFeedback: !!c.formativeImmediateFeedback,
+    summativeRevealAnswers: !!c.summativeRevealAnswers,
+  };
+  await prisma.platformSetting.upsert({
+    where: { key: EVAL_KEY },
+    create: { key: EVAL_KEY, value: JSON.stringify(clean) },
+    update: { value: JSON.stringify(clean) },
+  });
+}
+
 // ——— Certificat CERTEL Niveau 1 (réglé par le super admin) ———
 export interface CertelCertConfig {
   signatureDate: string; // "AAAA-MM-JJ" ou ""

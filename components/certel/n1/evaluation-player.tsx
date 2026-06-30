@@ -17,7 +17,7 @@ const STEPS: { kind: StepKind; label: string; icon: React.ComponentType<{ classN
   { kind: "situation", label: "Mise en situation", icon: Timer },
 ];
 
-export function EvaluationPlayer({ evaluation, certHref }: { evaluation: CertelEvaluation; certHref: string }) {
+export function EvaluationPlayer({ evaluation, certHref, summativeRevealAnswers = true }: { evaluation: CertelEvaluation; certHref: string; summativeRevealAnswers?: boolean }) {
   const [cur, setCur] = useState(0);
   const [examPct, setExamPct] = useState<number | null>(null);
   const step = STEPS[cur];
@@ -51,9 +51,9 @@ export function EvaluationPlayer({ evaluation, certHref }: { evaluation: CertelE
             <header className="mb-4">
               <p className="text-[11px] font-bold uppercase tracking-wide text-advanced-fg">Examen de connaissances</p>
               <h2 className="text-2xl font-extrabold tracking-tight text-foreground">QCM certifiant</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{evaluation.quiz.length} questions variées, auto-corrigées. Seuil de réussite indicatif : 60 %.</p>
+              <p className="mt-1 text-sm text-muted-foreground">{evaluation.quiz.length} questions variées. Épreuve sommative : répondez à tout, {summativeRevealAnswers ? "les corrigés s'affichent à la fin" : "seul votre score s'affiche à la fin"}. Seuil de réussite indicatif : 60 %.</p>
             </header>
-            <ExercisePlayer exercises={evaluation.quiz} onComplete={setExamPct} />
+            <ExercisePlayer exercises={evaluation.quiz} onComplete={setExamPct} immediateFeedback={false} revealAtEnd={summativeRevealAnswers} />
             {examPct !== null && examPct >= 60 && (
               <div className="mt-5 rounded-2xl border border-available/40 bg-available-soft/40 p-5 text-center">
                 <Award className="mx-auto size-8 text-available-fg" />

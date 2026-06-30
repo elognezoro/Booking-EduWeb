@@ -4,10 +4,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, Target, ListChecks, Wrench } from "lucide-react";
 import { getN3Module, N3_MODULES_META, N3_ACCENT } from "@/lib/certel/niveau3";
 import { LessonPlayer } from "@/components/certel/n1/lesson-player";
+import { getEvaluationConfig } from "@/lib/platform/settings";
 
-export function generateStaticParams() {
-  return N3_MODULES_META.map((m) => ({ module: m.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export function generateMetadata({ params }: { params: { module: string } }): Metadata {
   const meta = N3_MODULES_META.find((m) => m.slug === params.module);
@@ -18,9 +17,10 @@ const COMPETENCE_ICON: Record<string, React.ComponentType<{ className?: string }
   Techniques: Wrench, Méthodologiques: ListChecks, Organisationnelles: ListChecks, Transversales: Target,
 };
 
-export default function CertelN3ModulePage({ params }: { params: { module: string } }) {
+export default async function CertelN3ModulePage({ params }: { params: { module: string } }) {
   const mod = getN3Module(params.module);
   if (!mod) notFound();
+  const evalCfg = await getEvaluationConfig();
 
   return (
     <div className="formation-scope section py-10 sm:py-12" style={{ ["--certel-accent" as string]: N3_ACCENT }}>
@@ -63,7 +63,7 @@ export default function CertelN3ModulePage({ params }: { params: { module: strin
       </header>
 
       <div className="mt-8">
-        <LessonPlayer module={mod} />
+        <LessonPlayer module={mod} formativeImmediateFeedback={evalCfg.formativeImmediateFeedback} />
       </div>
     </div>
   );

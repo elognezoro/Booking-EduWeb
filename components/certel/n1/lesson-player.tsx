@@ -53,7 +53,7 @@ function useProgress(slug: string) {
   return { progress, loaded, persist, visit, setEval };
 }
 
-export function LessonPlayer({ module: mod }: { module: N1Module }) {
+export function LessonPlayer({ module: mod, formativeImmediateFeedback = true }: { module: N1Module; formativeImmediateFeedback?: boolean }) {
   const steps: Step[] = useMemo(() => {
     const s: Step[] = mod.lessons.map((lesson, idx) => ({ kind: "lesson", lesson, idx }));
     s.push({ kind: "eval" });
@@ -118,9 +118,9 @@ export function LessonPlayer({ module: mod }: { module: N1Module }) {
             <header className="mb-4">
               <p className="text-[11px] font-bold uppercase tracking-wide text-advanced-fg">Évaluation du module</p>
               <h2 className="text-2xl font-extrabold tracking-tight text-foreground">Vérifiez vos acquis</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{mod.exercises.length} exercices variés, auto-corrigés avec explications. Seuil de réussite : 60 %.</p>
+              <p className="mt-1 text-sm text-muted-foreground">{mod.exercises.length} exercices variés, auto-corrigés avec explications{formativeImmediateFeedback ? " — vérifiez chaque réponse avant de poursuivre" : ""}. Seuil de réussite : 60 %.</p>
             </header>
-            <ExercisePlayer exercises={mod.exercises} onComplete={setEval} />
+            <ExercisePlayer exercises={mod.exercises} onComplete={setEval} immediateFeedback={formativeImmediateFeedback} revealAtEnd />
           </section>
         )}
         {step.kind === "case" && mod.caseStudy && <CaseStudyView cs={mod.caseStudy} />}
