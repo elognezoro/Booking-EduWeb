@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CERTEL_LEVELS, CERTEL_REFS } from "@/lib/certel/diagnostic";
 import { CERTEL_PROGRAM } from "@/lib/certel/program";
+import { ExclusiveDetails } from "@/components/certel/exclusive-details";
 
 export const metadata: Metadata = { title: "Formation certifiante CERTEL" };
 
 export default function CertelProgramPage() {
   return (
     <>
+      <ExclusiveDetails />
       {/* Hero */}
       <section className="relative isolate overflow-hidden bg-advanced-night text-white">
         <div className="pointer-events-none absolute inset-0 bg-grid-soft bg-[size:32px_32px] opacity-[0.12]" />
