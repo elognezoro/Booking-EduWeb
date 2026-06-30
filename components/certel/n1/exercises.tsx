@@ -5,7 +5,7 @@ import { Check, X, RotateCcw, ChevronUp, ChevronDown, Lightbulb, CircleHelp, Tro
 import type { N1Exercise } from "@/lib/certel/niveau1/types";
 import { AudioReader } from "./audio-reader";
 
-const N1 = "#0891B2";
+const N1 = "var(--certel-accent, #0891B2)"; // accent du niveau (défini par .certel-level sur la page)
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {

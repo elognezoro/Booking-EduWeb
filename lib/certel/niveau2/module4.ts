@@ -1,0 +1,231 @@
+import { N1Module } from "../niveau1/types";
+
+/** Niveau 2 — Module 4 : LMS — déposer, organiser et animer un espace de cours. */
+export const MODULE_4: N1Module = {
+  code: "N2-M4",
+  slug: "module-4",
+  num: 4,
+  title: "LMS : déposer, organiser et animer un espace de cours",
+  subtitle:
+    "Faire le pont entre la production de contenus et leur diffusion : structurer un parcours en ligne, pas un simple dépôt de fichiers.",
+  duration: "13,5 heures · 1,5 semaine",
+  finalite:
+    "Permettre à l'apprenant de construire un espace de cours lisible, accessible et évaluatif dans Moodle, Google Classroom ou une plateforme EduWeb.",
+  objectives: [
+    "Déposer et organiser des ressources sur un LMS.",
+    "Structurer un espace de cours lisible et progressif.",
+    "Intégrer une activité interactive dans un parcours en ligne.",
+    "Créer un quiz numérique aligné sur des objectifs d'apprentissage.",
+    "Paramétrer le suivi des apprenants et les premières rétroactions automatiques.",
+    "Inscrire et accompagner des apprenants dans un espace de cours.",
+  ],
+  competences: [
+    { group: "Techniques", text: "Créer des sections et étiquettes explicites, déposer documents, vidéos et liens dans des formats adaptés, et créer une activité devoir, forum ou quiz." },
+    { group: "Méthodologiques", text: "Organiser une banque de questions simple, paramétrer barème, tentatives et rétroaction, et aligner le quiz sur les objectifs d'apprentissage." },
+    { group: "Qualité", text: "Garantir la lisibilité et l'accessibilité de l'espace, contrôler l'expérience apprenant par un test croisé et respecter la confidentialité des données de suivi." },
+    { group: "Transversales", text: "Mobiliser DigCompEdu (ressources numériques, enseignement/apprentissage, évaluation) et accompagner les apprenants par des annonces, rappels et messages ciblés." },
+  ],
+  lessons: [
+    {
+      id: "seq-1",
+      title: "Comprendre la logique d'un LMS",
+      icon: "BrainCircuit",
+      blocks: [
+        { type: "text", html: "Une plateforme d'apprentissage met en relation des <strong>ressources</strong>, des <strong>activités</strong>, des <strong>apprenants</strong>, des <strong>enseignants</strong> et des <strong>traces</strong>. Elle permet d'organiser un parcours selon une progression. Contrairement à un simple dossier cloud, elle peut inclure des consignes, des échéances, des quiz, des forums, des devoirs et des rapports." },
+        { type: "text", html: "Le formateur doit insister sur la <strong>lisibilité</strong> de l'espace. Un cours en ligne trop chargé décourage l'apprenant. Les sections doivent être nommées clairement et les ressources rangées selon une progression logique. Chaque ressource déposée doit avoir une intention : lire, regarder, répondre, produire, discuter ou s'évaluer." },
+        { type: "keypoints", title: "Les réflexes d'un bon espace", points: [
+          "Créer un titre de cours clair.",
+          "Structurer en sections ou semaines.",
+          "Limiter les dépôts inutiles.",
+          "Ajouter des consignes visibles.",
+        ] },
+        { type: "infographic", kind: "tree", title: "Un espace de cours structuré", data: { root: "Cours en ligne", nodes: [
+          { label: "0_Accueil" },
+          { label: "1_Objectifs" },
+          { label: "2_Ressources" },
+          { label: "3_Activités" },
+          { label: "4_Évaluation" },
+          { label: "5_Forum" },
+        ] } },
+        { type: "callout", tone: "example", title: "Exemple pédagogique", text: "Un cours peut être structuré en 0_Accueil, 1_Objectifs, 2_Ressources, 3_Activités, 4_Évaluation et 5_Forum." },
+      ],
+    },
+    {
+      id: "seq-2",
+      title: "Déposer et organiser les ressources",
+      icon: "FolderTree",
+      blocks: [
+        { type: "text", html: "Déposer un fichier ne suffit pas. Il faut choisir le <strong>bon format</strong>, nommer correctement le fichier, ajouter une description et éviter les fichiers trop lourds. Un PDF peut être adapté à la lecture, une vidéo doit être compressée ou hébergée, et un lien externe doit être vérifié." },
+        { type: "text", html: "L'<strong>étiquette</strong> ou la description explique ce que l'apprenant doit faire avec la ressource. Sans consigne, l'apprenant peut consulter sans comprendre l'objectif. L'<strong>accessibilité</strong> doit être prise en compte : titres clairs, documents lisibles, alternatives textuelles lorsque nécessaire." },
+        { type: "infographic", kind: "rules", title: "Bien déposer une ressource", data: { rules: [
+          { icon: "FileText", title: "Formats adaptés", text: "PDF, image optimisée, lien vérifié." },
+          { icon: "MessageSquare", title: "Descriptions courtes", text: "Une consigne qui dit quoi faire de la ressource." },
+          { icon: "Tag", title: "Nommage cohérent", text: "Un nom de fichier explicite et homogène." },
+          { icon: "FolderTree", title: "Bonne section", text: "La ressource est rangée là où l'apprenant l'attend." },
+        ] } },
+        { type: "callout", tone: "example", title: "Exemple pédagogique", text: "Au lieu de déposer « document.pdf », le formateur dépose « Guide_Module1_Gestion_Fichiers.pdf » avec la consigne : « Lire les pages 1 à 3 avant le quiz. »" },
+      ],
+    },
+    {
+      id: "seq-3",
+      title: "Activités et quiz numériques",
+      icon: "ListChecks",
+      blocks: [
+        { type: "text", html: "L'<strong>activité</strong> distingue un LMS d'un simple dépôt documentaire. Un <strong>devoir</strong> invite l'apprenant à produire. Un <strong>forum</strong> favorise l'échange. Un <strong>quiz</strong> vérifie la compréhension. Une activité interactive importée peut renforcer l'engagement." },
+        { type: "text", html: "Le quiz doit être <strong>aligné sur les objectifs</strong>. Les questions doivent être claires et les distracteurs plausibles. La rétroaction automatique aide l'apprenant à comprendre pourquoi sa réponse est correcte ou non. Dans Moodle, les questions peuvent être stockées dans une <strong>banque</strong> et réutilisées : cette logique favorise la mutualisation et l'amélioration progressive des évaluations." },
+        { type: "infographic", kind: "two-columns", title: "Ressource ou activité ?", data: { left: { title: "Ressource", subtitle: "à consulter", items: ["Document PDF à lire", "Vidéo à regarder", "Image ou schéma", "Lien externe vérifié"] }, right: { title: "Activité", subtitle: "à réaliser", items: ["Devoir : produire et rendre", "Forum : échanger", "Quiz : vérifier la compréhension", "Activité interactive importée"] } } },
+        { type: "infographic", kind: "steps", title: "Construire un quiz", data: { steps: [
+          { title: "Rédiger une consigne" },
+          { title: "Définir un barème" },
+          { title: "Prévoir des rétroactions" },
+          { title: "Tester le quiz comme apprenant" },
+        ] } },
+        { type: "callout", tone: "example", title: "Exemple pédagogique", text: "Un quiz de dix questions après une leçon peut permettre deux tentatives et afficher une rétroaction immédiate pour soutenir l'apprentissage." },
+      ],
+    },
+    {
+      id: "seq-4",
+      title: "Suivi, achèvement et accompagnement",
+      icon: "Users",
+      blocks: [
+        { type: "text", html: "Le LMS permet de suivre certains indicateurs : accès aux ressources, tentatives de quiz, remise de devoirs, notes, progression ou achèvement. Ces indicateurs ne disent pas tout de l'apprentissage, mais ils <strong>alertent</strong> le formateur." },
+        { type: "text", html: "L'accompagnement en ligne nécessite des <strong>annonces</strong>, des <strong>rappels</strong>, un <strong>calendrier</strong> et des messages ciblés. L'apprenant doit savoir ce qui est attendu, à quelle date et où poser ses questions. La <strong>confidentialité</strong> des données de suivi doit être respectée : les notes et difficultés individuelles ne se publient pas dans un espace ouvert à tous." },
+        { type: "keypoints", title: "Animer et suivre", points: [
+          "Configurer les dates et échéances.",
+          "Utiliser les annonces.",
+          "Consulter les rapports de base.",
+          "Respecter la confidentialité des résultats.",
+        ] },
+        { type: "callout", tone: "tip", title: "Exemple pédagogique", text: "Si trois apprenants n'ont pas ouvert le module, le formateur peut envoyer un message de relance personnalisé plutôt que publier leurs noms." },
+      ],
+    },
+    {
+      id: "seq-5",
+      title: "Travaux pratiques : construire et tester son espace",
+      icon: "Wrench",
+      blocks: [
+        { type: "text", html: "Le module est <strong>orienté production</strong> : chaque apprenant construit un espace de cours qui sera ensuite testé par un pair. Trois travaux pratiques jalonnent ce parcours : créer un espace structuré, créer un quiz numérique, puis valider l'ensemble par un test croisé." },
+        { type: "infographic", kind: "table", title: "Déroulement conseillé", data: { columns: ["Séance", "Durée", "Objectifs dominants", "Production attendue"], rows: [
+          ["Séance 1", "3 h", "Découverte du LMS et architecture du cours", "Plan d'espace de cours"],
+          ["Séance 2", "3 h", "Dépôt de ressources et consignes", "Espace avec cinq ressources"],
+          ["Séance 3", "3 h", "Création d'activités et quiz", "Quiz fonctionnel"],
+          ["Séance 4", "3 h", "Suivi, rétroactions et test apprenant", "Espace testé par un pair"],
+          ["Séance 5", "1,5 h", "Corrections et démonstration", "Cours finalisé"],
+        ] } },
+        { type: "callout", tone: "info", title: "TP 3 — Test croisé", text: "Un pair parcourt l'espace en rôle apprenant : il doit trouver les ressources, réaliser le quiz, puis signaler ses difficultés. Le test est réussi si le pair peut suivre le parcours sans assistance excessive." },
+        { type: "callout", tone: "tip", title: "Critère de réussite décisif", text: "L'espace validé doit être lisible pour un apprenant qui le découvre sans explication orale." },
+      ],
+    },
+    {
+      id: "seq-6",
+      title: "Trace écrite à retenir",
+      icon: "BookOpen",
+      blocks: [
+        { type: "text", html: "Un LMS professionnel est un <strong>parcours organisé</strong>, pas un dépôt de fichiers. Chaque ressource doit avoir une place, une consigne et un objectif ; chaque activité doit produire une <strong>trace utile</strong> à l'apprentissage." },
+        { type: "infographic", kind: "categories", title: "Les trois piliers d'un espace réussi", data: { columns: [
+          { title: "Organiser", accent: "#0891B2", items: [{ label: "Sections nommées clairement" }, { label: "Ressources rangées par progression" }, { label: "Nombre raisonnable de fichiers" }] },
+          { title: "Donner du sens", accent: "#6D5DF5", items: [{ label: "Une consigne par ressource" }, { label: "Une intention par dépôt" }, { label: "Objectifs visibles" }] },
+          { title: "Évaluer et suivre", accent: "#16A34A", items: [{ label: "Quiz aligné sur les objectifs" }, { label: "Rétroactions automatiques" }, { label: "Suivi respectueux de la confidentialité" }] },
+        ] } },
+        { type: "callout", tone: "info", title: "Alignement de compétences", text: "Le module mobilise DigCompEdu dans les domaines ressources numériques, enseignement/apprentissage et évaluation. Il consolide aussi DigComp 3 (création de contenus) et DigComp 2 (interaction numérique)." },
+      ],
+    },
+  ],
+  exercises: [
+    {
+      id: "f1", kind: "qcm", title: "Dépôt ou activité ?",
+      instruction: "Quelle affirmation distingue correctement un PDF déposé d'une activité devoir ?",
+      options: [
+        { text: "Le PDF est une ressource à consulter, le devoir est une activité qui demande une production évaluable.", correct: true },
+        { text: "Le PDF et le devoir sont strictement la même chose dans un LMS.", correct: false },
+        { text: "Le devoir sert seulement à éteindre la plateforme.", correct: false },
+        { text: "Le PDF demande une production, le devoir se contente d'être lu.", correct: false },
+      ],
+      feedback: "Le PDF est une ressource à consulter ; le devoir est une activité qui demande une production et permet une évaluation. Un parcours équilibré combine ressources et activités.",
+    },
+    {
+      id: "f2", kind: "truefalse", title: "Rôle de la rétroaction",
+      instruction: "Vrai ou faux ?",
+      statement: "Rédiger une rétroaction automatique transforme le quiz en outil d'apprentissage et pas seulement en outil de notation.",
+      answer: true,
+      feedback: "Vrai : la rétroaction aide l'apprenant à comprendre son erreur et à progresser ; elle transforme le quiz en véritable outil d'apprentissage.",
+    },
+    {
+      id: "f3", kind: "qcm", multiple: true, title: "Lisibilité d'un espace",
+      instruction: "Parmi ces critères, lesquels permettent de juger qu'un espace de cours est lisible ?",
+      options: [
+        { text: "Les sections sont nommées clairement.", correct: true },
+        { text: "Les ressources sont rangées selon une progression.", correct: true },
+        { text: "Les consignes indiquent ce qu'il faut faire.", correct: true },
+        { text: "Le maximum de fichiers possible est déposé dans une seule section.", correct: false },
+        { text: "Le nombre de fichiers reste raisonnable et la présentation est cohérente.", correct: true },
+      ],
+      feedback: "Un espace lisible se reconnaît à des sections clairement nommées, des ressources rangées par progression, des consignes explicites, une cohérence visuelle et un nombre raisonnable de fichiers.",
+    },
+    {
+      id: "f4", kind: "categorize", title: "Ressource ou activité ?",
+      instruction: "Classez chaque élément selon qu'il s'agit d'une ressource à consulter ou d'une activité à réaliser.",
+      categories: ["Ressource", "Activité"],
+      items: [
+        { label: "Document PDF à lire", category: "Ressource" },
+        { label: "Vidéo à regarder", category: "Ressource" },
+        { label: "Lien externe vérifié", category: "Ressource" },
+        { label: "Devoir à rendre", category: "Activité" },
+        { label: "Forum d'échange", category: "Activité" },
+        { label: "Quiz noté", category: "Activité" },
+      ],
+      feedback: "Les ressources se consultent (PDF, vidéo, lien) ; les activités demandent une production ou une interaction (devoir, forum, quiz). Un parcours équilibré combine les deux.",
+    },
+    {
+      id: "f5", kind: "order", title: "Construire un quiz aligné",
+      instruction: "Remettez dans le bon ordre les étapes de création d'un quiz numérique.",
+      items: ["Rédiger des questions alignées sur les objectifs", "Prévoir une bonne réponse et des distracteurs plausibles", "Attribuer les points (barème)", "Ajouter une rétroaction", "Tester le quiz comme apprenant"],
+      feedback: "On rédige d'abord des questions alignées sur les objectifs, on prévoit bonne réponse et distracteurs, on attribue les points, on ajoute la rétroaction, puis on teste le quiz en rôle apprenant.",
+    },
+    {
+      id: "f6", kind: "match", title: "Chaque élément, son rôle",
+      instruction: "Associez chaque composant d'un LMS à sa fonction principale.",
+      pairs: [
+        { left: "Devoir", right: "Permet la remise d'une production" },
+        { left: "Forum", right: "Favorise l'échange entre apprenants" },
+        { left: "Quiz", right: "Vérifie la compréhension" },
+        { left: "Banque de questions", right: "Stocke et réutilise des questions" },
+        { left: "Étiquette / description", right: "Donne la consigne d'une ressource" },
+      ],
+      feedback: "Le devoir organise une production à rendre, le forum favorise l'échange, le quiz vérifie la compréhension, la banque de questions permet la réutilisation, et l'étiquette donne le sens de la ressource.",
+    },
+    {
+      id: "f7", kind: "order", title: "Réaliser un test croisé",
+      instruction: "Remettez dans le bon ordre les étapes du test croisé (TP 3).",
+      items: ["Donner l'accès en rôle apprenant", "Demander au pair de trouver les ressources", "Faire réaliser le quiz", "Recueillir les difficultés", "Corriger l'espace"],
+      feedback: "On donne d'abord un accès en rôle apprenant, le pair cherche les ressources et réalise le quiz, on recueille ses difficultés, puis on corrige l'espace en conséquence.",
+    },
+    { id: "q1", kind: "qcm", title: "À quoi sert un LMS", instruction: "Un LMS sert principalement à :", options: [{ text: "Organiser des ressources et activités d'apprentissage", correct: true }, { text: "Éteindre un ordinateur", correct: false }, { text: "Créer uniquement des images", correct: false }, { text: "Remplacer tous les enseignants", correct: false }], feedback: "Le LMS structure et suit un apprentissage en ligne." },
+    { id: "q2", kind: "qcm", title: "Une bonne section", instruction: "Une bonne section de cours doit être :", options: [{ text: "Nommée clairement", correct: true }, { text: "Vide", correct: false }, { text: "Cachée sans raison", correct: false }, { text: "Remplie de fichiers non nommés", correct: false }], feedback: "La clarté guide l'apprenant." },
+    { id: "q3", kind: "qcm", title: "Une rétroaction utile", instruction: "Une rétroaction de quiz utile :", options: [{ text: "Explique la réponse", correct: true }, { text: "Insulte l'apprenant", correct: false }, { text: "Cache tous les résultats", correct: false }, { text: "Remplace l'objectif", correct: false }], feedback: "Elle soutient la remédiation." },
+    { id: "q4", kind: "qcm", title: "Tester en rôle apprenant", instruction: "Tester un cours en rôle apprenant permet de :", options: [{ text: "Vérifier l'expérience réelle", correct: true }, { text: "Supprimer les ressources", correct: false }, { text: "Désactiver le cloud", correct: false }, { text: "Corriger automatiquement tous les textes", correct: false }], feedback: "Le formateur voit ce que l'apprenant verra." },
+    { id: "q5", kind: "qcm", title: "La banque de questions", instruction: "Une banque de questions sert à :", options: [{ text: "Stocker et réutiliser des questions", correct: true }, { text: "Sauvegarder des images personnelles", correct: false }, { text: "Gérer les mots de passe", correct: false }, { text: "Remplacer les fichiers PDF", correct: false }], feedback: "Elle facilite la réutilisation des questions." },
+    { id: "q6", kind: "qcm", title: "Accompagner un dépôt", instruction: "Le dépôt d'une ressource doit être accompagné :", options: [{ text: "D'une consigne claire", correct: true }, { text: "D'un silence total", correct: false }, { text: "D'un accès administrateur pour tous", correct: false }, { text: "D'un fichier sans nom", correct: false }], feedback: "La consigne donne le sens de la ressource." },
+    { id: "q7", kind: "qcm", title: "Le devoir", instruction: "Un devoir dans un LMS permet :", options: [{ text: "La remise d'une production", correct: true }, { text: "La suppression de la plateforme", correct: false }, { text: "Le changement de mot de passe général", correct: false }, { text: "L'impression automatique", correct: false }], feedback: "Il organise une production à rendre." },
+    { id: "q8", kind: "qcm", title: "Le suivi des apprenants", instruction: "Le suivi des apprenants doit respecter :", options: [{ text: "La confidentialité", correct: true }, { text: "La publication des notes de tous", correct: false }, { text: "L'absence de règle", correct: false }, { text: "Le partage public des données", correct: false }], feedback: "Les données d'apprentissage sont sensibles." },
+    { id: "q9", kind: "qcm", title: "Une ressource trop lourde", instruction: "Une ressource trop lourde peut :", options: [{ text: "Ralentir ou gêner l'accès", correct: true }, { text: "Améliorer toujours la lecture", correct: false }, { text: "Corriger les quiz", correct: false }, { text: "Créer un badge", correct: false }], feedback: "Il faut optimiser les formats." },
+    { id: "q10", kind: "qcm", title: "L'achèvement d'activité", instruction: "L'achèvement d'activité permet de :", options: [{ text: "Suivre la progression", correct: true }, { text: "Changer la couleur du clavier", correct: false }, { text: "Effacer le cours", correct: false }, { text: "Bloquer Internet", correct: false }], feedback: "Il indique ce qui est réalisé ou non." },
+    { id: "q11", kind: "truefalse", title: "Un LMS, un simple dépôt ?", instruction: "Vrai ou faux ?", statement: "Un LMS professionnel est avant tout un dépôt de fichiers, sans progression ni activité.", answer: false, feedback: "Faux : un LMS professionnel est un parcours organisé. Chaque ressource a une place, une consigne et un objectif, et chaque activité produit une trace utile." },
+    { id: "q12", kind: "truefalse", title: "Publier les difficultés", instruction: "Vrai ou faux ?", statement: "Pour relancer trois apprenants en retard, il vaut mieux publier leurs noms dans l'espace ouvert à tous.", answer: false, feedback: "Faux : la confidentialité doit être respectée. On privilégie un message de relance personnalisé plutôt que la publication publique des noms ou des résultats." },
+  ],
+  caseStudy: {
+    title: "Étude de cas — Quinze PDF dans une seule section",
+    scenario:
+      "Un enseignant dépose quinze fichiers PDF dans une seule section appelée « documents », sans consignes, sans dates, sans activités et sans quiz. Les apprenants découvrent l'espace sans aucune explication orale.",
+    questions: [
+      "Quels problèmes rencontrera l'apprenant ?",
+      "Comment réorganiser l'espace ?",
+      "Quelles activités ajouter ?",
+    ],
+    corrige: [
+      "L'apprenant risque de ne pas savoir quoi lire, dans quel ordre, ni ce qui est attendu : il n'y a ni progression ni évaluation.",
+      "Il faut créer des sections, renommer les fichiers, ajouter des consignes et des dates, et ranger les ressources selon une progression logique.",
+      "On peut ajouter un forum de questions, un devoir, un quiz formatif et une activité interactive afin de produire des traces utiles à l'apprentissage.",
+    ],
+  },
+};

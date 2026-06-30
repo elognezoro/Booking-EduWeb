@@ -26,13 +26,14 @@ export async function saveInactivityLogout(formData: FormData) {
   redirect(`${SECURITY_PATH}?saved=1`);
 }
 
-/** Règle date de signature, lieu, signataires et signature/cachet des certificats CERTEL Niveau 1. Super admin. */
+/** Règle date de signature, lieu, signataires et signature/cachet des certificats CERTEL d'un niveau. Super admin. */
 export async function saveCertelCertConfig(formData: FormData) {
   await requirePermission("platform.manage");
-  const cur = await getCertelCertConfig();
+  const level = (String(formData.get("level") || "N1").toUpperCase().match(/^N[123]$/) ? String(formData.get("level")).toUpperCase() : "N1");
+  const cur = await getCertelCertConfig(level);
   // Image : "" = inchangée · "__REMOVE__" = retirée · "data:image/..." = nouvelle.
   const img = (formVal: string, current: string) => (formVal === "__REMOVE__" ? "" : formVal.startsWith("data:image/") ? formVal : current);
-  await setCertelCertConfig({
+  await setCertelCertConfig(level, {
     signatureDate: String(formData.get("signatureDate") || "").trim(),
     lieu: String(formData.get("lieu") || "").trim(),
     formateur: String(formData.get("formateur") || "").trim(),
@@ -42,8 +43,8 @@ export async function saveCertelCertConfig(formData: FormData) {
     cachetDataUrl: img(String(formData.get("cachetDataUrl") || ""), cur.cachetDataUrl),
   });
   revalidatePath(CERTEL_PATH);
-  revalidatePath("/certel/niveau-1/certificat");
-  redirect(`${CERTEL_PATH}?certsaved=1`);
+  revalidatePath(`/certel/niveau-${level.replace("N", "")}/certificat`);
+  redirect(`${CERTEL_PATH}?certsaved=${level}`);
 }
 const SUB_STATUS = ["ACTIVE", "SUSPENDED", "CANCELLED"];
 

@@ -71,7 +71,7 @@ export interface CertelCertConfig {
   signatureDataUrl: string; // image base64 (signature) ou ""
   cachetDataUrl: string; // image base64 (cachet) ou ""
 }
-const CERTEL_CERT_KEY = "certel_cert_n1";
+const certKey = (levelKey: string) => `certel_cert_${(levelKey || "n1").toLowerCase()}`;
 export const CERTEL_CERT_DEFAULTS: CertelCertConfig = {
   signatureDate: "", lieu: "", formateur: "", responsable: "", directeur: "Dr Elogne ZORO", signatureDataUrl: "", cachetDataUrl: "",
 };
@@ -85,8 +85,8 @@ function validIsoDate(s: unknown): string {
 const txt = (s: unknown, max = 120) => (typeof s === "string" ? s.trim().slice(0, max) : "");
 const dataImg = (s: unknown) => (typeof s === "string" && s.startsWith("data:image/") && s.length < 3_000_000 ? s : "");
 
-export async function getCertelCertConfig(): Promise<CertelCertConfig> {
-  const row = await prisma.platformSetting.findUnique({ where: { key: CERTEL_CERT_KEY } });
+export async function getCertelCertConfig(levelKey = "N1"): Promise<CertelCertConfig> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: certKey(levelKey) } });
   if (!row) return CERTEL_CERT_DEFAULTS;
   try {
     const v = JSON.parse(row.value);
@@ -104,7 +104,7 @@ export async function getCertelCertConfig(): Promise<CertelCertConfig> {
   }
 }
 
-export async function setCertelCertConfig(c: CertelCertConfig): Promise<void> {
+export async function setCertelCertConfig(levelKey: string, c: CertelCertConfig): Promise<void> {
   const clean: CertelCertConfig = {
     signatureDate: validIsoDate(c.signatureDate),
     lieu: txt(c.lieu),
@@ -115,8 +115,8 @@ export async function setCertelCertConfig(c: CertelCertConfig): Promise<void> {
     cachetDataUrl: dataImg(c.cachetDataUrl),
   };
   await prisma.platformSetting.upsert({
-    where: { key: CERTEL_CERT_KEY },
-    create: { key: CERTEL_CERT_KEY, value: JSON.stringify(clean) },
+    where: { key: certKey(levelKey) },
+    create: { key: certKey(levelKey), value: JSON.stringify(clean) },
     update: { value: JSON.stringify(clean) },
   });
 }

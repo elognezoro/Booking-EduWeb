@@ -11,7 +11,7 @@ import { AudioReader } from "./audio-reader";
 import { Infographic } from "./infographics";
 import { ExercisePlayer } from "./exercises";
 
-const N1 = "#0891B2";
+const N1 = "var(--certel-accent, #0891B2)"; // accent du niveau (défini par .certel-level sur la page)
 
 type Step =
   | { kind: "lesson"; lesson: N1Lesson; idx: number }

@@ -40,7 +40,7 @@ export default function CertelN1ModulePage({ params }: { params: { module: strin
   }
 
   return (
-    <div className="formation-scope section py-10 sm:py-12">
+    <div className="formation-scope section py-10 sm:py-12" style={{ ["--certel-accent" as string]: N1_ACCENT }}>
       {/* En-tête du module */}
       <Link href="/certel/niveau-1" className="mb-5 inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:underline"><ArrowLeft className="size-4" /> Niveau 1</Link>
       <header className="rounded-3xl border border-border bg-gradient-to-br from-card to-secondary/40 p-6 shadow-soft sm:p-8">

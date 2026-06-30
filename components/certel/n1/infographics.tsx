@@ -1,18 +1,28 @@
 import {
-  Cpu, Power, RotateCcw, Moon, LogOut, KeyRound, Save, ShieldAlert, EyeOff,
-  Folder, FolderOpen, Check, CircleDot,
+  Cpu, Power, RotateCcw, Moon, LogOut, KeyRound, Save, ShieldAlert, EyeOff, ShieldCheck,
+  Folder, FolderOpen, Check, CircleDot, CheckCircle, AlignLeft, BookMarked, BookOpen, Boxes,
+  BrainCircuit, CalendarDays, ClipboardCheck, ClipboardList, Clock, Cloud, Contrast, Download,
+  Eye, FileText, FileType, FolderTree, Heading, Image, Info, LayoutTemplate, Lightbulb, Link,
+  ListChecks, Lock, MessageSquare, Monitor, MousePointerClick, Palette, Plug, Presentation,
+  QrCode, Search, Send, Smile, Table as TableIcon, Tag, Target, Trophy, Type, Usb, Users, Video, Wrench,
 } from "lucide-react";
 import type { InfographicKind, N1TreeNode } from "@/lib/certel/niveau1/types";
 
+// Icônes lucide disponibles pour les infographies « rules » (et libellés). Tout nom absent → CircleDot.
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Cpu, Power, RotateCcw, Moon, LogOut, KeyRound, Save, ShieldAlert, EyeOff,
+  Cpu, Power, RotateCcw, Moon, LogOut, KeyRound, Save, ShieldAlert, ShieldCheck, EyeOff, Eye,
+  CheckCircle, AlignLeft, BookMarked, BookOpen, Boxes, BrainCircuit, CalendarDays, ClipboardCheck,
+  ClipboardList, Clock, Cloud, Contrast, Download, FileText, FileType, FolderTree, Folder, FolderOpen,
+  Heading, Image, Info, LayoutTemplate, Lightbulb, Link, ListChecks, Lock, MessageSquare, Monitor,
+  MousePointerClick, Palette, Plug, Presentation, QrCode, Search, Send, Smile, Table: TableIcon, Tag,
+  Target, Trophy, Type, Usb, Users, Video, Wrench,
 };
 function Icon({ name, className }: { name?: string; className?: string }) {
   const C = (name && ICONS[name]) || CircleDot;
   return <C className={className} />;
 }
 
-const N1 = "#0891B2"; // accent Niveau 1
+const N1 = "var(--certel-accent, #0891B2)"; // accent du niveau (défini par .certel-level sur la page)
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function Infographic({ kind, title, data }: { kind: InfographicKind; title?: string; data: any }) {

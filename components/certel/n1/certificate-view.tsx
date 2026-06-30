@@ -45,6 +45,7 @@ function Field({ text, p }: { text: string; p: FieldPos }) {
 }
 
 export interface CertificateData {
+  levelKey: string; // "N1" | "N2" | "N3" → image /certel/certificat-niveau<N>.png (mêmes positions)
   name: string;
   date: string;
   lieu: string;
@@ -62,6 +63,9 @@ export function CertificateView(props: CertificateData) {
     return () => document.documentElement.classList.remove("cert-print-mode");
   }, []);
 
+  const levelNum = (props.levelKey || "N1").replace(/\D/g, "") || "1";
+  const imageSrc = `/certel/certificat-niveau${levelNum}.png`;
+
   return (
     <div className="certificate-print-page">
       <div className="no-print mx-auto mb-4 flex max-w-[1100px] items-center justify-between gap-3">
@@ -75,7 +79,7 @@ export function CertificateView(props: CertificateData) {
 
       <div className="cert-sheet relative mx-auto w-full max-w-[1100px] overflow-hidden rounded-lg shadow-card" style={{ aspectRatio: "1491 / 1055", containerType: "inline-size" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/certel/certificat-niveau1.png" alt="Certificat de réussite CERTEL — Niveau 1" className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain" />
+        <img src={imageSrc} alt={`Certificat de réussite CERTEL — Niveau ${levelNum}`} className="pointer-events-none absolute inset-0 h-full w-full select-none object-contain" />
 
         {/* Cachet + signature dans la zone à droite du nom du Directeur Général. */}
         {props.cachetDataUrl && (
