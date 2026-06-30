@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, ArrowRight, Target, ListChecks, FlaskConical, ClipboardCheck, Clock, Users, CheckCircle2, Award, BookOpen } from "lucide-react";
+import { GraduationCap, ArrowRight, Target, ListChecks, FlaskConical, ClipboardCheck, Clock, Users, CheckCircle2, Award, BookOpen, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CERTEL_LEVELS, CERTEL_REFS } from "@/lib/certel/diagnostic";
@@ -95,8 +95,8 @@ export default function CertelProgramPage() {
               <h3 className="mb-3 mt-8 flex items-center gap-2 text-lg font-bold text-foreground"><BookOpen className="size-5" style={{ color: accent }} /> Thématiques &amp; syllabus</h3>
               <div className="space-y-4">
                 {level.themes.map((t) => (
-                  <details key={t.code} className="group overflow-hidden rounded-2xl border border-border bg-card" open>
-                    <summary className="flex cursor-pointer list-none items-start justify-between gap-3 p-5">
+                  <details key={t.code} name={`certel-${level.levelKey}`} className="group overflow-hidden rounded-2xl border border-border bg-card transition-shadow open:shadow-soft">
+                    <summary className="flex cursor-pointer list-none items-start justify-between gap-3 p-5 hover:bg-secondary/40">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="rounded-lg px-2 py-0.5 text-xs font-extrabold text-white" style={{ backgroundColor: accent }}>{t.code}</span>
@@ -104,7 +104,10 @@ export default function CertelProgramPage() {
                         </div>
                         <p className="mt-1.5 text-sm text-muted-foreground">{t.resume}</p>
                       </div>
-                      <span className="shrink-0 whitespace-nowrap text-xs font-semibold text-muted-foreground"><Clock className="mr-1 inline size-3.5" />{t.volumeHoraire}</span>
+                      <span className="flex shrink-0 items-center gap-2.5">
+                        <span className="whitespace-nowrap text-xs font-semibold text-muted-foreground"><Clock className="mr-1 inline size-3.5" />{t.volumeHoraire}</span>
+                        <ChevronDown className="size-5 text-muted-foreground transition-transform group-open:rotate-180" />
+                      </span>
                     </summary>
 
                     <div className="space-y-5 border-t border-border px-5 py-5">
