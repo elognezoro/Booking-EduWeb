@@ -4,6 +4,7 @@ import * as React from "react";
 import { Target, ListChecks, GraduationCap, ClipboardCheck } from "lucide-react";
 import type { RoleTraining } from "@/lib/role-training";
 import { TrainingQuiz } from "@/components/help/training-quiz";
+import { AudioReader } from "@/components/certel/n1/audio-reader";
 import { cn } from "@/lib/utils";
 
 interface TrainingEntry { key: string; label: string; color: string; training: RoleTraining }
@@ -37,10 +38,11 @@ export function TrainingExplorer({ entries }: { entries: TrainingEntry[] }) {
       )}
 
       <div className="rounded-2xl border border-border bg-card">
-        <header className="border-b border-border bg-secondary/40 px-5 py-4">
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-secondary/40 px-5 py-4">
           <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-foreground">
             <GraduationCap className="size-5 shrink-0 text-primary" /> {t.title}
           </h2>
+          <AudioReader text={`${t.title}. ${t.intro} ${t.modules.map((m) => `${m.title}. Objectif : ${m.objective}. ${m.content.join(" ")}`).join(" ")}`} label="Écouter la formation" />
         </header>
         <div className="space-y-6 px-5 py-5">
           <p className="flex items-start gap-2 rounded-xl border-l-4 border-primary bg-primary-50/50 px-4 py-3 text-sm leading-relaxed text-foreground">

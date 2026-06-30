@@ -19,7 +19,7 @@ export default async function TrainingPage() {
   const entries = ordered.map((k) => ({ key: k, label: ROLE_META[k].label, color: ROLE_META[k].color, training: ROLE_TRAINING[k] }));
 
   return (
-    <div className="space-y-5">
+    <div className="formation-scope space-y-5">
       <PageHeader
         title="Formation & auto-évaluation"
         description="Modules de prise en main de la plateforme et tests d'auto-évaluation à correction immédiate, adaptés à votre rôle."
