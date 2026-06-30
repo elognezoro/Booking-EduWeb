@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getCertelPricing, netAmount, type CertelLevelKey } from "./pricing";
+import type { Permission } from "@/lib/permissions";
 
 const CINETPAY_API_KEY = process.env.CINETPAY_API_KEY;
 const CINETPAY_SITE_ID = process.env.CINETPAY_SITE_ID;
@@ -24,6 +25,19 @@ export async function hasCertelAccess(userId: string | undefined | null, levelKe
   if (!userId) return false;
   const paid = await prisma.certelPayment.findFirst({ where: { userId, levelKey, status: "PAID" }, select: { id: true } });
   return !!paid;
+}
+
+/**
+ * Accès d'un utilisateur à un niveau CERTEL, en tenant compte du super administrateur :
+ * `platform.manage` donne un accès COMPLET à toutes les formations (supervision/test),
+ * sans paiement. Sinon, règle de paiement habituelle (gratuit ou paiement PAID).
+ */
+export async function canAccessCertelLevel(
+  user: { id?: string | null; permissions?: ReadonlySet<Permission> } | null | undefined,
+  levelKey: CertelLevelKey,
+): Promise<boolean> {
+  if (user?.permissions?.has("platform.manage")) return true;
+  return hasCertelAccess(user?.id, levelKey);
 }
 
 /** Référence de transaction unique (alphanumérique, acceptée par CinetPay). */

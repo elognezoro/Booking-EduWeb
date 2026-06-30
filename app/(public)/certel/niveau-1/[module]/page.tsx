@@ -6,7 +6,7 @@ import { getN1Module, N1_MODULES_META, N1_ACCENT } from "@/lib/certel/niveau1";
 import { LessonPlayer } from "@/components/certel/n1/lesson-player";
 import { getEvaluationConfig } from "@/lib/platform/settings";
 import { getCurrentUser } from "@/lib/auth";
-import { hasCertelAccess } from "@/lib/certel/payment";
+import { canAccessCertelLevel } from "@/lib/certel/payment";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export default async function CertelN1ModulePage({ params }: { params: { module:
   if (!meta) notFound();
   const mod = getN1Module(params.module);
   const user = await getCurrentUser();
-  if (!(await hasCertelAccess(user?.id, "N1"))) redirect("/certel/inscription/niveau-1");
+  if (!(await canAccessCertelLevel(user, "N1"))) redirect("/certel/inscription/niveau-1");
   const evalCfg = await getEvaluationConfig();
 
   // Module non encore disponible : page « à venir ».

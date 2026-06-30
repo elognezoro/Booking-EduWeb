@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { getOrCreateCertelCertificate, certelRef } from "@/lib/certel/certificate";
 import { getCertelCertConfig } from "@/lib/platform/settings";
-import { hasCertelAccess } from "@/lib/certel/payment";
+import { canAccessCertelLevel } from "@/lib/certel/payment";
 import { redirect } from "next/navigation";
 import { CertificateView } from "@/components/certel/n1/certificate-view";
 
@@ -34,7 +34,7 @@ export default async function CertelN2CertificatPage() {
     );
   }
 
-  if (!(await hasCertelAccess(user.id, "N2"))) redirect("/certel/inscription/niveau-2");
+  if (!(await canAccessCertelLevel(user, "N2"))) redirect("/certel/inscription/niveau-2");
   const cert = await getOrCreateCertelCertificate(user.id, user.fullName, "N2");
   const cfg = await getCertelCertConfig("N2");
 

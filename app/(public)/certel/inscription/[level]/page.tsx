@@ -5,7 +5,7 @@ import { ArrowLeft, ShieldCheck, CreditCard, Smartphone, Wallet, LogIn, CheckCir
 import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { getCertelPricing, netAmount, slugToLevel, levelToSlug } from "@/lib/certel/pricing";
-import { hasCertelAccess, reconcileCertelPayment, cinetpayConfigured } from "@/lib/certel/payment";
+import { canAccessCertelLevel, reconcileCertelPayment, cinetpayConfigured } from "@/lib/certel/payment";
 import { startCertelPayment } from "@/app/actions/certel-payment";
 import { PaymentOperators } from "@/components/certel/payment-operators";
 
@@ -46,7 +46,7 @@ export default async function CertelInscriptionPage({ params, searchParams }: { 
   let txStatus: "PAID" | "FAILED" | "PENDING" | "UNKNOWN" | null = null;
   if (searchParams.tx) txStatus = await reconcileCertelPayment(searchParams.tx);
 
-  const access = await hasCertelAccess(user?.id, levelKey);
+  const access = await canAccessCertelLevel(user, levelKey);
 
   return (
     <div className="formation-scope section py-10 sm:py-14" style={{ ["--certel-accent" as string]: meta.accent }}>

@@ -6,7 +6,7 @@ import { EvaluationPlayer } from "@/components/certel/n1/evaluation-player";
 import { N2_ACCENT } from "@/lib/certel/niveau2";
 import { getEvaluationConfig } from "@/lib/platform/settings";
 import { getCurrentUser } from "@/lib/auth";
-import { hasCertelAccess } from "@/lib/certel/payment";
+import { canAccessCertelLevel } from "@/lib/certel/payment";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = { title: "Évaluation certifiante · CERTEL Niveau 2" };
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function CertelN2EvaluationPage() {
   const ev = getCertelEvaluation("N2")!;
   const user = await getCurrentUser();
-  if (!(await hasCertelAccess(user?.id, "N2"))) redirect("/certel/inscription/niveau-2");
+  if (!(await canAccessCertelLevel(user, "N2"))) redirect("/certel/inscription/niveau-2");
   const evalCfg = await getEvaluationConfig();
   return (
     <div className="formation-scope section py-10 sm:py-12" style={{ ["--certel-accent" as string]: N2_ACCENT }}>

@@ -6,7 +6,7 @@ import { EvaluationPlayer } from "@/components/certel/n1/evaluation-player";
 import { N3_ACCENT } from "@/lib/certel/niveau3";
 import { getEvaluationConfig } from "@/lib/platform/settings";
 import { getCurrentUser } from "@/lib/auth";
-import { hasCertelAccess } from "@/lib/certel/payment";
+import { canAccessCertelLevel } from "@/lib/certel/payment";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = { title: "Évaluation certifiante · CERTEL Niveau 3" };
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function CertelN3EvaluationPage() {
   const ev = getCertelEvaluation("N3")!;
   const user = await getCurrentUser();
-  if (!(await hasCertelAccess(user?.id, "N3"))) redirect("/certel/inscription/niveau-3");
+  if (!(await canAccessCertelLevel(user, "N3"))) redirect("/certel/inscription/niveau-3");
   const evalCfg = await getEvaluationConfig();
   return (
     <div className="formation-scope section py-10 sm:py-12" style={{ ["--certel-accent" as string]: N3_ACCENT }}>

@@ -65,6 +65,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Mes réservations", href: "/dashboard/bookings/my", icon: CalendarCheck2, permission: "bookings.read_own" },
       { label: "Sport cérébral", href: "/dashboard/sport-cerebral", icon: Brain },
       { label: "Espace formation", href: "/formation", icon: GraduationCap },
+      { label: "Formation CERTEL", href: "/certel", icon: Award },
       { label: "Mon compte", href: "/dashboard/account", icon: UserCog },
     ],
   },

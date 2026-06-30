@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Lock, CheckCircle2, ArrowRight } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getCertelPricing, netAmount, levelToSlug, type CertelLevelKey } from "@/lib/certel/pricing";
-import { hasCertelAccess } from "@/lib/certel/payment";
+import { canAccessCertelLevel } from "@/lib/certel/payment";
 
 /**
  * Bandeau d'inscription affiché sur le hub d'un niveau CERTEL.
@@ -18,7 +18,7 @@ export async function CertelEnrollBanner({ levelKey, accent }: { levelKey: Certe
   if (net <= 0) return null;
 
   const user = await getCurrentUser();
-  const access = await hasCertelAccess(user?.id, levelKey);
+  const access = await canAccessCertelLevel(user, levelKey);
   const slug = levelToSlug(levelKey);
   const label = pricing.currency === "XOF" ? "FCFA" : pricing.currency;
   const hasDiscount = price.amount > 0 && price.discountPct > 0;

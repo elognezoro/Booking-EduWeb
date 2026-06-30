@@ -6,7 +6,7 @@ import { getN2Module, N2_MODULES_META, N2_ACCENT } from "@/lib/certel/niveau2";
 import { LessonPlayer } from "@/components/certel/n1/lesson-player";
 import { getEvaluationConfig } from "@/lib/platform/settings";
 import { getCurrentUser } from "@/lib/auth";
-import { hasCertelAccess } from "@/lib/certel/payment";
+import { canAccessCertelLevel } from "@/lib/certel/payment";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export default async function CertelN2ModulePage({ params }: { params: { module:
   const mod = getN2Module(params.module);
   if (!mod) notFound();
   const user = await getCurrentUser();
-  if (!(await hasCertelAccess(user?.id, "N2"))) redirect("/certel/inscription/niveau-2");
+  if (!(await canAccessCertelLevel(user, "N2"))) redirect("/certel/inscription/niveau-2");
   const evalCfg = await getEvaluationConfig();
 
   return (
