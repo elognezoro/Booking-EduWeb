@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Clock, Target, Lock, ListChecks, Wrench } from "lucide-react";
 import { getN1Module, N1_MODULES_META, N1_ACCENT } from "@/lib/certel/niveau1";
 import { LessonPlayer } from "@/components/certel/n1/lesson-player";
 import { getEvaluationConfig } from "@/lib/platform/settings";
+import { getCurrentUser } from "@/lib/auth";
+import { hasCertelAccess } from "@/lib/certel/payment";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,8 @@ export default async function CertelN1ModulePage({ params }: { params: { module:
   const meta = N1_MODULES_META.find((m) => m.slug === params.module);
   if (!meta) notFound();
   const mod = getN1Module(params.module);
+  const user = await getCurrentUser();
+  if (!(await hasCertelAccess(user?.id, "N1"))) redirect("/certel/inscription/niveau-1");
   const evalCfg = await getEvaluationConfig();
 
   // Module non encore disponible : page « à venir ».

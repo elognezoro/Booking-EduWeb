@@ -120,6 +120,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Établissements", href: "/dashboard/platform/organizations", icon: Building2, permission: "platform.manage" },
       { label: "Réglages des jeux", href: "/dashboard/platform/jeux", icon: Brain, permission: "platform.manage" },
       { label: "Diagnostics CERTEL", href: "/dashboard/platform/certel", icon: GraduationCap, permission: "platform.manage" },
+      { label: "Tarifs CERTEL", href: "/dashboard/platform/certel-tarifs", icon: CreditCard, permission: "platform.manage" },
       { label: "Évaluations", href: "/dashboard/platform/evaluations", icon: ClipboardCheck, permission: "platform.manage" },
       { label: "Sécurité & sessions", href: "/dashboard/platform/securite", icon: ShieldCheck, permission: "platform.manage" },
     ],

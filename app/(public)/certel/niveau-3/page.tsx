@@ -4,6 +4,7 @@ import { GraduationCap, ArrowRight, ArrowLeft, Clock, Headphones, Sparkles, Clip
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { N3_MODULES_META, N3_ACCENT } from "@/lib/certel/niveau3";
+import { CertelEnrollBanner } from "@/components/certel/enroll-banner";
 
 export const metadata: Metadata = { title: "CERTEL — Niveau 3 · Formation interactive" };
 
@@ -32,6 +33,7 @@ export default function CertelNiveau3Hub() {
       </section>
 
       <section className="section py-14">
+        <CertelEnrollBanner levelKey="N3" accent={N3_ACCENT} />
         <h2 className="mb-1 text-2xl font-extrabold tracking-tight text-foreground">Les 6 modules du Niveau 3</h2>
         <p className="mb-6 text-muted-foreground">Suivez-les dans l'ordre ; chacun se termine par une évaluation auto-corrigée.</p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

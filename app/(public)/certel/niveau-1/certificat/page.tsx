@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { getOrCreateCertelCertificate, certelRef } from "@/lib/certel/certificate";
 import { getCertelCertConfig } from "@/lib/platform/settings";
+import { hasCertelAccess } from "@/lib/certel/payment";
+import { redirect } from "next/navigation";
 import { CertificateView } from "@/components/certel/n1/certificate-view";
 
 export const metadata: Metadata = { title: "Certificat de réussite · CERTEL Niveau 1" };
@@ -33,6 +35,7 @@ export default async function CertelN1CertificatPage() {
     );
   }
 
+  if (!(await hasCertelAccess(user.id, "N1"))) redirect("/certel/inscription/niveau-1");
   const cert = await getOrCreateCertelCertificate(user.id, user.fullName, "N1");
   const cfg = await getCertelCertConfig();
 

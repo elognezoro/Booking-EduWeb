@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Clock, Target, ListChecks, Wrench } from "lucide-react";
 import { getN3Module, N3_MODULES_META, N3_ACCENT } from "@/lib/certel/niveau3";
 import { LessonPlayer } from "@/components/certel/n1/lesson-player";
 import { getEvaluationConfig } from "@/lib/platform/settings";
+import { getCurrentUser } from "@/lib/auth";
+import { hasCertelAccess } from "@/lib/certel/payment";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,8 @@ const COMPETENCE_ICON: Record<string, React.ComponentType<{ className?: string }
 export default async function CertelN3ModulePage({ params }: { params: { module: string } }) {
   const mod = getN3Module(params.module);
   if (!mod) notFound();
+  const user = await getCurrentUser();
+  if (!(await hasCertelAccess(user?.id, "N3"))) redirect("/certel/inscription/niveau-3");
   const evalCfg = await getEvaluationConfig();
 
   return (

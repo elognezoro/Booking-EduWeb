@@ -180,6 +180,27 @@ model CertelCertificate {
   @@index([levelKey, issuedAt])
 }
 
+// Paiement / inscription payante à un niveau CERTEL (via CinetPay : Mobile Money ou carte).
+// Accès au niveau accordé si prix = 0 OU s'il existe un paiement PAID pour (userId, levelKey).
+model CertelPayment {
+  id            String    @id @default(cuid())
+  userId        String
+  levelKey      String // N1 | N2 | N3
+  amount        Int // montant facturé en FCFA (après remise)
+  currency      String    @default("XOF")
+  status        String    @default("PENDING") // PENDING | PAID | FAILED | CANCELLED
+  transactionId String    @unique // référence unique transmise à CinetPay
+  method        String? // moyen de paiement rapporté (mobile money, carte…)
+  manual        Boolean   @default(false) // accordé manuellement par un admin (paiement hors-ligne)
+  fullName      String? // instantané du nom de l'inscrit
+  paidAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId, levelKey])
+  @@index([levelKey, status])
+}
+
 // Réglages globaux de la plateforme (clé/valeur), administrés par le super admin EduWeb.
 model PlatformSetting {
   key       String   @id
