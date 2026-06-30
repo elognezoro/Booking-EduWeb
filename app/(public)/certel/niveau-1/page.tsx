@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, ArrowRight, ArrowLeft, Clock, Lock, Headphones, Sparkles, ClipboardCheck, Award } from "lucide-react";
+import { GraduationCap, ArrowRight, ArrowLeft, Clock, Headphones, Sparkles, ClipboardCheck, Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { N1_MODULES_META, N1_ACCENT } from "@/lib/certel/niveau1";
@@ -37,31 +37,22 @@ export default function CertelNiveau1Hub() {
         <h2 className="mb-1 text-2xl font-extrabold tracking-tight text-foreground">Les 6 modules du Niveau 1</h2>
         <p className="mb-6 text-muted-foreground">Suivez-les dans l'ordre ; chacun se termine par une évaluation auto-corrigée.</p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {N1_MODULES_META.map((m) => {
-            const card = (
-              <div className={`group relative flex h-full flex-col rounded-2xl border border-border bg-card p-5 transition-all ${m.available ? "hover:-translate-y-1 hover:shadow-card" : "opacity-75"}`} style={{ borderTopColor: N1_ACCENT, borderTopWidth: 3 }}>
+          {N1_MODULES_META.map((m) => (
+            <Link key={m.slug} href={`/certel/niveau-1/${m.slug}`} className="block">
+              <div className="group relative flex h-full flex-col rounded-2xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:shadow-card" style={{ borderTopColor: N1_ACCENT, borderTopWidth: 3 }}>
                 <div className="flex items-center justify-between">
                   <span className="inline-flex size-11 items-center justify-center rounded-2xl text-lg font-extrabold text-white" style={{ backgroundColor: N1_ACCENT }}>{m.num}</span>
-                  {m.available ? (
-                    <span className="rounded-full bg-available-soft px-2.5 py-1 text-xs font-bold text-available-fg">Disponible</span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs font-bold text-muted-foreground"><Lock className="size-3" /> Bientôt</span>
-                  )}
+                  <span className="rounded-full bg-available-soft px-2.5 py-1 text-xs font-bold text-available-fg">Disponible</span>
                 </div>
                 <h3 className="mt-4 font-bold text-foreground">{m.title}</h3>
                 <p className="mt-1.5 flex-1 text-sm text-muted-foreground">{m.subtitle}</p>
                 <div className="mt-4 flex items-center justify-between">
                   <span className="text-xs font-semibold text-muted-foreground"><Clock className="mr-1 inline size-3.5" />{m.duration}</span>
-                  {m.available && <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: N1_ACCENT }}>Commencer <ArrowRight className="size-4 transition-all group-hover:translate-x-0.5" /></span>}
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: N1_ACCENT }}>Commencer <ArrowRight className="size-4 transition-all group-hover:translate-x-0.5" /></span>
                 </div>
               </div>
-            );
-            return m.available ? (
-              <Link key={m.slug} href={`/certel/niveau-1/${m.slug}`} className="block">{card}</Link>
-            ) : (
-              <div key={m.slug} aria-disabled className="cursor-not-allowed">{card}</div>
-            );
-          })}
+            </Link>
+          ))}
         </div>
 
         {/* Évaluation certifiante */}
