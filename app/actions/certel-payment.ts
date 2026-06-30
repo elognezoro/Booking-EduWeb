@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentUser, requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { setCertelPricing, slugToLevel, levelToSlug, type CertelLevelKey, type CertelPricing } from "@/lib/certel/pricing";
-import { certelLevelAmount, hasCertelAccess, initCinetPayPayment, newTransactionId } from "@/lib/certel/payment";
+import { certelLevelAmount, hasCertelAccess, initCinetPayPayment, newTransactionId, normalizeChannel } from "@/lib/certel/payment";
 
 const TARIFS_PATH = "/dashboard/platform/certel-tarifs";
 
@@ -38,6 +38,7 @@ export async function startCertelPayment(formData: FormData) {
     customerName: user.fullName,
     customerEmail: user.email,
     returnUrl: `${APP_URL}${insc}?tx=${transactionId}`,
+    channels: normalizeChannel(formData.get("channels")),
   });
 
   if ("url" in init) redirect(init.url);

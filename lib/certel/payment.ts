@@ -32,6 +32,13 @@ export function newTransactionId(levelKey: CertelLevelKey): string {
   return `CERTEL${levelKey}${rnd}`.slice(0, 60);
 }
 
+/** Canaux CinetPay supportés (validés côté serveur). ALL = laisse le choix sur la page CinetPay. */
+export type CinetPayChannel = "ALL" | "MOBILE_MONEY" | "WALLET" | "CREDIT_CARD";
+export const CINETPAY_CHANNELS: CinetPayChannel[] = ["ALL", "MOBILE_MONEY", "WALLET", "CREDIT_CARD"];
+export function normalizeChannel(v: unknown): CinetPayChannel {
+  return CINETPAY_CHANNELS.includes(v as CinetPayChannel) ? (v as CinetPayChannel) : "ALL";
+}
+
 /** Initialise un paiement CinetPay et renvoie l'URL de paiement (ou une erreur). */
 export async function initCinetPayPayment(args: {
   transactionId: string;
@@ -41,6 +48,7 @@ export async function initCinetPayPayment(args: {
   customerName?: string;
   customerEmail?: string;
   returnUrl: string;
+  channels?: CinetPayChannel;
 }): Promise<{ url: string } | { error: string }> {
   if (!cinetpayConfigured()) return { error: "Le paiement en ligne n'est pas encore configuré sur la plateforme." };
   try {
@@ -56,7 +64,7 @@ export async function initCinetPayPayment(args: {
         description: args.description.slice(0, 250),
         notify_url: `${APP_URL}/api/certel/payment/notify`,
         return_url: args.returnUrl,
-        channels: "ALL",
+        channels: args.channels || "ALL",
         lang: "fr",
         customer_name: (args.customerName || "Apprenant").slice(0, 100),
         ...(args.customerEmail ? { customer_email: args.customerEmail } : {}),

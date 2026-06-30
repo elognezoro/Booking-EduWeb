@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ShieldCheck, CreditCard, Smartphone, LogIn, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
+import { ArrowLeft, ShieldCheck, CreditCard, Smartphone, Wallet, LogIn, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { getCertelPricing, netAmount, slugToLevel, levelToSlug } from "@/lib/certel/pricing";
 import { hasCertelAccess, reconcileCertelPayment, cinetpayConfigured } from "@/lib/certel/payment";
 import { startCertelPayment } from "@/app/actions/certel-payment";
+import { PaymentOperators } from "@/components/certel/payment-operators";
+
+const PAY_METHODS: { value: string; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { value: "ALL", label: "Tous", icon: Wallet },
+  { value: "MOBILE_MONEY", label: "Mobile Money", icon: Smartphone },
+  { value: "WALLET", label: "Wave", icon: Smartphone },
+  { value: "CREDIT_CARD", label: "Carte", icon: CreditCard },
+];
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Inscription · CERTEL" };
@@ -90,12 +98,32 @@ export default async function CertelInscriptionPage({ params, searchParams }: { 
               <Button asChild className="mt-4"><Link href={`/login?callbackUrl=${encodeURIComponent(`/certel/inscription/${slug}`)}`}><LogIn className="size-4" /> Se connecter</Link></Button>
             </div>
           ) : (
-            <form action={startCertelPayment} className="space-y-3">
+            <form action={startCertelPayment} className="space-y-4">
               <input type="hidden" name="level" value={slug} />
-              <p className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5"><Smartphone className="size-4" style={{ color: meta.accent }} /> Mobile Money</span>
-                <span className="inline-flex items-center gap-1.5"><CreditCard className="size-4" style={{ color: meta.accent }} /> Carte bancaire</span>
-              </p>
+
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">Opérateurs acceptés</p>
+                <PaymentOperators />
+              </div>
+
+              <fieldset>
+                <legend className="mb-2 text-sm font-semibold text-foreground">Moyen de paiement</legend>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {PAY_METHODS.map((m, i) => {
+                    const Icon = m.icon;
+                    return (
+                      <label key={m.value} className="relative cursor-pointer">
+                        <input type="radio" name="channels" value={m.value} defaultChecked={i === 0} className="peer sr-only" />
+                        <span className="flex h-full flex-col items-center justify-center gap-1 rounded-xl border border-border bg-card px-2 py-3 text-center text-xs font-semibold text-muted-foreground transition peer-checked:border-transparent peer-checked:text-white peer-checked:[background-color:var(--certel-accent)] peer-checked:shadow-soft hover:bg-secondary/60">
+                          <Icon className="size-4" /> {m.label}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="mt-1.5 text-xs text-muted-foreground">« Tous » affiche l'ensemble des opérateurs sur la page de paiement sécurisée CinetPay.</p>
+              </fieldset>
+
               <Button type="submit" size="lg" className="w-full" style={{ backgroundColor: meta.accent }} disabled={!cinetpayConfigured()}>
                 <CreditCard className="size-4" /> Payer {fmt(net, pricing.currency)} et m'inscrire
               </Button>

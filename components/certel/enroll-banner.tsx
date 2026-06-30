@@ -41,7 +41,7 @@ export async function CertelEnrollBanner({ levelKey, accent }: { levelKey: Certe
           <p className="text-sm text-muted-foreground">
             Frais d'inscription : <span className="font-bold" style={{ color: accent }}>{net.toLocaleString("fr-FR")} {label}</span>
             {hasDiscount && <span className="ml-1.5 rounded-full bg-available-soft px-2 py-0.5 text-xs font-bold text-available-fg">−{price.discountPct}%</span>}
-            {" "}· Mobile Money ou carte bancaire.
+            {" "}· Wave, Orange / MTN / Moov Money ou carte bancaire.
           </p>
         </div>
       </div>
