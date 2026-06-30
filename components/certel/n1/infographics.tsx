@@ -5,6 +5,9 @@ import {
   Eye, FileText, FileType, FolderTree, Heading, Image, Info, LayoutTemplate, Lightbulb, Link,
   ListChecks, Lock, MessageSquare, Monitor, MousePointerClick, Palette, Plug, Presentation,
   QrCode, Search, Send, Smile, Table as TableIcon, Tag, Target, Trophy, Type, Usb, Users, Video, Wrench,
+  Accessibility, AlertTriangle, Blocks, Bot, CalendarClock, Compass, Database, Eraser, FileCheck,
+  FileKey, FileQuestion, Film, GanttChartSquare, GitBranch, Layers, LayoutDashboard, ListTree,
+  RefreshCw, Repeat, Scale, Scissors, ScrollText, Shuffle, Sigma, Sparkles, UserCheck, Workflow, Zap,
 } from "lucide-react";
 import type { InfographicKind, N1TreeNode } from "@/lib/certel/niveau1/types";
 
@@ -16,6 +19,9 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Heading, Image, Info, LayoutTemplate, Lightbulb, Link, ListChecks, Lock, MessageSquare, Monitor,
   MousePointerClick, Palette, Plug, Presentation, QrCode, Search, Send, Smile, Table: TableIcon, Tag,
   Target, Trophy, Type, Usb, Users, Video, Wrench,
+  Accessibility, AlertTriangle, Blocks, Bot, CalendarClock, Compass, Database, Eraser, FileCheck,
+  FileKey, FileQuestion, Film, GanttChartSquare, GitBranch, Layers, LayoutDashboard, ListTree,
+  RefreshCw, Repeat, Scale, Scissors, ScrollText, Shuffle, Sigma, Sparkles, UserCheck, Workflow, Zap,
 };
 function Icon({ name, className }: { name?: string; className?: string }) {
   const C = (name && ICONS[name]) || CircleDot;

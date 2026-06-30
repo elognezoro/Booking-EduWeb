@@ -1,0 +1,235 @@
+import type { N1Module } from "../niveau1/types";
+
+/** Niveau 3 — Module 2 : Administration et conception avancée d'un LMS. */
+export const MODULE_2: N1Module = {
+  code: "N3-M2",
+  slug: "module-2",
+  num: 2,
+  title: "Administration et conception avancée d'un LMS",
+  subtitle:
+    "Passer d'utilisateur à administrateur-concepteur : configuration, architecture de cours, rôles, évaluations avancées et pilotage des apprenants.",
+  duration: "20 heures · 2 semaines",
+  finalite:
+    "Passer du statut d'utilisateur à celui d'administrateur-concepteur d'une plateforme d'apprentissage : configuration, architecture de cours, gestion des rôles, évaluations avancées et suivi des apprenants.",
+  objectives: [
+    "Configurer et paramétrer un espace de cours sur un LMS.",
+    "Gérer les utilisateurs, les rôles et les droits d'accès.",
+    "Structurer un cours en sections, ressources et activités scénarisées.",
+    "Paramétrer des évaluations numériques avancées avec feedback automatisé.",
+    "Exploiter les outils de suivi et d'achèvement pour piloter les apprenants.",
+  ],
+  competences: [
+    { group: "Architecture & conception", text: "C17 — Déposer et structurer des ressources sur un LMS au niveau administration/conception : catégories, cours, sections, ressources et activités scénarisées." },
+    { group: "Évaluation numérique", text: "C26 — Créer des évaluations numériques avancées avec rétroaction automatisée : banque de questions, tentatives multiples, barème et feedback formatif." },
+    { group: "Déploiement & parcours", text: "C27 — Concevoir et déployer un parcours de formation en ligne complet, de la page d'accueil au badge final, avec critères d'achèvement." },
+    { group: "Gouvernance & sécurité", text: "Gérer rôles, permissions et droits d'accès selon le principe de moindre privilège, protéger les données et interpréter les traces numériques avec prudence." },
+  ],
+  lessons: [
+    {
+      id: "seq-1",
+      title: "Comprendre l'architecture d'un LMS",
+      icon: "Layers",
+      blocks: [
+        { type: "text", html: "Un <strong>LMS</strong> (Learning Management System) est un environnement organisé qui relie contenus, activités, utilisateurs, rôles, évaluations et données de suivi. L'administrateur-concepteur doit penser la plateforme comme un <strong>service d'apprentissage</strong>, et non comme un simple disque dur en ligne." },
+        { type: "text", html: "L'architecture comprend les <em>catégories</em>, les <em>cours</em>, les <em>sections</em>, les <em>ressources</em>, les <em>activités</em>, les <em>groupes</em>, les <em>rôles</em> et les <em>rapports</em>. Chaque choix a des effets sur l'accessibilité, la sécurité, la lisibilité et la maintenance." },
+        { type: "infographic", kind: "tree", title: "Les niveaux d'organisation d'un LMS", data: { root: "Plateforme LMS", nodes: [
+          { label: "Catégorie : Niveau 3 — Conception avancée", children: [
+            { label: "Cours : Administration d'un LMS", children: [
+              { label: "Section : Accueil & objectifs" },
+              { label: "Section : Ressources" },
+              { label: "Section : Activités" },
+              { label: "Section : Évaluation & remédiation" },
+            ] },
+          ] },
+          { label: "Rôles & groupes" },
+          { label: "Rapports & suivi" },
+        ] } },
+        { type: "callout", tone: "tip", title: "Point d'attention du formateur", text: "Faire verbaliser la logique de choix par les apprenants. Au niveau 3, la compétence ne se limite pas à appliquer une procédure : elle consiste à expliquer, ajuster et justifier une décision professionnelle." },
+        { type: "callout", tone: "info", title: "Cadres de référence", text: "La progression s'inscrit dans DigComp 2.2 (compétences numériques citoyennes) et DigCompEdu (compétences numériques professionnelles des éducateurs). Pour les usages d'IA, le module adopte une posture centrée sur l'humain, la vérification, la transparence et la protection des données." },
+      ],
+    },
+    {
+      id: "seq-2",
+      title: "Rôles, permissions et droits d'accès",
+      icon: "ShieldCheck",
+      blocks: [
+        { type: "text", html: "La gestion des rôles est essentielle pour <strong>protéger les données</strong> et <strong>distribuer les responsabilités</strong>. Un étudiant n'a pas les mêmes droits qu'un enseignant, un tuteur ou un administrateur. Dans Moodle, un <strong>rôle</strong> correspond à un ensemble de permissions attribuées dans un contexte donné." },
+        { type: "text", html: "Le <strong>principe de moindre privilège</strong> doit guider les choix : chaque utilisateur reçoit uniquement les droits nécessaires à sa mission. Les comptes partagés et les droits excessifs fragilisent la gouvernance de la plateforme." },
+        { type: "infographic", kind: "categories", title: "Rôles et droits minimaux", data: { columns: [
+          { title: "Enseignant", accent: "#6D5DF5", items: [{ label: "Édition du cours" }, { label: "Évaluation" }, { label: "Gestion des activités" }] },
+          { title: "Tuteur", accent: "#0891B2", items: [{ label: "Suivi" }, { label: "Forum" }, { label: "Correction selon besoin", hint: "sans édition du cours" }] },
+          { title: "Apprenant", accent: "#16A34A", items: [{ label: "Consultation" }, { label: "Remise" }, { label: "Participation" }] },
+        ] } },
+        { type: "callout", tone: "warn", title: "Règle d'or", text: "Aucun apprenant ne doit recevoir les droits de modification du cours. Les droits trop larges exposent à la perte de contenu et à l'altération des évaluations." },
+        { type: "callout", tone: "tip", title: "Point d'attention du formateur", text: "Faire verbaliser la logique de choix : expliquer, ajuster et justifier chaque attribution de droits relève de la compétence de niveau 3." },
+      ],
+    },
+    {
+      id: "seq-3",
+      title: "Structuration pédagogique du cours",
+      icon: "ListTree",
+      blocks: [
+        { type: "text", html: "Un cours LMS doit être <strong>lisible au premier regard</strong>. Les sections suivent la progression : accueil, objectifs, ressources, activités, évaluation et remédiation. Les titres doivent être explicites et les consignes suffisantes." },
+        { type: "text", html: "Les ressources ne doivent pas être déposées sans intention. Un PDF peut préparer une activité, une vidéo peut introduire une tâche, un forum peut soutenir une discussion, un test peut vérifier un acquis. <strong>La fonction pédagogique prime sur l'outil.</strong>" },
+        { type: "infographic", kind: "steps", title: "Une progression de cours lisible", data: { steps: [
+          { title: "Accueil", text: "page d'entrée, présentation du cours" },
+          { title: "Objectifs", text: "ce que l'apprenant saura faire" },
+          { title: "Ressources", text: "documents et médias intentionnels" },
+          { title: "Activités", text: "tâches scénarisées" },
+          { title: "Évaluation", text: "test, devoir, feedback" },
+          { title: "Remédiation", text: "reprise et approfondissement" },
+        ] } },
+        { type: "infographic", kind: "two-columns", title: "Ressource déposée sans intention vs ressource scénarisée", data: { left: { title: "Sans intention", subtitle: "à éviter", items: ["Liste de fichiers sans titre", "PDF déposé « au cas où »", "Forum sans consigne", "Section vide"] }, right: { title: "Scénarisée", subtitle: "fonction pédagogique claire", items: ["PDF qui prépare une activité", "Vidéo qui introduit une tâche", "Forum qui soutient une discussion", "Test qui vérifie un acquis"] } } },
+        { type: "callout", tone: "tip", title: "Point d'attention du formateur", text: "Au niveau 3, justifier le rôle pédagogique de chaque ressource fait partie de la compétence attendue." },
+      ],
+    },
+    {
+      id: "seq-4",
+      title: "Quiz avancé, banque de questions et rétroaction",
+      icon: "FileQuestion",
+      blocks: [
+        { type: "text", html: "La <strong>banque de questions</strong> permet de mutualiser, classer et réutiliser les items. Les questions peuvent être organisées par thème, niveau, compétence ou objectif. Un quiz avancé peut intégrer l'aléatoire, des tentatives multiples, un feedback immédiat, un feedback différé et un barème précis." },
+        { type: "text", html: "La <strong>rétroaction automatisée</strong> n'est pas seulement un message de correction. Elle guide l'apprenant : elle explique l'erreur, renvoie vers la ressource utile et propose une stratégie de reprise." },
+        { type: "infographic", kind: "rules", title: "Les leviers d'un quiz avancé", data: { rules: [
+          { icon: "Shuffle", title: "Aléatoire", text: "Tirer les questions au hasard dans la banque pour limiter la triche." },
+          { icon: "RotateCcw", title: "Tentatives multiples", text: "Encourager la reprise formative et l'apprentissage par essais." },
+          { icon: "Zap", title: "Feedback immédiat", text: "Réagir dès la réponse pour ancrer la correction." },
+          { icon: "Clock", title: "Feedback différé", text: "Livrer un retour global après la fermeture du test." },
+        ] } },
+        { type: "infographic", kind: "two-columns", title: "Un feedback inutile vs un feedback formatif", data: { left: { title: "« Faux »", subtitle: "feedback inutile", items: ["N'explique rien", "N'oriente pas", "Décourage l'apprenant"] }, right: { title: "Feedback formatif", subtitle: "exemple — phishing", items: ["« La réponse est incorrecte. »", "« Le lien suspect et la demande urgente de mot de passe sont des indices de phishing. »", "« Relisez la fiche sur les signaux d'alerte puis recommencez. »"] } } },
+        { type: "keypoints", title: "Un bon feedback automatisé", points: [
+          "Explique l'erreur sans humilier l'apprenant.",
+          "Renvoie vers la ressource utile.",
+          "Propose une stratégie de reprise.",
+        ] },
+      ],
+    },
+    {
+      id: "seq-5",
+      title: "Achèvement, badges et pilotage",
+      icon: "BarChart3",
+      blocks: [
+        { type: "text", html: "Le <strong>suivi d'achèvement</strong> permet de voir si une ressource a été consultée, une activité remise ou un score atteint. Les <strong>badges</strong> valorisent les étapes franchies. Ces indicateurs ne remplacent pas l'accompagnement humain, mais ils aident à repérer les blocages." },
+        { type: "text", html: "Le carnet de notes, les rapports d'activité et les tableaux d'achèvement doivent être lus <strong>avec prudence</strong>. Une connexion ne prouve pas toujours l'apprentissage ; un score faible peut signaler un problème de consigne, de prérequis ou de motivation." },
+        { type: "infographic", kind: "table", title: "Interpréter les traces numériques", data: { columns: ["Indicateur observé", "Ce qu'il ne prouve pas", "Lecture pédagogique"], rows: [
+          ["Ressource consultée", "que le contenu a été compris", "vérifier par une activité"],
+          ["Activité remise", "la qualité du travail", "lire et évaluer la production"],
+          ["Connexion fréquente", "un apprentissage réel", "croiser avec les résultats"],
+          ["Score faible", "un manque de capacité", "examiner consigne, prérequis, motivation"],
+        ] } },
+        { type: "callout", tone: "tip", title: "Le badge", text: "Un badge numérique sert à valoriser une compétence ou une étape validée. Il signale une progression reconnue, mais ne remplace ni le mot de passe, ni l'évaluation, ni l'accompagnement." },
+        { type: "callout", tone: "tip", title: "Point d'attention du formateur", text: "Faire verbaliser la lecture des rapports : les traces numériques demandent une interprétation pédagogique, jamais une lecture mécanique." },
+      ],
+    },
+    {
+      id: "seq-6",
+      title: "Produire et auditer un espace de cours complet",
+      icon: "ClipboardCheck",
+      blocks: [
+        { type: "text", html: "L'évaluation sommative du module consiste à produire un <strong>espace de cours fonctionnel</strong> : une page d'accueil, quatre sections, au moins cinq ressources, deux activités, un quiz noté, un devoir, des critères d'achèvement et un badge final." },
+        { type: "infographic", kind: "table", title: "Barème de l'évaluation pratique (50 points)", data: { columns: ["Critère", "Points"], rows: [
+          ["Architecture claire et lisible", "10"],
+          ["Gestion correcte des rôles et accès", "10"],
+          ["Ressources et activités alignées", "10"],
+          ["Quiz avancé avec feedback", "10"],
+          ["Suivi, achèvement et badge fonctionnels", "10"],
+        ] } },
+        { type: "callout", tone: "warn", title: "Erreurs fréquentes", text: "Sections vides, droits trop larges, feedbacks absents et absence de test apprenant. Un espace validé comporte au contraire une progression claire, des consignes explicites, un test paramétré avec feedback, un devoir évaluable, des critères d'achèvement visibles et des rôles cohérents." },
+        { type: "infographic", kind: "steps", title: "Auditer un livrable LMS", data: { steps: [
+          { title: "Relire", text: "par les pairs, avec une grille qualité" },
+          { title: "Tester", text: "vue apprenant, permissions, achèvement" },
+          { title: "Corriger", text: "sections vides, droits, feedbacks" },
+          { title: "Stabiliser", text: "documenter et figer le livrable" },
+        ] } },
+        { type: "keypoints", title: "Trace écrite à retenir", points: [
+          "La compétence professionnelle se manifeste par une production utile, cohérente, testée, sécurisée et documentée.",
+          "L'apprenant doit savoir justifier ses choix.",
+          "Il doit corriger les limites observées.",
+          "Il doit transférer la méthode vers une situation réelle.",
+        ] },
+      ],
+    },
+  ],
+  exercises: [
+    {
+      id: "f1", kind: "categorize", title: "Attribuer les droits minimaux",
+      instruction: "Pour un cours avec un enseignant, deux tuteurs et trente apprenants, associez chaque droit au rôle adapté (principe de moindre privilège).",
+      categories: ["Enseignant", "Tuteur", "Apprenant"],
+      items: [
+        { label: "Édition du cours", category: "Enseignant" },
+        { label: "Évaluation des productions", category: "Enseignant" },
+        { label: "Suivi et animation du forum", category: "Tuteur" },
+        { label: "Correction selon besoin", category: "Tuteur" },
+        { label: "Consultation des ressources", category: "Apprenant" },
+        { label: "Remise des travaux", category: "Apprenant" },
+      ],
+      feedback: "Enseignant : édition du cours et évaluation. Tuteurs : suivi, forum, correction selon besoin. Apprenants : consultation, remise, participation. Aucun apprenant ne doit recevoir les droits de modification du cours.",
+    },
+    {
+      id: "f2", kind: "order", title: "Réagir à des droits excessifs",
+      instruction: "Des apprenants ont reçu par erreur le rôle enseignant et ont modifié des consignes. Remettez les mesures correctives dans le bon ordre.",
+      items: ["Retirer les droits excessifs", "Restaurer la ressource supprimée", "Vérifier les journaux d'activité", "Informer les responsables", "Mettre en place des mesures préventives"],
+      feedback: "On retire d'abord les droits, on restaure le contenu, on consulte les journaux, on informe les responsables, puis on prévient la récidive (rôles minimaux, procédure d'inscription, test des permissions, sauvegardes régulières).",
+    },
+    {
+      id: "f3", kind: "order", title: "Structurer un cours lisible",
+      instruction: "Remettez les sections d'un cours LMS dans l'ordre d'une progression lisible.",
+      items: ["Accueil", "Objectifs", "Ressources", "Activités", "Évaluation", "Remédiation"],
+      feedback: "Un cours lisible commence par l'accueil et les objectifs, propose ressources puis activités, puis l'évaluation et enfin la remédiation.",
+    },
+    {
+      id: "f4", kind: "categorize", title: "Ressource scénarisée ou non ?",
+      instruction: "Classez chaque dépôt : ressource scénarisée (fonction pédagogique claire) ou dépôt sans intention.",
+      categories: ["Scénarisée", "Sans intention"],
+      items: [
+        { label: "PDF qui prépare une activité", category: "Scénarisée" },
+        { label: "Vidéo qui introduit une tâche", category: "Scénarisée" },
+        { label: "Forum avec consigne de discussion", category: "Scénarisée" },
+        { label: "Liste de fichiers sans titre", category: "Sans intention" },
+        { label: "Forum sans consigne", category: "Sans intention" },
+        { label: "Section vide", category: "Sans intention" },
+      ],
+      feedback: "La fonction pédagogique prime sur l'outil : chaque ressource doit préparer, introduire, soutenir ou vérifier un apprentissage.",
+    },
+    {
+      id: "f5", kind: "match", title: "Relier l'élément à son rôle",
+      instruction: "Associez chaque composant du LMS à sa fonction principale.",
+      pairs: [
+        { left: "Catégorie", right: "Organiser des cours" },
+        { left: "Banque de questions", right: "Classer et réutiliser les items" },
+        { left: "Badge", right: "Valoriser une étape validée" },
+        { left: "Achèvement d'activité", right: "Indiquer une progression" },
+        { left: "Rôle", right: "Ensemble de permissions dans un contexte" },
+      ],
+      feedback: "Chaque composant a une fonction propre : la catégorie structure l'offre, la banque mutualise les questions, le badge valorise, l'achèvement signale la progression et le rôle définit les permissions.",
+    },
+    { id: "q1", kind: "qcm", title: "Définition d'un rôle", instruction: "Dans un LMS, un rôle désigne :", options: [{ text: "Une couleur de thème", correct: false }, { text: "Un ensemble de permissions dans un contexte", correct: true }, { text: "Un type de fichier", correct: false }, { text: "Un navigateur", correct: false }], feedback: "Réponse B. Les rôles déterminent ce que l'utilisateur peut faire." },
+    { id: "q2", kind: "qcm", title: "Moindre privilège", instruction: "Le principe de moindre privilège signifie :", options: [{ text: "Donner tous les droits à tout le monde", correct: false }, { text: "Attribuer seulement les droits nécessaires", correct: true }, { text: "Supprimer les comptes", correct: false }, { text: "Interdire les quiz", correct: false }], feedback: "Réponse B. Il réduit les risques d'erreur et d'abus." },
+    { id: "q3", kind: "qcm", title: "Banque de questions", instruction: "La banque de questions sert à :", options: [{ text: "Organiser et réutiliser les questions", correct: true }, { text: "Enregistrer les vidéos uniquement", correct: false }, { text: "Remplacer les sections", correct: false }, { text: "Supprimer les notes", correct: false }], feedback: "Réponse A. Elle facilite la création de quiz cohérents." },
+    { id: "q4", kind: "qcm", title: "Achèvement d'activité", instruction: "Un achèvement d'activité peut indiquer :", options: [{ text: "Qu'une activité a été consultée ou réalisée", correct: true }, { text: "La couleur du logo", correct: false }, { text: "Le salaire du formateur", correct: false }, { text: "La marque du serveur", correct: false }], feedback: "Réponse A. Il donne un indicateur de progression." },
+    { id: "q5", kind: "qcm", title: "Bon feedback automatisé", instruction: "Un bon feedback automatisé doit :", options: [{ text: "Humilier l'apprenant", correct: false }, { text: "Expliquer l'erreur et orienter la reprise", correct: true }, { text: "Ne rien dire", correct: false }, { text: "Donner uniquement « vrai/faux »", correct: false }], feedback: "Réponse B. Le feedback soutient l'apprentissage." },
+    { id: "q6", kind: "qcm", title: "Rôle d'une catégorie", instruction: "Une catégorie LMS sert généralement à :", options: [{ text: "Organiser des cours", correct: true }, { text: "Modifier un mot de passe", correct: false }, { text: "Ouvrir un navigateur", correct: false }, { text: "Imprimer une attestation", correct: false }], feedback: "Réponse A. Elle structure l'offre de formation." },
+    { id: "q7", kind: "qcm", title: "Tentatives multiples", instruction: "Un test avec tentatives multiples peut favoriser :", options: [{ text: "La reprise formative", correct: true }, { text: "La suppression des cours", correct: false }, { text: "L'absence de feedback", correct: false }, { text: "La confusion", correct: false }], feedback: "Réponse A. Les tentatives multiples peuvent encourager l'apprentissage par reprise." },
+    { id: "q8", kind: "qcm", title: "Cours lisible", instruction: "Un cours lisible commence souvent par :", options: [{ text: "Objectifs, consignes et plan de progression", correct: true }, { text: "Une liste de fichiers sans titre", correct: false }, { text: "Un dossier vide", correct: false }, { text: "Un forum sans consigne", correct: false }], feedback: "Réponse A. L'accueil doit orienter l'apprenant." },
+    { id: "q9", kind: "qcm", title: "Interpréter les rapports", instruction: "Les rapports LMS doivent être interprétés :", options: [{ text: "Avec prudence et contexte", correct: true }, { text: "Comme une preuve absolue", correct: false }, { text: "Sans regarder les consignes", correct: false }, { text: "Uniquement par couleur", correct: false }], feedback: "Réponse A. Les traces numériques demandent une lecture pédagogique." },
+    { id: "q10", kind: "qcm", title: "Utilité d'un badge", instruction: "Un badge numérique peut servir à :", options: [{ text: "Valoriser une compétence ou une étape validée", correct: true }, { text: "Effacer les notes", correct: false }, { text: "Bloquer le cours", correct: false }, { text: "Remplacer le mot de passe", correct: false }], feedback: "Réponse A. Le badge signale une progression reconnue." },
+    { id: "q11", kind: "truefalse", title: "Compte partagé", instruction: "Vrai ou faux ?", statement: "Utiliser un compte partagé et des droits excessifs renforce la gouvernance de la plateforme.", answer: false, feedback: "Faux : les comptes partagés et les droits excessifs fragilisent la gouvernance. Le principe de moindre privilège doit guider les choix." },
+    { id: "q12", kind: "truefalse", title: "Connexion et apprentissage", instruction: "Vrai ou faux ?", statement: "Une connexion fréquente prouve à elle seule qu'un apprenant a appris.", answer: false, feedback: "Faux : une connexion ne prouve pas toujours l'apprentissage. Les traces doivent être croisées avec les résultats et lues avec prudence." },
+    { id: "q13", kind: "truefalse", title: "Fonction pédagogique", instruction: "Vrai ou faux ?", statement: "Dans un cours LMS, la fonction pédagogique d'une ressource prime sur l'outil utilisé.", answer: true, feedback: "Vrai : on dépose une ressource pour préparer, introduire, soutenir ou vérifier un apprentissage, jamais sans intention." },
+  ],
+  caseStudy: {
+    title: "Étude de cas — Droits excessifs sur un espace de cours",
+    scenario:
+      "Dans un cours en ligne, plusieurs apprenants ont reçu par erreur le rôle enseignant. Certains ont modifié les consignes et supprimé une ressource. L'administrateur-concepteur doit réagir, restaurer la situation et éviter que cela se reproduise.",
+    questions: [
+      "Quels risques identifiez-vous ?",
+      "Quelles mesures correctives appliquer immédiatement ?",
+      "Quelles mesures préventives mettre en place ?",
+    ],
+    corrige: [
+      "Risques : perte de contenu, altération des évaluations, fuite de données et confusion pédagogique.",
+      "Correctifs immédiats : retirer les droits excessifs, restaurer la ressource supprimée, vérifier les journaux d'activité et informer les responsables.",
+      "Prévention : appliquer des rôles minimaux, formaliser une procédure d'inscription, tester les permissions et réaliser des sauvegardes régulières.",
+    ],
+  },
+};

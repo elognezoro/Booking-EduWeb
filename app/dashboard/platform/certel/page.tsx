@@ -13,17 +13,18 @@ import { fromNow } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
-const CERT_LEVELS = ["N1", "N2"] as const;
+const CERT_LEVELS = ["N1", "N2", "N3"] as const;
 
 export default async function CertelDiagnosticsPage({ searchParams }: { searchParams: { certsaved?: string } }) {
   await requirePermission("platform.manage");
-  const [items, certs, cfgN1, cfgN2] = await Promise.all([
+  const [items, certs, cfgN1, cfgN2, cfgN3] = await Promise.all([
     prisma.certelDiagnostic.findMany({ orderBy: { createdAt: "desc" }, take: 500 }),
     prisma.certelCertificate.findMany({ orderBy: { issuedAt: "desc" }, take: 300 }),
     getCertelCertConfig("N1"),
     getCertelCertConfig("N2"),
+    getCertelCertConfig("N3"),
   ]);
-  const cfgByLevel: Record<string, CertelCertConfig> = { N1: cfgN1, N2: cfgN2 };
+  const cfgByLevel: Record<string, CertelCertConfig> = { N1: cfgN1, N2: cfgN2, N3: cfgN3 };
 
   const byLevel: Record<string, number> = { N1: 0, N2: 0, N3: 0 };
   for (const i of items) byLevel[i.levelKey] = (byLevel[i.levelKey] ?? 0) + 1;
