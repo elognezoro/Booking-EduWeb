@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, ArrowRight, ArrowLeft, Clock, Lock, Headphones, Sparkles, ClipboardCheck, Award } from "lucide-react";
+import { GraduationCap, ArrowRight, ArrowLeft, Clock, Headphones, Sparkles, ClipboardCheck, Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { N2_MODULES_META, N2_ACCENT } from "@/lib/certel/niveau2";
@@ -56,18 +56,18 @@ export default function CertelNiveau2Hub() {
         </div>
 
         {/* Évaluation certifiante */}
-        <div className="mt-8 overflow-hidden rounded-2xl border-l-4 bg-card p-6 shadow-soft" style={{ borderLeftColor: N2_ACCENT }}>
+        <Link href="/certel/niveau-2/evaluation" className="group mt-8 block overflow-hidden rounded-2xl border-l-4 bg-card p-6 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card" style={{ borderLeftColor: N2_ACCENT }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-advanced-soft text-advanced-fg"><Award className="size-6" /></span>
               <div>
                 <h3 className="text-lg font-extrabold text-foreground">Évaluation certifiante du Niveau 2</h3>
-                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Projet de production professionnel, examen mixte et mise en situation. Seuil de certification : moyenne ≥ 60/100 avec projet validé.</p>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Projet fil rouge, examen mixte et mise en situation. Seuil de certification : moyenne ≥ 60/100 avec projet validé.</p>
               </div>
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-muted-foreground"><Lock className="size-3.5" /> Après les 6 modules</span>
+            <span className="inline-flex items-center gap-1 text-sm font-bold text-advanced-fg group-hover:gap-2">Commencer <ArrowRight className="size-4 transition-all" /></span>
           </div>
-        </div>
+        </Link>
       </section>
     </div>
   );

@@ -65,7 +65,7 @@ export default function CertelNiveau1Hub() {
         </div>
 
         {/* Évaluation certifiante */}
-        <div className="mt-8 overflow-hidden rounded-2xl border-l-4 bg-card p-6 shadow-soft" style={{ borderLeftColor: "#6D5DF5" }}>
+        <Link href="/certel/niveau-1/evaluation" className="group mt-8 block overflow-hidden rounded-2xl border-l-4 bg-card p-6 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-card" style={{ borderLeftColor: "#6D5DF5" }}>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-advanced-soft text-advanced-fg"><Award className="size-6" /></span>
@@ -74,9 +74,9 @@ export default function CertelNiveau1Hub() {
                 <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Projet de synthèse (30 %), examen final mixte (30 %), QCM (30 pts) et mise en situation pratique. Seuil de certification : moyenne ≥ 60/100 avec projet validé.</p>
               </div>
             </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-muted-foreground"><Lock className="size-3.5" /> Après les 6 modules</span>
+            <span className="inline-flex items-center gap-1 text-sm font-bold text-advanced-fg group-hover:gap-2">Commencer <ArrowRight className="size-4 transition-all" /></span>
           </div>
-        </div>
+        </Link>
       </section>
     </div>
   );
