@@ -22,7 +22,13 @@ export async function startCertelPayment(formData: FormData) {
   if (await hasCertelAccess(user.id, levelKey)) redirect(`/certel/${levelToSlug(levelKey)}`);
 
   const { amount, currency } = await certelLevelAmount(levelKey);
-  if (amount <= 0) redirect(`/certel/${levelToSlug(levelKey)}`); // gratuit
+  if (amount <= 0) {
+    // Niveau gratuit : on enregistre une inscription gratuite (accès) pour l'utilisateur authentifié.
+    await prisma.certelPayment.create({
+      data: { userId: user.id, levelKey, amount: 0, currency, status: "PAID", transactionId: newTransactionId(levelKey), fullName: user.fullName, paidAt: new Date() },
+    });
+    redirect(`/certel/${levelToSlug(levelKey)}`);
+  }
 
   const transactionId = newTransactionId(levelKey);
   await prisma.certelPayment.create({

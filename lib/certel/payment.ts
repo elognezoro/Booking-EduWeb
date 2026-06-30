@@ -18,26 +18,30 @@ export async function certelLevelAmount(levelKey: CertelLevelKey): Promise<{ amo
   return { amount: netAmount(pricing.levels[levelKey], pricing.currency), currency: pricing.currency };
 }
 
-/** Accès accordé si le niveau est gratuit, ou si un paiement PAID existe pour (userId, levelKey). */
+/**
+ * Existe-t-il une INSCRIPTION valide pour (userId, levelKey) ? — c.-à-d. un paiement réussi
+ * OU un accès accordé manuellement par l'admin (les deux portent le statut PAID).
+ * Aucun accès « libre » : même un niveau gratuit exige une inscription (créée à la volée
+ * lors de l'inscription gratuite). L'utilisateur doit être authentifié.
+ */
 export async function hasCertelAccess(userId: string | undefined | null, levelKey: CertelLevelKey): Promise<boolean> {
-  const { amount } = await certelLevelAmount(levelKey);
-  if (amount <= 0) return true;
   if (!userId) return false;
   const paid = await prisma.certelPayment.findFirst({ where: { userId, levelKey, status: "PAID" }, select: { id: true } });
   return !!paid;
 }
 
 /**
- * Accès d'un utilisateur à un niveau CERTEL, en tenant compte du super administrateur :
- * `platform.manage` donne un accès COMPLET à toutes les formations (supervision/test),
- * sans paiement. Sinon, règle de paiement habituelle (gratuit ou paiement PAID).
+ * Accès d'un utilisateur à un niveau CERTEL. Règle : l'utilisateur doit être AUTHENTIFIÉ et
+ * disposer d'une inscription (frais payés OU inscription accordée par l'admin). Le super
+ * administrateur (`platform.manage`) a un accès complet pour la supervision/le test.
  */
 export async function canAccessCertelLevel(
   user: { id?: string | null; permissions?: ReadonlySet<Permission> } | null | undefined,
   levelKey: CertelLevelKey,
 ): Promise<boolean> {
-  if (user?.permissions?.has("platform.manage")) return true;
-  return hasCertelAccess(user?.id, levelKey);
+  if (!user?.id) return false; // authentification obligatoire
+  if (user.permissions?.has("platform.manage")) return true;
+  return hasCertelAccess(user.id, levelKey);
 }
 
 /** Référence de transaction unique (alphanumérique, acceptée par CinetPay). */

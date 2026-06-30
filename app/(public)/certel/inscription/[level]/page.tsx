@@ -94,9 +94,17 @@ export default async function CertelInscriptionPage({ params, searchParams }: { 
             </div>
           ) : !user ? (
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">Connectez-vous pour vous inscrire et régler les frais.</p>
+              <p className="text-sm text-muted-foreground">Connectez-vous pour vous inscrire{net > 0 ? " et régler les frais" : ""}.</p>
               <Button asChild className="mt-4"><Link href={`/login?callbackUrl=${encodeURIComponent(`/certel/inscription/${slug}`)}`}><LogIn className="size-4" /> Se connecter</Link></Button>
             </div>
+          ) : net <= 0 ? (
+            <form action={startCertelPayment} className="space-y-3 text-center">
+              <input type="hidden" name="level" value={slug} />
+              <p className="text-sm text-muted-foreground">Ce niveau est gratuit : votre inscription débloque immédiatement l'accès aux modules.</p>
+              <Button type="submit" size="lg" className="w-full" style={{ backgroundColor: meta.accent }}>
+                <CheckCircle2 className="size-4" /> M'inscrire gratuitement
+              </Button>
+            </form>
           ) : (
             <form action={startCertelPayment} className="space-y-4">
               <input type="hidden" name="level" value={slug} />
