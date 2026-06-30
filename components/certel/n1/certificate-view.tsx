@@ -68,9 +68,14 @@ export function CertificateView(props: CertificateData) {
 
   return (
     <div className="certificate-print-page">
+      {/* Forçage paysage à l'impression, limité à la page certificat (le <style> n'existe
+          que lorsque ce composant est monté ; les autres impressions ne sont pas affectées).
+          Le @page nu garantit l'orientation même si les @page nommés ne sont pas honorés. */}
+      <style>{`@media print { @page { size: A4 landscape; margin: 0; } }`}</style>
+
       <div className="no-print mx-auto mb-4 flex max-w-[1100px] items-center justify-between gap-3">
-        <Link href="/certel/niveau-1" className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:underline">
-          <ArrowLeft className="size-4" /> Niveau 1
+        <Link href={`/certel/niveau-${levelNum}`} className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:underline">
+          <ArrowLeft className="size-4" /> Niveau {levelNum}
         </Link>
         <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-full bg-advanced px-4 py-2 text-sm font-bold text-white transition hover:bg-advanced/90">
           <Printer className="size-4" /> Télécharger en PDF
@@ -101,7 +106,7 @@ export function CertificateView(props: CertificateData) {
       </div>
 
       <p className="no-print mx-auto mt-4 max-w-[1100px] text-center text-sm text-muted-foreground">
-        Astuce : dans la fenêtre d'impression, choisissez « Enregistrer au format PDF », orientation paysage, marges « Aucune ».
+        Le certificat s'imprime automatiquement en paysage. Dans la fenêtre d'impression, choisissez « Enregistrer au format PDF » et marges « Aucune ».
       </p>
     </div>
   );
