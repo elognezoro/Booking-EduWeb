@@ -8,7 +8,7 @@ import { X } from "lucide-react";
  * - Miniature en haut de la page d'accueil, DÉPLAÇABLE (glisser) sur tout l'écran, FERMABLE.
  * - Au survol : agrandissement + feux d'artifice (voir keyframes .indep-particle dans globals.css).
  * - Affichée pendant ~1 mois puis disparaît automatiquement (date de fin ci-dessous).
- * Image : public/independence-ci-66.jpg (repli sur le SVG si absente).
+ * Image : public/independence-ci-66.webp (repli sur le SVG si absente).
  */
 const END = new Date("2026-08-24T23:59:59"); // fin d'affichage (≈ 1 mois)
 const LS_KEY = "indep-ci-66-closed";
@@ -121,7 +121,7 @@ export function IndependenceBanner() {
         {hover && !dragging && <Fireworks />}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/independence-ci-66.jpg"
+          src="/independence-ci-66.webp"
           onError={(e) => {
             const t = e.currentTarget;
             if (!t.dataset.fb) { t.dataset.fb = "1"; t.src = "/independence-ci-66.svg"; }
