@@ -38,7 +38,6 @@ export function InstitutionPicker({ institutions }: { institutions: InstitutionO
       <div className="relative">
         <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
         <input
-          autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher votre institution (nom, sigle, ville)…"
