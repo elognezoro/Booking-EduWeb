@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14213d"/>
+      <stop offset="0.55" stop-color="#22345c"/>
+      <stop offset="0.8" stop-color="#c2603a"/>
+      <stop offset="1" stop-color="#f0a04b"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3c4"/>
+      <stop offset="0.5" stop-color="#f7c948"/>
+      <stop offset="1" stop-color="#b47e11"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" fill="url(#sky)"/>
+  <!-- feux d'artifice stylisés -->
+  <g stroke-width="2" stroke-linecap="round" opacity="0.8">
+    <g stroke="#f7c948"><line x1="70" y1="90" x2="70" y2="60"/><line x1="70" y1="90" x2="98" y2="72"/><line x1="70" y1="90" x2="42" y2="72"/><line x1="70" y1="90" x2="88" y2="112"/><line x1="70" y1="90" x2="52" y2="112"/></g>
+    <g stroke="#ff7900"><line x1="330" y1="110" x2="330" y2="82"/><line x1="330" y1="110" x2="356" y2="94"/><line x1="330" y1="110" x2="304" y2="94"/><line x1="330" y1="110" x2="348" y2="130"/><line x1="330" y1="110" x2="312" y2="130"/></g>
+    <g stroke="#ffffff"><line x1="200" y1="70" x2="200" y2="46"/><line x1="200" y1="70" x2="222" y2="58"/><line x1="200" y1="70" x2="178" y2="58"/></g>
+  </g>
+  <text x="200" y="210" text-anchor="middle" fill="url(#gold)" font-size="120" font-weight="bold">66<tspan font-size="52" dy="-46">e</tspan></text>
+  <text x="200" y="262" text-anchor="middle" fill="url(#gold)" font-size="34" font-weight="bold" letter-spacing="3">ANNIVERSAIRE</text>
+  <text x="200" y="292" text-anchor="middle" fill="#ffffff" font-size="15" letter-spacing="1.5">DE L'INDÉPENDANCE DE LA</text>
+  <text x="200" y="314" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="bold" letter-spacing="2">CÔTE D'IVOIRE</text>
+  <!-- drapeau ivoirien -->
+  <g transform="translate(140,345)">
+    <rect x="0" y="0" width="40" height="80" fill="#ff7900"/>
+    <rect x="40" y="0" width="40" height="80" fill="#ffffff"/>
+    <rect x="80" y="0" width="40" height="80" fill="#009e60"/>
+    <rect x="0" y="0" width="120" height="80" fill="none" stroke="#ffffff" stroke-opacity="0.4"/>
+  </g>
+  <text x="200" y="470" text-anchor="middle" fill="#f7c948" font-size="20" font-weight="bold">7 AOÛT 1960 — 7 AOÛT 2026</text>
+  <text x="200" y="522" text-anchor="middle" fill="#ffffff" font-size="26" font-style="italic" font-family="'Segoe Script','Brush Script MT',cursive">Bonne fête de l'Indépendance !</text>
+  <text x="200" y="565" text-anchor="middle" fill="#ffffff" fill-opacity="0.6" font-size="12" font-family="system-ui, sans-serif">EduWeb Booking · Côte d'Ivoire</text>
+</svg>

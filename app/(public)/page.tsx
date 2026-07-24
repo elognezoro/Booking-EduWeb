@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { InstitutionPicker } from "@/components/public/institution-picker";
 import { FloatingToc } from "@/components/ui/floating-toc";
 import { CertelFloatingCta } from "@/components/certel/floating-cta";
+import { IndependenceBanner } from "@/components/home/independence-banner";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +49,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <IndependenceBanner />
       {/* ===================== HERO (image plein cadre + dégradé vert) ===================== */}
       <section className="relative isolate -mt-16 overflow-hidden">
         {/* Image de fond — déposez l'image dans public/brand/eduweb-hero.png */}
