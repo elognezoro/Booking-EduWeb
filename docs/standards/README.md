@@ -7,6 +7,7 @@ fonctionnalité doit s'y conformer ; les écarts connus sont notés ci-dessous.
 |------|----------|---------|
 | STD-010 | File Storage Standards | [STD-010-file-storage.md](./STD-010-file-storage.md) |
 | STD-011 | API Standards | [STD-011-api.md](./STD-011-api.md) |
+| STD-012 | Backend Standards | [STD-012-backend.md](./STD-012-backend.md) |
 
 ## État de conformité (au moment de l'ajout)
 
