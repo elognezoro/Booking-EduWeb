@@ -72,7 +72,7 @@ export default function CertelProgramPage() {
               <p className="mt-4 max-w-3xl text-sm leading-relaxed text-foreground">{level.finalite}</p>
 
               {["N1", "N2", "N3"].includes(level.levelKey) && (
-                <Button asChild className="mt-4 text-white hover:opacity-90" style={{ backgroundColor: accent }}>
+                <Button asChild className="mt-4 h-auto min-h-[2.5rem] w-full whitespace-normal py-2 text-center text-white hover:opacity-90 sm:w-auto" style={{ backgroundColor: accent }}>
                   <Link href={`/certel/niveau-${level.levelKey.replace("N", "")}`}><GraduationCap className="size-4" /> Accéder à la formation interactive du Niveau {level.levelKey.replace("N", "")} <ArrowRight className="size-4" /></Link>
                 </Button>
               )}

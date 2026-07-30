@@ -111,8 +111,8 @@ export default async function HomePage() {
       {/* ===================== SPORT CÉRÉBRAL ===================== */}
       <section id="sport-cerebral" className="section scroll-mt-20 py-16">
         <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary via-primary-600 to-primary-700 text-primary-foreground shadow-glow">
-          <div className="grid items-center gap-8 p-8 lg:grid-cols-[1.15fr_1fr] lg:p-12">
-            <div>
+          <div className="grid items-center gap-6 p-6 sm:gap-8 sm:p-8 lg:grid-cols-[1.15fr_1fr] lg:p-12">
+            <div className="min-w-0">
               <Badge className="mb-4 bg-white/15 text-white ring-0"><Brain className="size-3.5" /> Nouveau · Espace jeux</Badge>
               <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Sport cérébral</h2>
               <p className="mt-1 text-lg font-semibold text-[#F0E2C0]">Entraînez votre esprit comme vous entraînez votre corps.</p>
@@ -122,12 +122,12 @@ export default async function HomePage() {
                 notre capacité à <strong className="text-white">réfléchir, mémoriser, déduire, résoudre et persévérer</strong>.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
+                <Button asChild size="lg" className="h-auto min-h-[3rem] w-full whitespace-normal bg-white py-2.5 text-center text-primary hover:bg-white/90 sm:w-auto">
                   <Link href="/sport-cerebral">Entrer dans l'espace Sport cérébral <ArrowRight className="size-4" /></Link>
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
               {[
                 { icon: Grid3x3, t: "Sudoku" },
                 { icon: Brain, t: "Mémoire" },
