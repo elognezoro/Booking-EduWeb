@@ -87,12 +87,12 @@ export function ServiceTree({ nodes, parents, sites }: { nodes: ServiceNode[]; p
               <GripVertical className="size-4 shrink-0 cursor-grab text-muted-foreground/60 active:cursor-grabbing" />
               {d.depth > 0 && <CornerDownRight className="size-3.5 shrink-0 text-muted-foreground" />}
               <span className="truncate">{d.name}</span>
-              {d.code && <span className="shrink-0 text-xs text-muted-foreground">· {d.code}</span>}
-              {d.headName && <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-advanced-fg"><Star className="size-3" /> {d.headName}</span>}
-              {d.counts.children > 0 && <span className="shrink-0 text-xs text-muted-foreground">· {d.counts.children} sous-service{d.counts.children > 1 ? "s" : ""}</span>}
+              {d.code && <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">· {d.code}</span>}
+              {d.headName && <span className="hidden shrink-0 items-center gap-1 text-xs font-semibold text-advanced-fg sm:inline-flex"><Star className="size-3" /> {d.headName}</span>}
+              {d.counts.children > 0 && <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">· {d.counts.children} sous-service{d.counts.children > 1 ? "s" : ""}</span>}
             </span>
             <span className="flex shrink-0 items-center gap-2">
-              <span className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="hidden items-center gap-3 text-xs text-muted-foreground sm:flex">
                 <span className="inline-flex items-center gap-1"><Users className="size-3" /> {d.counts.users}</span>
                 <span className="inline-flex items-center gap-1"><Boxes className="size-3" /> {d.counts.resources}</span>
               </span>

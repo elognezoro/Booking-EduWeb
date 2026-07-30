@@ -251,7 +251,7 @@ function ResultView({ result }: { result: CertelSubmitResult }) {
         <p className="text-sm leading-relaxed text-foreground">{level.appreciation}</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <ScorePill label="Auto-positionnement" value={s.autopos} max={30} />
         <ScorePill label="QCM" value={s.qcm} max={30} />
         <ScorePill label="Partie en ligne" value={s.online60} max={60} />

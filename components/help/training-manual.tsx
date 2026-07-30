@@ -337,7 +337,7 @@ export function TrainingManual({ content, generatedOn }: { content: TrainingCont
         <p className="text-sm leading-relaxed text-muted-foreground">
           La formation s'organise en un <strong className="text-foreground">tronc commun</strong> (modules T1 à T3, suivis par tous les profils) puis un <strong className="text-foreground">module métier</strong> propre à chaque rôle. Le tableau ci-dessous présente l'aiguillage des parcours par famille de rôles.
         </p>
-        <div className="overflow-hidden rounded-xl border border-border break-inside-avoid">
+        <div className="overflow-x-auto rounded-xl border border-border break-inside-avoid">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-secondary/60 text-left">
@@ -556,7 +556,7 @@ export function TrainingManual({ content, generatedOn }: { content: TrainingCont
 
         {/* Annexe E — Fiche formateur */}
         <Block title="Annexe E — Fiche formateur (session type)" icon={Presentation}>
-          <div className="overflow-hidden rounded-xl border border-border break-inside-avoid">
+          <div className="overflow-x-auto rounded-xl border border-border break-inside-avoid">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-secondary/60 text-left">

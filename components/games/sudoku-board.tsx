@@ -145,7 +145,7 @@ export function SudokuBoard({ initialLevel = "facile", slug = "sudoku" }: { init
         </div>
 
         {/* Grille */}
-        <div className="grid grid-cols-9 overflow-hidden rounded-xl border-2 border-foreground/30 bg-card">
+        <div className="mx-auto grid w-full max-w-[26rem] grid-cols-9 overflow-hidden rounded-xl border-2 border-foreground/30 bg-card">
           {values.map((v, i) => {
             const r = Math.floor(i / 9);
             const c = i % 9;
@@ -162,8 +162,7 @@ export function SudokuBoard({ initialLevel = "facile", slug = "sudoku" }: { init
                   c % 3 === 2 && c !== 8 && "border-r-2 border-r-foreground/30",
                   r % 3 === 2 && r !== 8 && "border-b-2 border-b-foreground/30",
                   selected === i ? "bg-primary/15" : sameVal ? "bg-primary-50" : "bg-card hover:bg-secondary",
-                  given ? "text-foreground" : isError ? "text-unavailable-fg" : "text-primary",
-                  "size-9 sm:size-11"
+                  given ? "text-foreground" : isError ? "text-unavailable-fg" : "text-primary"
                 )}
               >
                 {v !== 0 ? v : ""}

@@ -141,7 +141,7 @@ function Pattern({ data }: { data: { pattern: string; examples: string[] } }) {
 
 function Table({ data }: { data: { columns: string[]; rows: string[][] } }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
+    <div className="overflow-x-auto rounded-xl border border-border bg-card">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-secondary/70 text-left">

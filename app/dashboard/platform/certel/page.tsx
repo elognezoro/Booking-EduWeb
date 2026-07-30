@@ -98,7 +98,7 @@ function CertConfigCard({ level, cfg, saved, certs, accent }: { level: string; c
         </form>
         <p className="mt-3 text-sm text-muted-foreground"><span className="font-semibold text-foreground">{certs.length}</span> certificat{certs.length > 1 ? "s" : ""} {level} délivré{certs.length > 1 ? "s" : ""} à ce jour.</p>
         {certs.length > 0 && (
-          <div className="mt-3 overflow-hidden rounded-xl border border-border">
+          <div className="mt-3 overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-sm">
               <thead><tr className="bg-secondary/60 text-left"><th className="px-3 py-2 font-bold">Référence</th><th className="px-3 py-2 font-bold">Bénéficiaire</th><th className="px-3 py-2 font-bold">Émis le</th></tr></thead>
               <tbody>

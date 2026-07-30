@@ -42,7 +42,7 @@ export function ReserveButton({
                   <option value="LOAN">Emprunt physique</option>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div><Label htmlFor="ss">Début (sur place)</Label><Input id="ss" name="slotStart" type="datetime-local" /></div>
                 <div><Label htmlFor="se">Fin</Label><Input id="se" name="slotEnd" type="datetime-local" /></div>
               </div>
