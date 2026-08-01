@@ -53,7 +53,10 @@ export default async function BrainDashboardPage() {
         actions={
           <div className="flex flex-wrap gap-2">
             {user.permissions.has("platform.manage") && (
-              <Button asChild variant="outline"><Link href="/dashboard/sport-cerebral/admin"><Award className="size-4" /> Banque de questions</Link></Button>
+              <>
+                <Button asChild variant="outline"><Link href="/dashboard/sport-cerebral/admin/jeux"><Gamepad2 className="size-4" /> Gestion des jeux</Link></Button>
+                <Button asChild variant="outline"><Link href="/dashboard/sport-cerebral/admin"><Award className="size-4" /> Banque de questions</Link></Button>
+              </>
             )}
             <Button asChild><Link href="/sport-cerebral">Jouer <ArrowRight className="size-4" /></Link></Button>
           </div>
