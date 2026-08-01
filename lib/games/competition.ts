@@ -5,9 +5,9 @@ import { GAMES } from "./catalog";
 
 export const COMPETITION_COOKIE = "eduweb_competition";
 
-// Jeux éligibles aux compétitions (score comparable entre joueurs).
-export const COMPETITION_SLUGS = ["calcul-mental", "logique", "attention", "culture-generale", "sudoku", "memoire"];
-export const competitionGames = () => GAMES.filter((g) => COMPETITION_SLUGS.includes(g.slug));
+// Jeux proposés aux compétitions = tous les jeux jouables de l'espace « Sport cérébral ».
+export const competitionGames = () => GAMES.filter((g) => g.playable);
+export const COMPETITION_SLUGS = competitionGames().map((g) => g.slug);
 
 /** Code de session lisible (sans caractères ambigus). */
 export function genCompetitionCode(): string {

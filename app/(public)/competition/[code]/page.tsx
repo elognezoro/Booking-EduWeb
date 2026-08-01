@@ -14,6 +14,9 @@ import { Attention } from "@/components/games/attention";
 import { SudokuBoard } from "@/components/games/sudoku-board";
 import { MemoryGame } from "@/components/games/memory-game";
 import { Quiz, type QuizQuestion } from "@/components/games/quiz";
+import { Logigramme } from "@/components/games/logigramme";
+import { Crossword } from "@/components/games/crossword";
+import { Morpion } from "@/components/games/morpion";
 import { getGame, LEVELS } from "@/lib/games/catalog";
 import { getMyParticipant } from "@/lib/games/competition";
 import { joinCompetition, leaveCompetition } from "@/app/actions/competition";
@@ -120,6 +123,9 @@ export default async function CompetitionPlayPage({ params, searchParams }: { pa
             {comp.gameSlug === "sudoku" && <SudokuBoard initialLevel={level} />}
             {comp.gameSlug === "memoire" && <MemoryGame initialLevel={level} />}
             {comp.gameSlug === "culture-generale" && <Quiz questions={questions} level={level} />}
+            {comp.gameSlug === "logigrammes" && <Logigramme initialLevel={level} />}
+            {comp.gameSlug === "mots-croises" && <Crossword initialLevel={level} />}
+            {comp.gameSlug === "defis-ia" && <Morpion initialLevel={level} />}
           </Card>
           <p className="mt-3 text-center text-xs text-muted-foreground">Votre meilleur score est retenu. Rejouez pour l'améliorer ; l'organisateur suit le classement en direct.</p>
         </>
