@@ -1,23 +1,33 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { GAMES, type GameDef } from "./catalog";
+import { getGamesAvailability } from "@/lib/platform/settings";
+import { type GameAvailability } from "./availability";
 
 export interface EffectiveGame extends GameDef {
-  published: boolean;
+  published: boolean; // dérivé : disponible = availability !== "DISABLED"
+  availability: GameAvailability;
   audioUrl: string | null;
   sortOrder: number;
 }
 
-/** Fusionne le catalogue (code) avec la configuration éditable (BDD) : publication, ordre, consigne, audio. */
+/** Fusionne le catalogue (code) avec la configuration éditable (BDD) : disponibilité, ordre, consigne, audio. */
 export async function getEffectiveGames(opts?: { includeHidden?: boolean }): Promise<EffectiveGame[]> {
-  const configs = await prisma.brainSportGameConfig.findMany();
+  const [configs, availMap] = await Promise.all([
+    prisma.brainSportGameConfig.findMany(),
+    getGamesAvailability(),
+  ]);
   const bySlug = new Map(configs.map((c) => [c.slug, c]));
   const list: EffectiveGame[] = GAMES.map((g, i) => {
     const c = bySlug.get(g.slug);
+    // Rétro-compat : si aucune disponibilité n'a été réglée, on la déduit de l'ancien indicateur `published`
+    // (jeu masqué → DISABLED, sinon on garde le comportement historique via le défaut SUBSCRIPTION).
+    const availability: GameAvailability = availMap[g.slug] ?? (c && c.published === false ? "DISABLED" : "SUBSCRIPTION");
     return {
       ...g,
       consigne: c?.consigne?.trim() ? c.consigne : g.consigne,
-      published: c ? c.published : true,
+      availability,
+      published: availability !== "DISABLED",
       audioUrl: c?.audioPath ? `/api/brain-audio/${g.slug}` : null,
       sortOrder: c?.sortOrder ?? i,
     };

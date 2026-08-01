@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Gamepad2, CheckCircle2, Save, ArrowLeft, Lock } from "lucide-react";
+import { Gamepad2, CheckCircle2, Save, ArrowLeft, Lock, Info } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +26,16 @@ export default async function PlatformGamesPage({ searchParams }: { searchParams
         description="Verrouillage des jeux selon l'abonnement (super admin). Les abonnés ont toujours accès à tout."
         icon={<span className="inline-flex size-11 items-center justify-center rounded-2xl bg-advanced-soft text-advanced-fg"><Gamepad2 className="size-6" /></span>}
       />
+
+      <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary-50/50 px-4 py-3 text-sm text-foreground">
+        <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+        <span>
+          Ces réglages concernent uniquement la <strong>sélection « découverte »</strong> offerte aux non-abonnés, pour les
+          jeux réglés sur « Abonnement requis ». Pour rendre un jeu <strong>ouvert à tous</strong>, réservé aux
+          <strong> membres connectés</strong> ou <strong>indisponible</strong>, utilisez la{" "}
+          <Link href="/dashboard/sport-cerebral/admin/jeux" className="font-semibold text-primary hover:underline">gestion des jeux</Link>.
+        </span>
+      </div>
 
       {searchParams.saved && (
         <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">

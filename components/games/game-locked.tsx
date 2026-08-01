@@ -1,11 +1,64 @@
 import Link from "next/link";
-import { Lock, Sparkles, ArrowRight, LogIn } from "lucide-react";
+import { Lock, Sparkles, ArrowRight, LogIn, Ban } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GamesAccess } from "@/lib/games/access";
 
-/** Carte de blocage affichée à la place d'un jeu réservé aux établissements abonnés. */
+/** Carte de blocage affichée à la place d'un jeu non accessible (indisponible, connexion ou abonnement requis). */
 export function GameLocked({ title, access }: { title: string; access: GamesAccess }) {
+  const reason = access.lock ?? "subscription";
+
+  if (reason === "disabled") {
+    return (
+      <Card className="mt-5 p-8 text-center">
+        <span className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-2xl bg-unavailable-soft text-unavailable-fg">
+          <Ban className="size-7" />
+        </span>
+        <h2 className="text-xl font-extrabold text-foreground">« {title} » n'est pas disponible</h2>
+        <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
+          Ce jeu a été désactivé par l'administrateur. Il pourra être remis à disposition ultérieurement.
+        </p>
+        <div className="mt-5 flex justify-center">
+          <Button asChild variant="outline">
+            <Link href="/sport-cerebral">
+              Voir les jeux disponibles <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
+  if (reason === "auth") {
+    return (
+      <Card className="mt-5 p-8 text-center">
+        <span className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
+          <LogIn className="size-7" />
+        </span>
+        <h2 className="text-xl font-extrabold text-foreground">Connectez-vous pour jouer à « {title} »</h2>
+        <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
+          Ce jeu est réservé aux utilisateurs connectés. Un simple compte suffit — la création de compte est gratuite.
+        </p>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          <Button asChild>
+            <Link href="/login">
+              <LogIn className="size-4" /> Se connecter
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/register">Créer un compte</Link>
+          </Button>
+          <Button asChild variant="ghost">
+            <Link href="/sport-cerebral">
+              Voir les jeux disponibles <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
+  // reason === "subscription"
   const anon = access.reason === "anonymous";
   return (
     <Card className="mt-5 p-8 text-center">

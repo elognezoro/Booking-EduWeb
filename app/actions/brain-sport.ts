@@ -11,7 +11,9 @@ import { getEffectiveGames } from "@/lib/games/config";
 import { recordCompetitionResult } from "@/lib/games/competition";
 import { saveGameAudio, deleteGameAudio } from "@/lib/games/audio-storage";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
-import type { Level } from "@/lib/games/catalog";
+import { getGame, type Level } from "@/lib/games/catalog";
+import { setGameAvailability } from "@/lib/platform/settings";
+import { normalizeAvailability } from "@/lib/games/availability";
 
 export interface RecordResult {
   recorded: boolean;
@@ -107,17 +109,14 @@ export async function deleteBrainQuestion(formData: FormData) {
 /* ----------------------------- Admin : gestion des jeux (super admin) ----------------------------- */
 const GAMES_ADMIN_PATH = "/dashboard/sport-cerebral/admin/jeux";
 
-export async function toggleGamePublished(formData: FormData) {
+/** Règle la disponibilité d'un jeu : Ouvert à tous / Connexion requise / Abonnement requis / Indisponible. */
+export async function setGameAvailabilityAction(formData: FormData) {
   await requirePermission("platform.manage");
   const slug = String(formData.get("slug"));
-  const games = await getEffectiveGames({ includeHidden: true });
-  const g = games.find((x) => x.slug === slug);
-  if (g) {
-    await prisma.brainSportGameConfig.upsert({
-      where: { slug }, create: { slug, published: !g.published, sortOrder: g.sortOrder }, update: { published: !g.published },
-    });
-  }
+  const mode = normalizeAvailability(formData.get("availability"));
+  if (getGame(slug)) await setGameAvailability(slug, mode);
   revalidatePath(GAMES_ADMIN_PATH);
+  revalidatePath("/sport-cerebral");
   redirect(GAMES_ADMIN_PATH);
 }
 

@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { normalizeAvailability, type GameAvailability } from "@/lib/games/availability";
 
 export interface GamesGating {
   enabled: boolean; // le verrouillage par abonnement est-il actif ?
@@ -32,6 +33,36 @@ export async function setGamesGating(g: GamesGating): Promise<void> {
     where: { key: KEY },
     create: { key: KEY, value: JSON.stringify(g) },
     update: { value: JSON.stringify(g) },
+  });
+}
+
+// ——— Disponibilité par jeu (réglée par l'administrateur système) ———
+// Stockée en JSON { [slug]: "PUBLIC" | "AUTH" | "SUBSCRIPTION" | "DISABLED" } ; les jeux absents
+// suivent le défaut (SUBSCRIPTION), ce qui préserve le comportement historique.
+const AVAIL_KEY = "games_availability";
+
+export async function getGamesAvailability(): Promise<Record<string, GameAvailability>> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: AVAIL_KEY } });
+  if (!row) return {};
+  try {
+    const v = JSON.parse(row.value);
+    const out: Record<string, GameAvailability> = {};
+    if (v && typeof v === "object") {
+      for (const [slug, mode] of Object.entries(v)) out[slug] = normalizeAvailability(mode);
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export async function setGameAvailability(slug: string, mode: GameAvailability): Promise<void> {
+  const current = await getGamesAvailability();
+  current[slug] = normalizeAvailability(mode);
+  await prisma.platformSetting.upsert({
+    where: { key: AVAIL_KEY },
+    create: { key: AVAIL_KEY, value: JSON.stringify(current) },
+    update: { value: JSON.stringify(current) },
   });
 }
 
