@@ -11,6 +11,7 @@ import { LEVELS } from "@/lib/games/catalog";
 import { getEffectiveGames } from "@/lib/games/config";
 import { getDailyChallenge } from "@/lib/games/daily";
 import { getGamesGate, gameLockReason } from "@/lib/games/access";
+import { describeSchedule } from "@/lib/games/availability";
 import { JoinByCode } from "@/components/competitions/join-by-code";
 
 export const dynamic = "force-dynamic";
@@ -26,8 +27,9 @@ export default async function SportCerebralPage() {
   // combinée aux réglages de découverte pour les jeux réservés aux abonnés.
   const gate = await getGamesGate();
   const { openAll } = gate;
+  const now = new Date();
   // Bannière « découverte » : pertinente seulement s'il reste des jeux réservés aux abonnés.
-  const anySubscriptionLocked = games.some((g) => gameLockReason(g.availability, gate, g.slug) === "subscription");
+  const anySubscriptionLocked = games.some((g) => gameLockReason(g.availability, g.schedule, gate, g.slug, now) === "subscription");
   return (
     <>
       {/* ===================== HERO ===================== */}
@@ -122,7 +124,7 @@ export default async function SportCerebralPage() {
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {games.map((g) => {
             const Icon = ICONS[g.icon] ?? Gamepad2;
-            const lock = gameLockReason(g.availability, gate, g.slug); // "auth" | "subscription" | null
+            const lock = gameLockReason(g.availability, g.schedule, gate, g.slug, now); // "auth" | "subscription" | "schedule" | null
             const open = g.playable && !!g.href && !lock;
             return (
               <Card key={g.slug} className="flex flex-col gap-4 p-6">
@@ -136,7 +138,9 @@ export default async function SportCerebralPage() {
                       <p className="mt-0.5 text-sm text-muted-foreground">{g.short}</p>
                     </div>
                   </div>
-                  {lock === "auth" ? (
+                  {lock === "schedule" ? (
+                    <Badge tone="pending"><Clock className="mr-1 inline size-3" />Programmé</Badge>
+                  ) : lock === "auth" ? (
                     <Badge tone="info"><LogIn className="mr-1 inline size-3" />Connexion</Badge>
                   ) : lock === "subscription" ? (
                     <Badge tone="pending"><Lock className="mr-1 inline size-3" />Abonnement</Badge>
@@ -173,6 +177,11 @@ export default async function SportCerebralPage() {
                   <Button asChild className="mt-auto w-full">
                     <Link href={g.href!}>Commencer <ArrowRight className="size-4" /></Link>
                   </Button>
+                ) : lock === "schedule" ? (
+                  <div className="mt-auto rounded-lg bg-pending-soft px-3 py-2 text-center text-xs font-semibold text-pending-fg">
+                    <span className="inline-flex items-center gap-1.5"><Clock className="size-3.5" /> Disponible sur créneau</span>
+                    {describeSchedule(g.schedule) && <span className="mt-0.5 block font-medium">{describeSchedule(g.schedule)}</span>}
+                  </div>
                 ) : lock === "auth" ? (
                   <Link href="/login" className="mt-auto flex items-center justify-center gap-1.5 rounded-lg bg-sky-50 px-3 py-2 text-center text-xs font-semibold text-sky-700 transition-colors hover:bg-sky-100">
                     <LogIn className="size-3.5" /> Connectez-vous pour jouer

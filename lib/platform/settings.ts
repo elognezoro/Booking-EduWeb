@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { normalizeAvailability, type GameAvailability } from "@/lib/games/availability";
+import { normalizeAvailability, normalizeSchedule, scheduleIsEmpty, type GameAvailability, type GameSchedule } from "@/lib/games/availability";
 
 export interface GamesGating {
   enabled: boolean; // le verrouillage par abonnement est-il actif ?
@@ -62,6 +62,40 @@ export async function setGameAvailability(slug: string, mode: GameAvailability):
   await prisma.platformSetting.upsert({
     where: { key: AVAIL_KEY },
     create: { key: AVAIL_KEY, value: JSON.stringify(current) },
+    update: { value: JSON.stringify(current) },
+  });
+}
+
+// ——— Conditions de temps par jeu (période, plage horaire, jours) ———
+// Stockées en JSON { [slug]: GameSchedule } ; une fenêtre vide = aucune restriction.
+const SCHEDULE_KEY = "games_schedule";
+
+export async function getGamesSchedule(): Promise<Record<string, GameSchedule>> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: SCHEDULE_KEY } });
+  if (!row) return {};
+  try {
+    const v = JSON.parse(row.value);
+    const out: Record<string, GameSchedule> = {};
+    if (v && typeof v === "object") {
+      for (const [slug, sched] of Object.entries(v)) {
+        const norm = normalizeSchedule(sched);
+        if (!scheduleIsEmpty(norm)) out[slug] = norm;
+      }
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export async function setGameSchedule(slug: string, schedule: GameSchedule): Promise<void> {
+  const current = await getGamesSchedule();
+  const norm = normalizeSchedule(schedule);
+  if (scheduleIsEmpty(norm)) delete current[slug];
+  else current[slug] = norm;
+  await prisma.platformSetting.upsert({
+    where: { key: SCHEDULE_KEY },
+    create: { key: SCHEDULE_KEY, value: JSON.stringify(current) },
     update: { value: JSON.stringify(current) },
   });
 }

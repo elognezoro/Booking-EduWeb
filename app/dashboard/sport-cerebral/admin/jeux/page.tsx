@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { getEffectiveGames } from "@/lib/games/config";
 import { saveGameConsigne, moveGameOrder, uploadGameAudio, removeGameAudio } from "@/app/actions/brain-sport";
 import { AvailabilitySelect } from "@/components/games/availability-select";
+import { GameScheduleForm } from "@/components/games/game-schedule-form";
 import { GAME_AVAILABILITIES, AVAILABILITY_META } from "@/lib/games/availability";
 
 export const dynamic = "force-dynamic";
@@ -96,6 +97,9 @@ export default async function GamesAdminPage() {
                   </form>
                 </div>
               </div>
+
+              {/* Conditions de temps (période, plage horaire, jours) */}
+              <GameScheduleForm slug={g.slug} schedule={g.schedule} />
             </CardContent>
           </Card>
         ))}

@@ -1,21 +1,23 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { GAMES, type GameDef } from "./catalog";
-import { getGamesAvailability } from "@/lib/platform/settings";
-import { type GameAvailability } from "./availability";
+import { getGamesAvailability, getGamesSchedule } from "@/lib/platform/settings";
+import { type GameAvailability, type GameSchedule } from "./availability";
 
 export interface EffectiveGame extends GameDef {
   published: boolean; // dérivé : disponible = availability !== "DISABLED"
   availability: GameAvailability;
+  schedule: GameSchedule | null; // conditions de temps (null = aucune)
   audioUrl: string | null;
   sortOrder: number;
 }
 
-/** Fusionne le catalogue (code) avec la configuration éditable (BDD) : disponibilité, ordre, consigne, audio. */
+/** Fusionne le catalogue (code) avec la configuration éditable (BDD) : disponibilité, temps, ordre, consigne, audio. */
 export async function getEffectiveGames(opts?: { includeHidden?: boolean }): Promise<EffectiveGame[]> {
-  const [configs, availMap] = await Promise.all([
+  const [configs, availMap, scheduleMap] = await Promise.all([
     prisma.brainSportGameConfig.findMany(),
     getGamesAvailability(),
+    getGamesSchedule(),
   ]);
   const bySlug = new Map(configs.map((c) => [c.slug, c]));
   const list: EffectiveGame[] = GAMES.map((g, i) => {
@@ -27,6 +29,7 @@ export async function getEffectiveGames(opts?: { includeHidden?: boolean }): Pro
       ...g,
       consigne: c?.consigne?.trim() ? c.consigne : g.consigne,
       availability,
+      schedule: scheduleMap[g.slug] ?? null,
       published: availability !== "DISABLED",
       audioUrl: c?.audioPath ? `/api/brain-audio/${g.slug}` : null,
       sortOrder: c?.sortOrder ?? i,

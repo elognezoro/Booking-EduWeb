@@ -12,8 +12,8 @@ import { recordCompetitionResult } from "@/lib/games/competition";
 import { saveGameAudio, deleteGameAudio } from "@/lib/games/audio-storage";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import { getGame, type Level } from "@/lib/games/catalog";
-import { setGameAvailability } from "@/lib/platform/settings";
-import { normalizeAvailability } from "@/lib/games/availability";
+import { setGameAvailability, setGameSchedule } from "@/lib/platform/settings";
+import { normalizeAvailability, normalizeSchedule } from "@/lib/games/availability";
 
 export interface RecordResult {
   recorded: boolean;
@@ -115,6 +115,29 @@ export async function setGameAvailabilityAction(formData: FormData) {
   const slug = String(formData.get("slug"));
   const mode = normalizeAvailability(formData.get("availability"));
   if (getGame(slug)) await setGameAvailability(slug, mode);
+  revalidatePath(GAMES_ADMIN_PATH);
+  revalidatePath("/sport-cerebral");
+  redirect(GAMES_ADMIN_PATH);
+}
+
+/** Règle les conditions de temps d'un jeu (période, plage horaire, jours). Champ `clear` = tout effacer. */
+export async function setGameScheduleAction(formData: FormData) {
+  await requirePermission("platform.manage");
+  const slug = String(formData.get("slug"));
+  if (getGame(slug)) {
+    if (formData.get("clear")) {
+      await setGameSchedule(slug, {});
+    } else {
+      const schedule = normalizeSchedule({
+        from: (formData.get("from") as string) || undefined,
+        to: (formData.get("to") as string) || undefined,
+        startTime: (formData.get("startTime") as string) || undefined,
+        endTime: (formData.get("endTime") as string) || undefined,
+        days: formData.getAll("days").map((d) => Number(d)),
+      });
+      await setGameSchedule(slug, schedule);
+    }
+  }
   revalidatePath(GAMES_ADMIN_PATH);
   revalidatePath("/sport-cerebral");
   redirect(GAMES_ADMIN_PATH);

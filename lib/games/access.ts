@@ -5,17 +5,19 @@ import { GAMES } from "./catalog";
 import { getDailyChallenge } from "./daily";
 import { getEffectiveGame } from "./config";
 import { getGamesGating } from "@/lib/platform/settings";
-import { DEFAULT_AVAILABILITY, type GameAvailability } from "./availability";
+import { DEFAULT_AVAILABILITY, isWithinSchedule, describeSchedule, type GameAvailability, type GameSchedule } from "./availability";
 
 export type AccessReason = "admin" | "subscribed" | "anonymous" | "unsubscribed";
 /** Raison pour laquelle un jeu précis est verrouillé pour l'utilisateur courant. */
-export type GameLockReason = "auth" | "subscription" | "disabled";
+export type GameLockReason = "auth" | "subscription" | "disabled" | "schedule";
 export interface GamesAccess {
   full: boolean;
   reason: AccessReason;
   organizationName: string | null;
   /** Renseigné uniquement pour un jeu verrouillé (voir getGameAccess). */
   lock?: GameLockReason;
+  /** Précision affichée pour un blocage horaire (fenêtre de disponibilité). */
+  lockNote?: string;
 }
 
 /** Nombre de jeux offerts par défaut (rotation quotidienne) aux visiteurs sans abonnement. */
@@ -93,8 +95,16 @@ export async function getGamesGate(): Promise<GamesGate> {
  * Retourne `null` si le jeu est jouable, sinon la raison du blocage.
  * (Les jeux DISABLED sont déjà exclus du hub ; ils renvoient tout de même "disabled" ici par sûreté.)
  */
-export function gameLockReason(availability: GameAvailability, gate: GamesGate, slug: string): GameLockReason | null {
+export function gameLockReason(
+  availability: GameAvailability,
+  schedule: GameSchedule | null | undefined,
+  gate: GamesGate,
+  slug: string,
+  now: Date = new Date()
+): GameLockReason | null {
   if (availability === "DISABLED") return "disabled";
+  // Fenêtre de temps : s'applique à tous, sauf à l'administrateur plateforme (qui peut prévisualiser).
+  if (gate.access.reason !== "admin" && !isWithinSchedule(schedule, now)) return "schedule";
   if (availability === "PUBLIC") return null;
   if (availability === "AUTH") return gate.access.reason === "anonymous" ? "auth" : null;
   // SUBSCRIPTION : suit le verrouillage par abonnement + sélection découverte.
@@ -105,8 +115,11 @@ export function gameLockReason(availability: GameAvailability, gate: GamesGate, 
 export async function getGameAccess(slug: string): Promise<{ allowed: boolean; access: GamesAccess }> {
   const game = await getEffectiveGame(slug);
   const availability: GameAvailability = game?.availability ?? DEFAULT_AVAILABILITY;
+  const schedule = game?.schedule ?? null;
   const [access, gating] = await Promise.all([getGamesAccess(), getGamesGating()]);
   const gate = computeGate(access, gating);
-  const lock = gameLockReason(availability, gate, slug);
-  return { allowed: lock === null, access: lock ? { ...access, lock } : access };
+  const lock = gameLockReason(availability, schedule, gate, slug);
+  if (!lock) return { allowed: true, access };
+  const lockNote = lock === "schedule" ? describeSchedule(schedule) : undefined;
+  return { allowed: false, access: { ...access, lock, ...(lockNote ? { lockNote } : {}) } };
 }

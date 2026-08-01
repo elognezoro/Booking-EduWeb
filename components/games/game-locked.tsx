@@ -1,12 +1,34 @@
 import Link from "next/link";
-import { Lock, Sparkles, ArrowRight, LogIn, Ban } from "lucide-react";
+import { Lock, Sparkles, ArrowRight, LogIn, Ban, CalendarClock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GamesAccess } from "@/lib/games/access";
 
-/** Carte de blocage affichée à la place d'un jeu non accessible (indisponible, connexion ou abonnement requis). */
+/** Carte de blocage affichée à la place d'un jeu non accessible (indisponible, hors créneau, connexion ou abonnement requis). */
 export function GameLocked({ title, access }: { title: string; access: GamesAccess }) {
   const reason = access.lock ?? "subscription";
+
+  if (reason === "schedule") {
+    return (
+      <Card className="mt-5 p-8 text-center">
+        <span className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-2xl bg-pending-soft text-pending-fg">
+          <CalendarClock className="size-7" />
+        </span>
+        <h2 className="text-xl font-extrabold text-foreground">« {title} » n'est pas disponible en ce moment</h2>
+        <p className="mx-auto mt-2 max-w-xl text-muted-foreground">
+          Ce jeu n'est ouvert que sur certains créneaux.
+          {access.lockNote ? <> Disponibilité : <span className="font-semibold text-foreground">{access.lockNote}</span>.</> : null}
+        </p>
+        <div className="mt-5 flex justify-center">
+          <Button asChild variant="outline">
+            <Link href="/sport-cerebral">
+              Voir les jeux disponibles <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </Card>
+    );
+  }
 
   if (reason === "disabled") {
     return (

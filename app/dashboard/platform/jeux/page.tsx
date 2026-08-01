@@ -74,7 +74,8 @@ export default async function PlatformGamesPage({ searchParams }: { searchParams
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            La consigne, l'audio et l'ordre des jeux se règlent dans la{" "}
+            Les <strong>conditions de temps</strong> (période, plage horaire, jours), la consigne, l'audio et l'ordre des jeux
+            se règlent dans la{" "}
             <Link href="/dashboard/sport-cerebral/admin/jeux" className="font-semibold text-primary hover:underline">gestion des jeux</Link>.
           </p>
         </CardContent>
