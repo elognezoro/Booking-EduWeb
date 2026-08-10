@@ -77,23 +77,19 @@ export default async function ReceiptPage({
 
       {/* ===================== LE REÇU ===================== */}
       <div className="mx-auto max-w-3xl rounded-xl border-2 border-foreground/20 bg-white p-8 text-[#10231E] shadow-sm print:rounded-none print:border-black/40 print:shadow-none">
-        {/* En-tête : logos (institution + sous-direction côte à côte) + identité */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-foreground/15 pb-5">
-          <div className="flex items-center gap-3">
-            {org.logoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={org.logoUrl} alt={org.name} className="size-20 rounded-lg border border-black/10 bg-white object-contain p-1" />
-            )}
-            {dept?.logoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={dept.logoUrl} alt={dept.name} className="size-20 rounded-lg border border-black/10 bg-white object-contain p-1" />
-            )}
-          </div>
-          <div className="min-w-0 text-right">
-            <p className="text-lg font-extrabold uppercase leading-tight">{org.name}</p>
-            {dept && <p className="text-sm font-bold text-[#064B3A]">{dept.name}</p>}
-            {org.city && <p className="text-xs text-black/60">{org.city}</p>}
-          </div>
+        {/* En-tête vertical centré : logo institution, nom, logo sous-direction, sous-direction + ville */}
+        <div className="flex flex-col items-center gap-2 border-b-2 border-foreground/15 pb-5 text-center">
+          {org.logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={org.logoUrl} alt={org.name} className="size-20 rounded-lg border border-black/10 bg-white object-contain p-1" />
+          )}
+          <p className="text-lg font-extrabold uppercase leading-tight">{org.name}</p>
+          {dept?.logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={dept.logoUrl} alt={dept.name} className="size-20 rounded-lg border border-black/10 bg-white object-contain p-1" />
+          )}
+          {dept && <p className="text-sm font-bold text-[#064B3A]">{dept.name}</p>}
+          {org.city && <p className="text-xs text-black/60">{org.city}</p>}
         </div>
 
         {/* Titre + numéro d'identification */}
