@@ -10,11 +10,14 @@ import {
   AlertCircle,
   Info,
   WalletCards,
+  Lightbulb,
+  Rocket,
 } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { resolveFinanceScope } from "@/lib/finances/scope";
 import { CASHBOX_KINDS, type CashboxKind } from "@/lib/finances/constants";
+import { CASHBOX_PRESETS, CATEGORY_PRESETS, remainingPresets } from "@/lib/finances/presets";
 import { createFinanceCashbox, toggleFinanceCashbox, createFinanceCategory, toggleFinanceCategory } from "@/app/actions/finances";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SpacePicker } from "@/components/finances/space-picker";
@@ -74,6 +77,14 @@ export default async function Page({
     { kind: "EXPENSE", title: "Catégories de dépenses", rows: expenseCategories },
   ];
 
+  // Suggestions restantes (les exemples déjà créés dans cet espace ne sont plus proposés).
+  const cashboxSuggestions = remainingPresets(CASHBOX_PRESETS, cashboxes.map((c) => c.name));
+  const categorySuggestions = {
+    INCOME: remainingPresets(CATEGORY_PRESETS.INCOME, incomeCategories.map((c) => c.name)),
+    EXPENSE: remainingPresets(CATEGORY_PRESETS.EXPENSE, expenseCategories.map((c) => c.name)),
+  };
+  const setupIncomplete = cashboxes.length === 0 || incomeCategories.length + expenseCategories.length === 0;
+
   return (
     <div className="space-y-6">
       <Link
@@ -107,6 +118,40 @@ export default async function Page({
         <div className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
           <AlertCircle className="size-5" /> Une erreur est survenue. Vérifiez la saisie puis réessayez.
         </div>
+      )}
+
+      {/* ===================== GUIDE DE DÉMARRAGE (tant que l'espace n'est pas configuré) ===================== */}
+      {setupIncomplete && scope.canManage && (
+        <Card className="border-primary/20 bg-primary-50/40">
+          <CardContent className="space-y-3 py-5">
+            <p className="flex items-center gap-2 text-sm font-bold text-foreground">
+              <Rocket className="size-4 text-primary" /> Guide de démarrage — 3 étapes avec des exemples concrets
+            </p>
+            <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+              <li>
+                <strong className="text-foreground">Créez vos caisses &amp; comptes</strong> — là où l'argent entre et
+                sort. Ex. : <em>« Caisse principale »</em> (espèces), <em>« Compte bancaire principal »</em>,{" "}
+                <em>« Orange Money »</em> ou <em>« Wave »</em> (Mobile Money).
+              </li>
+              <li>
+                <strong className="text-foreground">Créez vos catégories</strong> — pour classer les mouvements.
+                Recettes : <em>« Scolarité &amp; inscriptions »</em>, <em>« Location de salles &amp; équipements »</em>,{" "}
+                <em>« Subventions &amp; dotations »</em>… Dépenses : <em>« Fournitures de bureau »</em>,{" "}
+                <em>« Eau &amp; électricité »</em>, <em>« Carburant &amp; déplacements »</em>…
+              </li>
+              <li>
+                <strong className="text-foreground">Saisissez vos premières écritures</strong> — ex. un encaissement de{" "}
+                <em>50 000 F</em> « Scolarité — KOUASSI Aya » en espèces dans « Caisse principale », ou une facture{" "}
+                <em>« Location amphithéâtre — ONG Partenaire »</em> de <em>150 000 F</em> à recouvrer (réglable en
+                plusieurs fois depuis la page Facturation).
+              </li>
+            </ol>
+            <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+              <Lightbulb className="mt-0.5 size-3.5 shrink-0 text-primary" />
+              Le plus rapide : cliquez sur les suggestions ci-dessous — chaque clic crée l'élément dans cet espace.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -147,6 +192,30 @@ export default async function Page({
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+
+            {scope.canManage && cashboxSuggestions.length > 0 && (
+              <div className="space-y-2">
+                <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  <Lightbulb className="size-3.5 text-primary" /> Suggestions — cliquez pour créer
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {cashboxSuggestions.map((p) => (
+                    <form key={p.name} action={createFinanceCashbox}>
+                      {hiddenScope}
+                      <input type="hidden" name="name" value={p.name} />
+                      <input type="hidden" name="cashboxKind" value={p.kind} />
+                      <button
+                        type="submit"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary-50"
+                      >
+                        <Plus className="size-3" /> {p.name}
+                        <span className="text-muted-foreground">· {CASHBOX_KINDS[p.kind]}</span>
+                      </button>
+                    </form>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -220,6 +289,24 @@ export default async function Page({
                           </form>
                         )}
                       </div>
+                    ))}
+                  </div>
+                )}
+                {scope.canManage && categorySuggestions[kind].length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {categorySuggestions[kind].map((name) => (
+                      <form key={name} action={createFinanceCategory}>
+                        {hiddenScope}
+                        <input type="hidden" name="kind" value={kind} />
+                        <input type="hidden" name="name" value={name} />
+                        <button
+                          type="submit"
+                          title="Cliquez pour créer cette catégorie"
+                          className="inline-flex items-center gap-1 rounded-lg border border-dashed border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-50 hover:text-primary"
+                        >
+                          <Plus className="size-3" /> {name}
+                        </button>
+                      </form>
                     ))}
                   </div>
                 )}
