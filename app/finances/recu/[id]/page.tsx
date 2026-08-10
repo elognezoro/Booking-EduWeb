@@ -65,6 +65,10 @@ export default async function ReceiptPage({
 
   const dateLong = entry.date.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
   const method = PAYMENT_METHODS[entry.method as PaymentMethod] ?? entry.method;
+  // Motif décomposé : le libellé composé à la saisie (« X — Département · Section »)
+  // s'affiche en lignes empilées : intitulé, puis département, puis section.
+  const [motifBase, ...motifRestArr] = entry.label.split(" — ");
+  const motifParts = motifRestArr.join(" — ").split(" · ").filter(Boolean);
   const backHref = `/dashboard/finances/encaissements?espace=${encodeURIComponent(entry.departmentId ?? "org")}`;
 
   return (
@@ -134,9 +138,15 @@ export default async function ReceiptPage({
           </div>
           <div className="flex flex-wrap gap-2 border-b border-dotted border-black/30 pb-2">
             <dt className="w-40 shrink-0 text-black/60">Motif</dt>
-            <dd className="font-semibold">
-              {entry.label}
-              {category?.name ? <span className="font-normal text-black/60"> — {category.name}</span> : null}
+            <dd className="min-w-0 font-semibold">
+              {/* Libellé décomposé : intitulé, puis département, puis section — chacun sur sa ligne. */}
+              <span className="block">{motifBase}</span>
+              {motifParts.map((part) => (
+                <span key={part} className="block font-normal text-black/70">{part}</span>
+              ))}
+              {category?.name && category.name !== motifBase ? (
+                <span className="block font-normal text-black/60">Catégorie : {category.name}</span>
+              ) : null}
             </dd>
           </div>
           <div className="flex flex-wrap gap-2 border-b border-dotted border-black/30 pb-2">
@@ -159,7 +169,8 @@ export default async function ReceiptPage({
             <p className="text-sm text-black/70">
               Fait à {org.city || "—"}, le <span className="font-semibold text-black">{dateLong}</span>
             </p>
-            <p className="mt-10 border-t border-black/40 px-8 pt-1 text-sm font-semibold">Le caissier / La caissière</p>
+            <p className="mt-2 text-base font-black uppercase tracking-widest text-red-600 print:text-red-600">COMPTABILITE</p>
+            <p className="mt-8 border-t border-black/40 px-8 pt-1 text-sm font-semibold">Le caissier / La caissière</p>
           </div>
         </div>
 

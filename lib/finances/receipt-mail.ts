@@ -35,7 +35,8 @@ export async function sendFinanceReceiptEmail(entryId: string, toOverride?: stri
     ["Date", date],
     ["Reçu de", entry.thirdParty || "—"],
     ["Montant", `${fmtMoney(entry.amount, entry.currency)} (${amountToWordsFcfa(entry.amount)})`],
-    ["Motif", entry.label + (category?.name ? ` — ${category.name}` : "")],
+    // Catégorie ajoutée seulement si le libellé ne commence pas déjà par elle (évite le doublon).
+    ["Motif", entry.label + (category?.name && !entry.label.startsWith(category.name) ? ` — ${category.name}` : "")],
     ["Mode de règlement", PAYMENT_METHODS[entry.method as PaymentMethod] ?? entry.method],
   ];
   if (entry.reference) rows.push(["N° de pièce", entry.reference]);
