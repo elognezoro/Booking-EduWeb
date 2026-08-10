@@ -179,9 +179,10 @@ export function EntryForm({
       {cashboxes.length > 0 && (
         <div>
           <Label htmlFor="cashboxId">Caisse / compte</Label>
-          <Select id="cashboxId" name="cashboxId" defaultValue="">
-            <option value="">— Sans caisse —</option>
+          {/* Par défaut : la première caisse de l'espace (ex. « Ressources HB / APRID »). */}
+          <Select id="cashboxId" name="cashboxId" defaultValue={cashboxes[0].id}>
             {cashboxes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+            <option value="">— Sans caisse —</option>
           </Select>
         </div>
       )}
