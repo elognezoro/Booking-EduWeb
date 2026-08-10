@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { createFinanceEntry } from "@/app/actions/finances";
 import { PAYMENT_METHODS, PAYMENT_METHOD_KEYS, type EntryKind } from "@/lib/finances/constants";
 import { ENS_DEPARTMENTS, isConsultationDocumentaire, CONSULTATION_DEFAULT_AMOUNT } from "@/lib/finances/ens-academics";
+import { StudentPicker, type StudentOption } from "@/components/finances/student-picker";
 
 const OTHER = "__AUTRE__";
 
@@ -23,12 +24,14 @@ export function EntryForm({
   back,
   cashboxes,
   categories,
+  students = [],
 }: {
   kind: EntryKind;
   espace: string;
   back: string;
   cashboxes: { id: string; name: string }[];
   categories: { id: string; name: string }[];
+  students?: StudentOption[];
 }) {
   const [label, setLabel] = React.useState(categories[0]?.name ?? OTHER);
   const [categoryId, setCategoryId] = React.useState(categories[0]?.id ?? "");
@@ -40,6 +43,18 @@ export function EntryForm({
   const [amount, setAmount] = React.useState(() =>
     categories[0] && isConsultationDocumentaire(categories[0].name) ? defaultAmount : ""
   );
+  // Payeur (recherche étudiant) + N° de pièce auto-rempli avec le matricule de l'étudiant choisi.
+  const [payer, setPayer] = React.useState("");
+  const [reference, setReference] = React.useState("");
+  const [autoRef, setAutoRef] = React.useState("");
+
+  const onPickStudent = (s: StudentOption) => {
+    setPayer(s.fullName);
+    if (s.matricule && (reference === "" || reference === autoRef)) {
+      setReference(s.matricule);
+      setAutoRef(s.matricule);
+    }
+  };
 
   const isOther = label === OTHER || categories.length === 0;
   const consultation = !isOther && isConsultationDocumentaire(label);
@@ -181,7 +196,28 @@ export function EntryForm({
         </div>
       )}
 
-      <div><Label htmlFor="thirdParty">{kind === "INCOME" ? "Payeur" : "Bénéficiaire"}</Label><Input id="thirdParty" name="thirdParty" placeholder="Nom du tiers (facultatif)" /></div>
+      <div>
+        <Label htmlFor="thirdParty">{kind === "INCOME" ? "Payeur" : "Bénéficiaire"}</Label>
+        {kind === "INCOME" && students.length > 0 ? (
+          <>
+            <StudentPicker
+              students={students}
+              department={consultation ? dept : ""}
+              section={consultation ? section : ""}
+              value={payer}
+              onChange={setPayer}
+              onPick={onPickStudent}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              {consultation && (dept || section)
+                ? "Liste filtrée selon le département et la section choisis."
+                : "Recherchez dans la liste des étudiants, ou saisissez librement un nom."}
+            </p>
+          </>
+        ) : (
+          <Input id="thirdParty" name="thirdParty" placeholder="Nom du tiers (facultatif)" />
+        )}
+      </div>
       {kind === "INCOME" && (
         <div>
           <Label htmlFor="thirdPartyEmail">E-mail du payeur</Label>
@@ -189,7 +225,19 @@ export function EntryForm({
           <p className="mt-1 text-xs text-muted-foreground">Si renseigné, le reçu (avec son numéro) lui est envoyé automatiquement par e-mail.</p>
         </div>
       )}
-      <div><Label htmlFor="reference">N° de pièce</Label><Input id="reference" name="reference" placeholder="Réf. justificatif (facultatif)" /></div>
+      <div>
+        <Label htmlFor="reference">N° de pièce</Label>
+        <Input
+          id="reference"
+          name="reference"
+          placeholder="N° d'identification / réf. justificatif (facultatif)"
+          value={reference}
+          onChange={(e) => setReference(e.target.value)}
+        />
+        {kind === "INCOME" && students.length > 0 && (
+          <p className="mt-1 text-xs text-muted-foreground">Pré-rempli avec le n° d'identification (matricule) de l'étudiant sélectionné.</p>
+        )}
+      </div>
       <div><Label htmlFor="note">Note</Label><Textarea id="note" name="note" rows={2} /></div>
       <Button type="submit" className="w-full"><Plus className="size-4" /> Enregistrer</Button>
     </form>

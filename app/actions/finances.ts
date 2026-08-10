@@ -9,6 +9,9 @@ import { nextFinanceNumber } from "@/lib/finances/numbering";
 import { normalizeMethod, normalizeCashboxKind, type EntryKind } from "@/lib/finances/constants";
 import { importCertelPayments } from "@/lib/finances/certel";
 import { sendFinanceReceiptEmail } from "@/lib/finances/receipt-mail";
+import { ENS_DEPARTMENTS } from "@/lib/finances/ens-academics";
+import { DEMO_STUDENTS } from "@/lib/finances/demo-students";
+import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 
 /*
  * Toutes les actions du module Finances :
@@ -310,6 +313,88 @@ export async function setFinanceSpaceLogo(formData: FormData) {
   }
   revalidatePath(BASE);
   redirect(`${back}&saved=1`);
+}
+
+/* ----------------------------- Étudiants (payeurs) ----------------------------- */
+
+const STUDENTS_BACK = "/dashboard/finances/parametres";
+
+/** Rapproche un intitulé CSV d'un département/section du référentiel ENS (insensible aux accents). */
+function matchAcademic(rawDept: string, rawSection: string): { department: string; section: string } {
+  const nd = normalizeKey(rawDept);
+  const dept = ENS_DEPARTMENTS.find((d) => {
+    const n = normalizeKey(d.name);
+    return n === nd || n.includes(nd) || nd.includes(n.replace("departement ", "").replace("departement des ", ""));
+  });
+  const department = dept?.name ?? rawDept.trim();
+  const ns = normalizeKey(rawSection);
+  const section =
+    dept?.sections.find((s) => {
+      const n = normalizeKey(s);
+      return n === ns || n.includes(ns) || ns.includes(n);
+    }) ??
+    rawSection.trim() ??
+    "";
+  return { department, section: section || (dept?.sections.length === 1 ? dept.sections[0] : rawSection.trim()) };
+}
+
+/** Import CSV de la liste des étudiants (payeurs) : colonnes nom, matricule, departement, section. */
+export async function importFinanceStudentsCsv(formData: FormData) {
+  const scope = await requireScope(formData);
+  const back = `${STUDENTS_BACK}?espace=${encodeURIComponent(scope.space.key)}`;
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) redirect(`${back}&error=csv`);
+  const rows = parseCsv(await file.text());
+  if (rows.length < 2) redirect(`${back}&error=csv`);
+  const header = rows[0];
+  const iName = findColumn(header, ["nom", "nom complet", "nom_complet", "etudiant", "étudiant", "name", "fullname"]);
+  const iMat = findColumn(header, ["matricule", "numero", "n°", "identifiant", "id"]);
+  const iDept = findColumn(header, ["departement", "département", "dept", "departement academique"]);
+  const iSec = findColumn(header, ["section", "filiere", "filière", "section/filiere", "section / filière"]);
+  if (iName < 0 || iDept < 0) redirect(`${back}&error=colonnes`);
+
+  const data: { organizationId: string; fullName: string; matricule: string | null; department: string; section: string }[] = [];
+  for (const row of rows.slice(1)) {
+    const fullName = (row[iName] ?? "").trim().slice(0, 120);
+    if (!fullName) continue;
+    const { department, section } = matchAcademic((row[iDept] ?? "").trim(), iSec >= 0 ? (row[iSec] ?? "").trim() : "");
+    data.push({
+      organizationId: scope.organizationId,
+      fullName,
+      matricule: iMat >= 0 ? (row[iMat] ?? "").trim().slice(0, 40).toUpperCase() || null : null,
+      department: department.slice(0, 120),
+      section: (section || "—").slice(0, 120),
+    });
+  }
+  if (data.length === 0) redirect(`${back}&error=csv`);
+  await prisma.financeStudent.createMany({ data });
+  revalidatePath(BASE);
+  redirect(`${back}&students=${data.length}`);
+}
+
+/** Crée les étudiants FICTIFS de démonstration (une seule fois ; purgeables ensuite). */
+export async function seedDemoFinanceStudents(formData: FormData) {
+  const scope = await requireScope(formData);
+  const back = `${STUDENTS_BACK}?espace=${encodeURIComponent(scope.space.key)}`;
+  const existing = await prisma.financeStudent.count({ where: { organizationId: scope.organizationId, demo: true } });
+  if (existing > 0) redirect(`${back}&error=demoexiste`);
+  await prisma.financeStudent.createMany({
+    data: DEMO_STUDENTS.map((s) => ({ organizationId: scope.organizationId, ...s, demo: true })),
+  });
+  revalidatePath(BASE);
+  redirect(`${back}&studentsdemo=${DEMO_STUDENTS.length}`);
+}
+
+/** Supprime les étudiants : mode "demo" (fiches fictives uniquement) ou "all" (toute la liste). */
+export async function deleteFinanceStudents(formData: FormData) {
+  const scope = await requireScope(formData);
+  const back = `${STUDENTS_BACK}?espace=${encodeURIComponent(scope.space.key)}`;
+  const mode = formData.get("mode") === "all" ? "all" : "demo";
+  const res = await prisma.financeStudent.deleteMany({
+    where: { organizationId: scope.organizationId, ...(mode === "demo" ? { demo: true } : {}) },
+  });
+  revalidatePath(BASE);
+  redirect(`${back}&studentsdel=${res.count}`);
 }
 
 /** Renvoie le reçu d'un encaissement par e-mail (adresse saisie, mémorisée sur l'écriture). */

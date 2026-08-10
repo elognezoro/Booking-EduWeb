@@ -1203,3 +1203,19 @@ model FinanceCounter {
   key   String @id // "orgId:departmentId|org:KIND:année"
   count Int    @default(0)
 }
+
+// Étudiant « payeur » (référentiel par institution, importé par CSV) : alimente la liste
+// déroulante Payeur du formulaire d'encaissement, filtrée par département académique et
+// section/filière. `demo` = fiche fictive de démonstration, purgeable en un clic.
+model FinanceStudent {
+  id             String   @id @default(cuid())
+  organizationId String
+  fullName       String
+  matricule      String?
+  department     String // département académique (ex. « Département des Langues »)
+  section        String // section / filière (ex. « Anglais »)
+  demo           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, department, section])
+}

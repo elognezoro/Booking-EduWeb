@@ -12,15 +12,20 @@ import {
   WalletCards,
   Lightbulb,
   Rocket,
+  GraduationCap,
+  Upload,
+  Sparkles,
+  Download,
 } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { resolveFinanceScope } from "@/lib/finances/scope";
 import { CASHBOX_KINDS, type CashboxKind } from "@/lib/finances/constants";
 import { CASHBOX_PRESETS, CATEGORY_PRESETS, remainingPresets } from "@/lib/finances/presets";
-import { createFinanceCashbox, toggleFinanceCashbox, deleteFinanceCashbox, createFinanceCategory, toggleFinanceCategory, deleteFinanceCategory, setFinanceSpaceLogo } from "@/app/actions/finances";
+import { createFinanceCashbox, toggleFinanceCashbox, deleteFinanceCashbox, createFinanceCategory, toggleFinanceCategory, deleteFinanceCategory, setFinanceSpaceLogo, importFinanceStudentsCsv, seedDemoFinanceStudents, deleteFinanceStudents } from "@/app/actions/finances";
 import { CertificateImageUpload } from "@/components/certificates/image-upload";
 import { ConfirmActionButton } from "@/components/confirm-action";
+import { FileDropzone } from "@/components/ui/file-dropzone";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SpacePicker } from "@/components/finances/space-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,13 +66,15 @@ export default async function Page({
   }
 
   // Cloisonnement strict : chaque requête inclut le filtre de l'espace courant.
-  const [cashboxes, incomeCategories, expenseCategories, dept] = await Promise.all([
+  const [cashboxes, incomeCategories, expenseCategories, dept, studentCount, demoCount] = await Promise.all([
     prisma.financeCashbox.findMany({ where: { ...scope.filter }, orderBy: { createdAt: "asc" } }),
     prisma.financeCategory.findMany({ where: { ...scope.filter, kind: "INCOME" }, orderBy: { name: "asc" } }),
     prisma.financeCategory.findMany({ where: { ...scope.filter, kind: "EXPENSE" }, orderBy: { name: "asc" } }),
     scope.filter.departmentId
       ? prisma.department.findUnique({ where: { id: scope.filter.departmentId }, select: { name: true, logoUrl: true } })
       : Promise.resolve(null),
+    prisma.financeStudent.count({ where: { organizationId: scope.organizationId } }),
+    prisma.financeStudent.count({ where: { organizationId: scope.organizationId, demo: true } }),
   ]);
 
   const hiddenScope = (
@@ -124,7 +131,28 @@ export default async function Page({
           <AlertCircle className="size-5" />
           {searchParams.error === "utilisee"
             ? "Suppression impossible : des écritures sont rattachées à cet élément. Désactivez-le plutôt (l'historique et les reçus restent intacts)."
-            : "Une erreur est survenue. Vérifiez la saisie puis réessayez."}
+            : searchParams.error === "colonnes"
+              ? "Colonnes introuvables dans le CSV : il faut au minimum « nom » et « departement » (téléchargez le modèle)."
+              : searchParams.error === "demoexiste"
+                ? "Les étudiants de démonstration existent déjà — supprimez-les d'abord pour les régénérer."
+                : searchParams.error === "csv"
+                  ? "Fichier CSV illisible ou vide."
+                  : "Une erreur est survenue. Vérifiez la saisie puis réessayez."}
+        </div>
+      )}
+      {searchParams.students && (
+        <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">
+          <CheckCircle2 className="size-5" /> {searchParams.students} étudiant(s) importé(s) depuis le fichier CSV.
+        </div>
+      )}
+      {searchParams.studentsdemo && (
+        <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">
+          <CheckCircle2 className="size-5" /> {searchParams.studentsdemo} étudiant(s) fictif(s) de démonstration créé(s).
+        </div>
+      )}
+      {searchParams.studentsdel && (
+        <div className="flex items-center gap-2 rounded-xl border border-available/30 bg-available-soft px-4 py-3 text-sm font-semibold text-available-fg">
+          <Trash2 className="size-5" /> {searchParams.studentsdel} étudiant(s) supprimé(s).
         </div>
       )}
 
@@ -399,6 +427,82 @@ export default async function Page({
                 Sélectionnez une sous-direction (en haut à droite) pour définir son logo propre.
               </p>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ===================== ÉTUDIANTS — LISTE DES PAYEURS ===================== */}
+      {scope.canManage && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base"><GraduationCap className="size-4" /> Étudiants — liste des payeurs</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Cette liste alimente la recherche du champ <strong>Payeur</strong> du formulaire d'encaissement
+              (filtrée par département et section/filière pour la consultation documentaire). Le matricule sert de
+              n° de pièce. Liste commune à toute l'institution.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone="info">{studentCount} étudiant(s) enregistré(s)</Badge>
+              {demoCount > 0 && <Badge tone="pending">{demoCount} fiche(s) de démonstration</Badge>}
+            </div>
+
+            {/* Import CSV par glisser-déposer */}
+            <form action={importFinanceStudentsCsv} className="space-y-2.5 rounded-xl border border-border bg-secondary/30 p-4">
+              <input type="hidden" name="espace" value={scope.space.key} />
+              <p className="flex items-center gap-1.5 text-sm font-bold text-foreground"><Upload className="size-4 text-primary" /> Importer la liste des étudiants (CSV)</p>
+              <FileDropzone
+                name="file"
+                accept=".csv,text/csv"
+                required
+                className="gap-1 rounded-xl px-3 py-5"
+                title="Glissez-déposez ou choisissez un fichier CSV"
+                hint="Colonnes : nom, matricule, departement, section"
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button type="submit" size="sm"><Upload className="size-4" /> Importer</Button>
+                <Button asChild size="sm" variant="ghost">
+                  <a href="/api/finances/students/template"><Download className="size-4" /> Télécharger le modèle CSV</a>
+                </Button>
+              </div>
+            </form>
+
+            {/* Démo + purges */}
+            <div className="flex flex-wrap items-center gap-2">
+              {demoCount === 0 && (
+                <form action={seedDemoFinanceStudents}>
+                  <input type="hidden" name="espace" value={scope.space.key} />
+                  <Button type="submit" size="sm" variant="outline"><Sparkles className="size-4" /> Générer des étudiants de démonstration</Button>
+                </form>
+              )}
+              {demoCount > 0 && (
+                <ConfirmActionButton
+                  action={deleteFinanceStudents}
+                  hidden={{ espace: scope.space.key, mode: "demo" }}
+                  triggerLabel="Supprimer les étudiants de démonstration"
+                  triggerIcon={<Trash2 className="size-4" />}
+                  triggerVariant="outline"
+                  title="Supprimer toutes les fiches de démonstration ?"
+                  description={`${demoCount} fiche(s) fictive(s) seront définitivement supprimées — les étudiants importés par CSV ne sont pas touchés. À faire avant le dépôt de la vraie liste, pour éviter toute confusion.`}
+                  confirmLabel="Supprimer la démo"
+                  confirmVariant="destructive"
+                />
+              )}
+              {studentCount > 0 && (
+                <ConfirmActionButton
+                  action={deleteFinanceStudents}
+                  hidden={{ espace: scope.space.key, mode: "all" }}
+                  triggerLabel="Vider toute la liste"
+                  triggerIcon={<Trash2 className="size-4" />}
+                  triggerVariant="ghost"
+                  title="Supprimer TOUS les étudiants de la liste ?"
+                  description={`Les ${studentCount} fiche(s) (import CSV et démonstration) seront définitivement supprimées. Les écritures et reçus déjà émis ne sont pas modifiés.`}
+                  confirmLabel="Tout supprimer"
+                  confirmVariant="destructive"
+                />
+              )}
+            </div>
           </CardContent>
         </Card>
       )}

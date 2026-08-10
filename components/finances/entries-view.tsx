@@ -56,10 +56,19 @@ export async function EntriesView({
   }
 
   const back = `/dashboard/finances/${c.slug}`;
-  const [entries, cashboxes, categories] = await Promise.all([
+  const [entries, cashboxes, categories, students] = await Promise.all([
     prisma.financeEntry.findMany({ where: { ...scope.filter, kind }, orderBy: { date: "desc" }, take: 100 }),
     prisma.financeCashbox.findMany({ where: { ...scope.filter, active: true }, orderBy: { name: "asc" } }),
     prisma.financeCategory.findMany({ where: { ...scope.filter, kind, active: true }, orderBy: { name: "asc" } }),
+    // Référentiel des étudiants payeurs (par institution) — alimente la recherche du champ Payeur.
+    kind === "INCOME"
+      ? prisma.financeStudent.findMany({
+          where: { organizationId: scope.organizationId },
+          orderBy: { fullName: "asc" },
+          take: 2000,
+          select: { fullName: true, matricule: true, department: true, section: true, demo: true },
+        })
+      : Promise.resolve([]),
   ]);
   const cashboxName = new Map(cashboxes.map((x) => [x.id, x.name]));
   const categoryName = new Map(categories.map((x) => [x.id, x.name]));
@@ -149,6 +158,7 @@ export async function EntriesView({
                 back={back}
                 cashboxes={cashboxes.map((x) => ({ id: x.id, name: x.name }))}
                 categories={categories.map((x) => ({ id: x.id, name: x.name }))}
+                students={students}
               />
             </CardContent>
           </Card>
