@@ -38,8 +38,11 @@ export function StudentPicker({
 
   const filtered = React.useMemo(() => {
     const q = normalizeKey(value);
+    // Cascade tolérante (casse/accents) entre le référentiel et les fiches importées.
+    const nd = normalizeKey(department);
+    const ns = normalizeKey(section);
     return students
-      .filter((s) => (!department || s.department === department) && (!section || s.section === section))
+      .filter((s) => (!nd || normalizeKey(s.department) === nd) && (!ns || normalizeKey(s.section) === ns))
       .filter((s) => !q || normalizeKey(s.fullName).includes(q) || (s.matricule ? normalizeKey(s.matricule).includes(q) : false))
       .slice(0, 50);
   }, [students, department, section, value]);
@@ -65,6 +68,14 @@ export function StudentPicker({
           aria-label="Payeur — recherche d'étudiant"
         />
       </div>
+
+      {open && filtered.length === 0 && (
+        <div className="absolute z-30 mt-1 w-full rounded-xl border border-border bg-card px-3 py-2.5 text-xs text-muted-foreground shadow-soft">
+          {students.length === 0
+            ? "Aucun étudiant dans la liste — importez-la dans « Paramètres fin. »."
+            : "Aucun étudiant ne correspond à ce filtre (département/section) ou à cette recherche. Vous pouvez saisir le nom librement."}
+        </div>
+      )}
 
       {open && filtered.length > 0 && (
         <ul
