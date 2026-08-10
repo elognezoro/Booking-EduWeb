@@ -15,6 +15,22 @@ import { GuidePrintActions } from "@/components/help/guide-print-actions";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Reçu de paiement · EduWeb Booking" };
 
+/**
+ * Retire du nom de l'institution un suffixe « de/du/des/d' <ville> » quand la ville
+ * est déjà affichée séparément dans l'en-tête (ex. « École Normale Supérieure d'Abidjan »
+ * + ville « Abidjan » → « École Normale Supérieure »).
+ */
+function stripCitySuffix(name: string, city: string | null): string {
+  if (!city) return name;
+  const n = name.toLowerCase();
+  const c = city.trim().toLowerCase();
+  if (!c || !n.endsWith(c)) return name;
+  const head = name.slice(0, name.length - c.length);
+  const m = head.match(/(?:\s+(?:de|du|des)\s+|\s+d['’])$/i);
+  const out = (m ? head.slice(0, head.length - m[0].length) : head).trim();
+  return out || name;
+}
+
 export default async function ReceiptPage({
   params,
   searchParams,
@@ -77,16 +93,16 @@ export default async function ReceiptPage({
 
       {/* ===================== LE REÇU ===================== */}
       <div className="mx-auto max-w-3xl rounded-xl border-2 border-foreground/20 bg-white p-8 text-[#10231E] shadow-sm print:rounded-none print:border-black/40 print:shadow-none">
-        {/* En-tête vertical centré : logo institution, nom, logo sous-direction, sous-direction + ville */}
+        {/* En-tête vertical centré : logo institution, nom (sans la ville), logo sous-direction, sous-direction + ville */}
         <div className="flex flex-col items-center gap-2 border-b-2 border-foreground/15 pb-5 text-center">
           {org.logoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={org.logoUrl} alt={org.name} className="size-20 rounded-lg border border-black/10 bg-white object-contain p-1" />
+            <img src={org.logoUrl} alt={org.name} className="size-28 rounded-lg bg-white object-contain p-1" />
           )}
-          <p className="text-lg font-extrabold uppercase leading-tight">{org.name}</p>
+          <p className="text-lg font-extrabold uppercase leading-tight">{stripCitySuffix(org.name, org.city)}</p>
           {dept?.logoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={dept.logoUrl} alt={dept.name} className="size-20 rounded-lg border border-black/10 bg-white object-contain p-1" />
+            <img src={dept.logoUrl} alt={dept.name} className="size-28 rounded-lg bg-white object-contain p-1" />
           )}
           {dept && <p className="text-sm font-bold text-[#064B3A]">{dept.name}</p>}
           {org.city && <p className="text-xs text-black/60">{org.city}</p>}
