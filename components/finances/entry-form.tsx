@@ -1,0 +1,171 @@
+"use client";
+
+import * as React from "react";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input, Select, Textarea } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { createFinanceEntry } from "@/app/actions/finances";
+import { PAYMENT_METHODS, PAYMENT_METHOD_KEYS, type EntryKind } from "@/lib/finances/constants";
+import { ENS_DEPARTMENTS, isConsultationDocumentaire } from "@/lib/finances/ens-academics";
+
+const OTHER = "__AUTRE__";
+
+/**
+ * Formulaire de saisie d'une écriture (encaissement / dépense).
+ * - « Libellé » est une liste déroulante alimentée par les catégories de l'espace
+ *   (+ « Autre » pour une saisie libre) ; choisir un libellé sélectionne la catégorie assortie.
+ * - Libellé « Consultation documentaire » → cascade Département → Section/filière (ENS d'Abidjan).
+ */
+export function EntryForm({
+  kind,
+  espace,
+  back,
+  cashboxes,
+  categories,
+}: {
+  kind: EntryKind;
+  espace: string;
+  back: string;
+  cashboxes: { id: string; name: string }[];
+  categories: { id: string; name: string }[];
+}) {
+  const [label, setLabel] = React.useState(categories[0]?.name ?? OTHER);
+  const [categoryId, setCategoryId] = React.useState(categories[0]?.id ?? "");
+  const [dept, setDept] = React.useState("");
+  const [section, setSection] = React.useState("");
+
+  const isOther = label === OTHER || categories.length === 0;
+  const consultation = !isOther && isConsultationDocumentaire(label);
+  const sections = ENS_DEPARTMENTS.find((d) => d.name === dept)?.sections ?? [];
+
+  const onLabelChange = (value: string) => {
+    setLabel(value);
+    // Synchronise la catégorie avec le libellé choisi (modifiable ensuite).
+    const match = categories.find((c) => c.name === value);
+    if (match) setCategoryId(match.id);
+    if (!isConsultationDocumentaire(value)) {
+      setDept("");
+      setSection("");
+    }
+  };
+
+  return (
+    <form action={createFinanceEntry} className="space-y-3">
+      <input type="hidden" name="espace" value={espace} />
+      <input type="hidden" name="back" value={back} />
+      <input type="hidden" name="kind" value={kind} />
+
+      <div>
+        <Label htmlFor="label-select" required>Libellé</Label>
+        {categories.length > 0 ? (
+          <Select
+            id="label-select"
+            name={isOther ? undefined : "label"}
+            value={label}
+            onChange={(e) => onLabelChange(e.target.value)}
+          >
+            {categories.map((c) => (
+              <option key={c.id} value={c.name}>{c.name}</option>
+            ))}
+            <option value={OTHER}>Autre (saisie libre)…</option>
+          </Select>
+        ) : (
+          <p className="mb-1 text-xs text-muted-foreground">
+            Aucune catégorie dans cet espace — créez-en dans « Paramètres fin. » pour un libellé en liste.
+          </p>
+        )}
+        {isOther && (
+          <Input
+            name="label"
+            required
+            placeholder={kind === "INCOME" ? "Ex. Location salle A — atelier" : "Ex. Achat de fournitures"}
+            className={categories.length > 0 ? "mt-2" : undefined}
+            aria-label="Libellé (saisie libre)"
+          />
+        )}
+      </div>
+
+      {/* Cascade ENS : Département → Section/filière (consultation documentaire) */}
+      {consultation && (
+        <div className="space-y-3 rounded-xl border border-primary/20 bg-primary-50/40 p-3">
+          <div>
+            <Label htmlFor="deptAcad" required>Département</Label>
+            <Select
+              id="deptAcad"
+              name="deptAcad"
+              required
+              value={dept}
+              onChange={(e) => { setDept(e.target.value); setSection(""); }}
+            >
+              <option value="" disabled>— Choisir un département —</option>
+              {ENS_DEPARTMENTS.map((d) => (
+                <option key={d.name} value={d.name}>{d.name}</option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="sectionAcad" required>Section / filière</Label>
+            <Select
+              id="sectionAcad"
+              name="sectionAcad"
+              required
+              value={section}
+              onChange={(e) => setSection(e.target.value)}
+              disabled={!dept}
+            >
+              <option value="" disabled>{dept ? "— Choisir une section —" : "Choisissez d'abord un département"}</option>
+              {sections.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </Select>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div><Label htmlFor="amount" required>Montant (FCFA)</Label><Input id="amount" name="amount" type="number" min={1} required /></div>
+        <div><Label htmlFor="date">Date</Label><Input id="date" name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></div>
+      </div>
+
+      <div>
+        <Label htmlFor="method">Mode de paiement</Label>
+        <Select id="method" name="method" defaultValue="CASH">
+          {PAYMENT_METHOD_KEYS.map((m) => <option key={m} value={m}>{PAYMENT_METHODS[m]}</option>)}
+        </Select>
+      </div>
+
+      {cashboxes.length > 0 && (
+        <div>
+          <Label htmlFor="cashboxId">Caisse / compte</Label>
+          <Select id="cashboxId" name="cashboxId" defaultValue="">
+            <option value="">— Sans caisse —</option>
+            {cashboxes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+          </Select>
+        </div>
+      )}
+
+      {categories.length > 0 && (
+        <div>
+          <Label htmlFor="categoryId">Catégorie</Label>
+          <Select id="categoryId" name="categoryId" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <option value="">— Sans catégorie —</option>
+            {categories.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+          </Select>
+        </div>
+      )}
+
+      <div><Label htmlFor="thirdParty">{kind === "INCOME" ? "Payeur" : "Bénéficiaire"}</Label><Input id="thirdParty" name="thirdParty" placeholder="Nom du tiers (facultatif)" /></div>
+      {kind === "INCOME" && (
+        <div>
+          <Label htmlFor="thirdPartyEmail">E-mail du payeur</Label>
+          <Input id="thirdPartyEmail" name="thirdPartyEmail" type="email" placeholder="adresse@exemple.ci (facultatif)" />
+          <p className="mt-1 text-xs text-muted-foreground">Si renseigné, le reçu (avec son numéro) lui est envoyé automatiquement par e-mail.</p>
+        </div>
+      )}
+      <div><Label htmlFor="reference">N° de pièce</Label><Input id="reference" name="reference" placeholder="Réf. justificatif (facultatif)" /></div>
+      <div><Label htmlFor="note">Note</Label><Textarea id="note" name="note" rows={2} /></div>
+      <Button type="submit" className="w-full"><Plus className="size-4" /> Enregistrer</Button>
+    </form>
+  );
+}

@@ -56,7 +56,11 @@ export async function createFinanceEntry(formData: FormData) {
   const scope = await requireScope(formData);
   const kind: EntryKind = formData.get("kind") === "EXPENSE" ? "EXPENSE" : "INCOME";
   const amount = int(formData.get("amount"));
-  const label = txt(formData.get("label"));
+  let label = txt(formData.get("label"));
+  // Rattachement académique (ex. « Consultation documentaire ») : Département · Section/filière.
+  const deptAcad = txt(formData.get("deptAcad"), 80);
+  const sectionAcad = txt(formData.get("sectionAcad"), 80);
+  if (label && deptAcad) label = `${label} — ${deptAcad}${sectionAcad ? ` · ${sectionAcad}` : ""}`.slice(0, 200);
   const back = backPath(formData, scope);
   if (amount <= 0 || !label) redirect(back.replace("saved=1", "error=invalide"));
 

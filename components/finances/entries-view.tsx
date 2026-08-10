@@ -6,13 +6,12 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input, Select, Textarea } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SpacePicker } from "@/components/finances/space-picker";
+import { EntryForm } from "@/components/finances/entry-form";
 import { resolveFinanceScope } from "@/lib/finances/scope";
-import { createFinanceEntry, deleteFinanceEntry } from "@/app/actions/finances";
-import { PAYMENT_METHODS, PAYMENT_METHOD_KEYS, ENTRY_SOURCES, type EntryKind } from "@/lib/finances/constants";
+import { deleteFinanceEntry } from "@/app/actions/finances";
+import { PAYMENT_METHODS, ENTRY_SOURCES, type EntryKind } from "@/lib/finances/constants";
 import { fmtMoney } from "@/lib/money";
 
 const COPY: Record<EntryKind, { title: string; description: string; new: string; empty: string; slug: string }> = {
@@ -144,51 +143,13 @@ export async function EntriesView({
           <Card className="lg:sticky lg:top-20 lg:self-start">
             <CardHeader><CardTitle className="flex items-center gap-2 text-base"><Plus className="size-4" /> {c.new}</CardTitle></CardHeader>
             <CardContent>
-              <form action={createFinanceEntry} className="space-y-3">
-                <input type="hidden" name="espace" value={scope.space.key} />
-                <input type="hidden" name="back" value={back} />
-                <input type="hidden" name="kind" value={kind} />
-                <div><Label htmlFor="label" required>Libellé</Label><Input id="label" name="label" required placeholder={kind === "INCOME" ? "Ex. Location salle A — atelier" : "Ex. Achat de fournitures"} /></div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div><Label htmlFor="amount" required>Montant (FCFA)</Label><Input id="amount" name="amount" type="number" min={1} required /></div>
-                  <div><Label htmlFor="date">Date</Label><Input id="date" name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></div>
-                </div>
-                <div>
-                  <Label htmlFor="method">Mode de paiement</Label>
-                  <Select id="method" name="method" defaultValue="CASH">
-                    {PAYMENT_METHOD_KEYS.map((m) => <option key={m} value={m}>{PAYMENT_METHODS[m]}</option>)}
-                  </Select>
-                </div>
-                {cashboxes.length > 0 && (
-                  <div>
-                    <Label htmlFor="cashboxId">Caisse / compte</Label>
-                    <Select id="cashboxId" name="cashboxId" defaultValue="">
-                      <option value="">— Sans caisse —</option>
-                      {cashboxes.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-                    </Select>
-                  </div>
-                )}
-                {categories.length > 0 && (
-                  <div>
-                    <Label htmlFor="categoryId">Catégorie</Label>
-                    <Select id="categoryId" name="categoryId" defaultValue="">
-                      <option value="">— Sans catégorie —</option>
-                      {categories.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-                    </Select>
-                  </div>
-                )}
-                <div><Label htmlFor="thirdParty">{kind === "INCOME" ? "Payeur" : "Bénéficiaire"}</Label><Input id="thirdParty" name="thirdParty" placeholder="Nom du tiers (facultatif)" /></div>
-                {kind === "INCOME" && (
-                  <div>
-                    <Label htmlFor="thirdPartyEmail">E-mail du payeur</Label>
-                    <Input id="thirdPartyEmail" name="thirdPartyEmail" type="email" placeholder="adresse@exemple.ci (facultatif)" />
-                    <p className="mt-1 text-xs text-muted-foreground">Si renseigné, le reçu (avec son numéro) lui est envoyé automatiquement par e-mail.</p>
-                  </div>
-                )}
-                <div><Label htmlFor="reference">N° de pièce</Label><Input id="reference" name="reference" placeholder="Réf. justificatif (facultatif)" /></div>
-                <div><Label htmlFor="note">Note</Label><Textarea id="note" name="note" rows={2} /></div>
-                <Button type="submit" className="w-full"><Plus className="size-4" /> Enregistrer</Button>
-              </form>
+              <EntryForm
+                kind={kind}
+                espace={scope.space.key}
+                back={back}
+                cashboxes={cashboxes.map((x) => ({ id: x.id, name: x.name }))}
+                categories={categories.map((x) => ({ id: x.id, name: x.name }))}
+              />
             </CardContent>
           </Card>
         )}
