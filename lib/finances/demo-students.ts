@@ -59,10 +59,10 @@ export const DEMO_STUDENTS: DemoStudent[] = [
   { fullName: "KRA Konan Wilfried", matricule: "23-B-P40103MAT/SP", department: D.ST, section: "Mathématiques" },
   { fullName: "TRAORE Adama", matricule: "23-B-P40104MAT/SP", department: D.ST, section: "Mathématiques" },
   // ——— Sciences et Technologie · Sciences Physiques ———
-  { fullName: "ABOA Akoua Nadège", matricule: "24-A-P40201SPH/SP", department: D.ST, section: "Sciences Physiques" },
-  { fullName: "DEMBELE Bakary", matricule: "24-A-P40202SPH/SP", department: D.ST, section: "Sciences Physiques" },
-  { fullName: "LOBA Gnamien Éric", matricule: "23-B-P40203SPH/SP", department: D.ST, section: "Sciences Physiques" },
-  { fullName: "CISSE Kadiatou", matricule: "23-B-P40204SPH/SP", department: D.ST, section: "Sciences Physiques" },
+  { fullName: "ABOA Akoua Nadège", matricule: "24-A-P40201SPH/SP", department: D.ST, section: "Physique-Chimie" },
+  { fullName: "DEMBELE Bakary", matricule: "24-A-P40202SPH/SP", department: D.ST, section: "Physique-Chimie" },
+  { fullName: "LOBA Gnamien Éric", matricule: "23-B-P40203SPH/SP", department: D.ST, section: "Physique-Chimie" },
+  { fullName: "CISSE Kadiatou", matricule: "23-B-P40204SPH/SP", department: D.ST, section: "Physique-Chimie" },
   // ——— Sciences et Technologie · SVT ———
   { fullName: "AMANI Affoussiata", matricule: "24-A-P40301SVT/SP", department: D.ST, section: "Sciences de la Vie et de la Terre (SVT)" },
   { fullName: "GOGOUA Zamblé Hervé", matricule: "24-A-P40302SVT/SP", department: D.ST, section: "Sciences de la Vie et de la Terre (SVT)" },

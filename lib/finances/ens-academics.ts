@@ -23,7 +23,7 @@ export const ENS_DEPARTMENTS: AcademicDepartment[] = [
   },
   {
     name: "Département Sciences et Technologie",
-    sections: ["Mathématiques", "Sciences Physiques", "Sciences de la Vie et de la Terre (SVT)"],
+    sections: ["Mathématiques", "Physique-Chimie", "Sciences de la Vie et de la Terre (SVT)"],
   },
   {
     name: "Département des Sciences de l'Éducation",
