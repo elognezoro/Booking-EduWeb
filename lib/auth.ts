@@ -46,6 +46,7 @@ export interface CurrentUser {
   functionTitle: string | null;
   organizationId: string | null;
   organizationName: string | null;
+  departmentId: string | null;
   departmentName: string | null;
   roles: RoleKey[];
   permissions: Set<Permission>;
@@ -77,6 +78,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   let organizationId = user.organizationId;
   let organizationName = user.organization?.name ?? null;
+  let departmentId = user.departmentId;
   let departmentName = user.department?.name ?? null;
 
   // Super administrateur : sélecteur d'institution. Si une « organisation active » valide
@@ -88,6 +90,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
       if (org) {
         organizationId = org.id;
         organizationName = org.name;
+        departmentId = null;
         departmentName = null;
       }
     }
@@ -103,6 +106,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     functionTitle: user.functionTitle,
     organizationId,
     organizationName,
+    departmentId,
     departmentName,
     roles,
     permissions: await resolveUserPermissions(roles, organizationId),

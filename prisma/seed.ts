@@ -30,6 +30,12 @@ async function clear() {
   await prisma.brainSportQuestion.deleteMany();
   await prisma.brainSportAttempt.deleteMany();
   await prisma.brainSportBadge.deleteMany();
+
+  await prisma.financeEntry.deleteMany();
+  await prisma.financeInvoice.deleteMany();
+  await prisma.financeCashbox.deleteMany();
+  await prisma.financeCategory.deleteMany();
+  await prisma.financeCounter.deleteMany();
   // --- Réservations de ressources ---
   await prisma.bookingReview.deleteMany();
   await prisma.bookingParticipant.deleteMany();

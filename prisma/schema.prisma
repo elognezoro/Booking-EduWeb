@@ -1111,3 +1111,93 @@ model LmsWorkshopAssessment {
   @@index([submissionId])
   @@index([reviewerId])
 }
+
+// ===========================================================================
+// ===================== FINANCES — espace financier cloisonné ================
+// Chaque enregistrement appartient à une institution (organizationId) et,
+// optionnellement, à une sous-direction (departmentId ; null = espace de
+// l'institution entière). Cloisonnement applicatif : chaque requête filtre
+// par { organizationId, departmentId ∈ périmètre de l'utilisateur }.
+// Convention du sous-système : IDs en chaîne (comme Certel*/Lms*).
+// ===========================================================================
+
+// Caisse / compte : point d'encaissement-décaissement d'un espace financier.
+model FinanceCashbox {
+  id             String   @id @default(cuid())
+  organizationId String
+  departmentId   String? // null = caisse de l'institution
+  name           String
+  kind           String   @default("CASH") // CASH | BANK | MOBILE_MONEY
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, departmentId])
+}
+
+// Catégorie de recette ou de dépense (configurable par espace).
+model FinanceCategory {
+  id             String   @id @default(cuid())
+  organizationId String
+  departmentId   String?
+  kind           String // INCOME | EXPENSE
+  name           String
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, departmentId, kind])
+}
+
+// Écriture financière : un encaissement (INCOME) ou une dépense (EXPENSE).
+model FinanceEntry {
+  id             String    @id @default(cuid())
+  organizationId String
+  departmentId   String?
+  kind           String // INCOME | EXPENSE
+  number         String // numéro auto : REC-2026-0001 / DEP-2026-0001
+  label          String
+  amount         Int // montant en FCFA (unité entière)
+  currency       String    @default("XOF")
+  method         String    @default("CASH") // CASH | MOBILE_MONEY | CHEQUE | TRANSFER | CARD
+  date           DateTime  @default(now())
+  thirdParty     String? // payeur / bénéficiaire
+  reference      String? // n° de pièce justificative
+  note           String?
+  source         String    @default("MANUAL") // MANUAL | CERTEL | INVOICE
+  sourceId       String?   @unique // idempotence (ex. transactionId CinetPay)
+  cashboxId      String?
+  categoryId     String?
+  invoiceId      String?
+  createdById    String?
+  createdAt      DateTime  @default(now())
+
+  @@unique([organizationId, number])
+  @@index([organizationId, departmentId, kind, date])
+  @@index([invoiceId])
+}
+
+// Facture interne : frais à recouvrer auprès d'un redevable (usager, service, partenaire).
+model FinanceInvoice {
+  id             String    @id @default(cuid())
+  organizationId String
+  departmentId   String?
+  number         String // numéro auto : FAC-2026-0001
+  debtorName     String // redevable
+  debtorUserId   String? // compte lié (facultatif)
+  label          String
+  amount         Int // montant dû en FCFA
+  paidAmount     Int       @default(0)
+  status         String    @default("PENDING") // PENDING | PARTIAL | PAID | CANCELLED
+  dueDate        DateTime?
+  note           String?
+  createdById    String?
+  createdAt      DateTime  @default(now())
+
+  @@unique([organizationId, number])
+  @@index([organizationId, departmentId, status])
+}
+
+// Compteur de numérotation par espace/type/année (upsert atomique).
+model FinanceCounter {
+  key   String @id // "orgId:departmentId|org:KIND:année"
+  count Int    @default(0)
+}

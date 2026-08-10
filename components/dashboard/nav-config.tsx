@@ -34,6 +34,11 @@ import {
   UserCog,
   Award,
   GraduationCap,
+  Wallet,
+  Coins,
+  Receipt,
+  BookOpenCheck,
+  SlidersHorizontal,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -96,6 +101,18 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Statistiques doc.", href: "/dashboard/library/statistics", icon: BarChart3, permission: "library.statistics" },
       { label: "Collections", href: "/dashboard/library/collections", icon: Layers, permission: "library.manage" },
       { label: "Domaines", href: "/dashboard/library/domains", icon: FolderTree, permission: "library.manage" },
+    ],
+  },
+  {
+    title: "Finances",
+    icon: Wallet,
+    items: [
+      { label: "Tableau de bord", href: "/dashboard/finances", icon: Wallet, permission: "finances.read", exact: true },
+      { label: "Encaissements", href: "/dashboard/finances/encaissements", icon: Coins, permission: "finances.read" },
+      { label: "Dépenses", href: "/dashboard/finances/depenses", icon: Receipt, permission: "finances.read" },
+      { label: "Facturation", href: "/dashboard/finances/facturation", icon: FileStack, permission: "finances.read" },
+      { label: "Journal", href: "/dashboard/finances/journal", icon: BookOpenCheck, permission: "finances.read" },
+      { label: "Paramètres fin.", href: "/dashboard/finances/parametres", icon: SlidersHorizontal, permission: "finances.manage" },
     ],
   },
   {

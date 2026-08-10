@@ -127,7 +127,10 @@ export async function reconcileCertelPayment(transactionId: string): Promise<"PA
   if (payment.status === "PAID") return "PAID";
   const status = await verifyCinetPayPayment(transactionId);
   if (status === "ACCEPTED") {
-    await prisma.certelPayment.update({ where: { transactionId }, data: { status: "PAID", paidAt: new Date() } });
+    const updated = await prisma.certelPayment.update({ where: { transactionId }, data: { status: "PAID", paidAt: new Date() } });
+    // Comptabilise la recette dans l'espace financier de la plateforme (idempotent, non bloquant).
+    const { recordCertelFinanceEntry } = await import("@/lib/finances/certel");
+    await recordCertelFinanceEntry(updated.id).catch(() => {});
     return "PAID";
   }
   if (status === "REFUSED") {

@@ -36,6 +36,9 @@ export const PERMISSIONS = [
   "documents.download",
   "documents.reserve",
   "library.statistics",
+  // ---- Finances (espace financier cloisonné) ----
+  "finances.read", // consulter l'espace financier de son périmètre
+  "finances.manage", // saisir encaissements/dépenses, factures, caisses, catégories
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -74,6 +77,8 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "documents.download": "Télécharger des documents",
   "documents.reserve": "Réserver / emprunter des documents",
   "library.statistics": "Consulter les statistiques de la bibliothèque",
+  "finances.read": "Consulter les finances",
+  "finances.manage": "Gérer les finances (saisies, factures, caisses)",
 };
 
 // Matrice rôle -> permissions.
@@ -113,6 +118,8 @@ export const ROLE_PERMISSIONS: Record<RoleKey, Permission[]> = {
     "documents.download",
     "documents.reserve",
     "library.statistics",
+    "finances.read",
+    "finances.manage",
   ],
   RESOURCE_MANAGER: [
     "resources.create",
