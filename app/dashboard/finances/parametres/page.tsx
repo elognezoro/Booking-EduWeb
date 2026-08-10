@@ -18,8 +18,9 @@ import { prisma } from "@/lib/prisma";
 import { resolveFinanceScope } from "@/lib/finances/scope";
 import { CASHBOX_KINDS, type CashboxKind } from "@/lib/finances/constants";
 import { CASHBOX_PRESETS, CATEGORY_PRESETS, remainingPresets } from "@/lib/finances/presets";
-import { createFinanceCashbox, toggleFinanceCashbox, createFinanceCategory, toggleFinanceCategory, setFinanceSpaceLogo } from "@/app/actions/finances";
+import { createFinanceCashbox, toggleFinanceCashbox, deleteFinanceCashbox, createFinanceCategory, toggleFinanceCategory, deleteFinanceCategory, setFinanceSpaceLogo } from "@/app/actions/finances";
 import { CertificateImageUpload } from "@/components/certificates/image-upload";
+import { ConfirmActionButton } from "@/components/confirm-action";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SpacePicker } from "@/components/finances/space-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -120,7 +121,10 @@ export default async function Page({
       )}
       {searchParams.error && (
         <div className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive">
-          <AlertCircle className="size-5" /> Une erreur est survenue. Vérifiez la saisie puis réessayez.
+          <AlertCircle className="size-5" />
+          {searchParams.error === "utilisee"
+            ? "Suppression impossible : des écritures sont rattachées à cet élément. Désactivez-le plutôt (l'historique et les reçus restent intacts)."
+            : "Une erreur est survenue. Vérifiez la saisie puis réessayez."}
         </div>
       )}
 
@@ -186,13 +190,27 @@ export default async function Page({
                       </Badge>
                     </div>
                     {scope.canManage && (
-                      <form action={toggleFinanceCashbox}>
-                        {hiddenScope}
-                        <input type="hidden" name="id" value={box.id} />
-                        <Button type="submit" size="sm" variant="outline">
-                          {box.active ? "Désactiver" : "Réactiver"}
-                        </Button>
-                      </form>
+                      <div className="flex items-center gap-1.5">
+                        <form action={toggleFinanceCashbox}>
+                          {hiddenScope}
+                          <input type="hidden" name="id" value={box.id} />
+                          <Button type="submit" size="sm" variant="outline">
+                            {box.active ? "Désactiver" : "Réactiver"}
+                          </Button>
+                        </form>
+                        <ConfirmActionButton
+                          action={deleteFinanceCashbox}
+                          hidden={{ id: box.id, espace: scope.space.key, back: BACK }}
+                          triggerLabel=""
+                          triggerIcon={<Trash2 className="size-4 text-unavailable" />}
+                          triggerVariant="ghost"
+                          triggerSize="icon-sm"
+                          title={`Supprimer la caisse « ${box.name} » ?`}
+                          description="Suppression définitive. Elle n'est possible que si aucune écriture ne s'y rattache — sinon, désactivez-la pour préserver l'historique."
+                          confirmLabel="Supprimer"
+                          confirmVariant="destructive"
+                        />
+                      </div>
                     )}
                   </div>
                 ))}
@@ -284,13 +302,27 @@ export default async function Page({
                           </Badge>
                         </div>
                         {scope.canManage && (
-                          <form action={toggleFinanceCategory}>
-                            {hiddenScope}
-                            <input type="hidden" name="id" value={cat.id} />
-                            <Button type="submit" size="sm" variant="outline">
-                              {cat.active ? "Désactiver" : "Réactiver"}
-                            </Button>
-                          </form>
+                          <div className="flex items-center gap-1.5">
+                            <form action={toggleFinanceCategory}>
+                              {hiddenScope}
+                              <input type="hidden" name="id" value={cat.id} />
+                              <Button type="submit" size="sm" variant="outline">
+                                {cat.active ? "Désactiver" : "Réactiver"}
+                              </Button>
+                            </form>
+                            <ConfirmActionButton
+                              action={deleteFinanceCategory}
+                              hidden={{ id: cat.id, espace: scope.space.key, back: BACK }}
+                              triggerLabel=""
+                              triggerIcon={<Trash2 className="size-4 text-unavailable" />}
+                              triggerVariant="ghost"
+                              triggerSize="icon-sm"
+                              title={`Supprimer la catégorie « ${cat.name} » ?`}
+                              description="Suppression définitive. Elle n'est possible que si aucune écriture ne s'y rattache — sinon, désactivez-la pour préserver l'historique."
+                              confirmLabel="Supprimer"
+                              confirmVariant="destructive"
+                            />
+                          </div>
                         )}
                       </div>
                     ))}

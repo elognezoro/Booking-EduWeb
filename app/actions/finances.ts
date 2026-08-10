@@ -146,6 +146,20 @@ export async function toggleFinanceCashbox(formData: FormData) {
   redirect(backPath(formData, scope));
 }
 
+/** Supprime une caisse — uniquement si aucune écriture ne s'y rattache (sinon : désactiver). */
+export async function deleteFinanceCashbox(formData: FormData) {
+  const scope = await requireScope(formData);
+  const id = txt(formData.get("id"));
+  const back = backPath(formData, scope, "deleted");
+  const box = await prisma.financeCashbox.findFirst({ where: { id, ...scope.filter } });
+  if (!box) redirect(back.replace("deleted=1", "error=introuvable"));
+  const used = await prisma.financeEntry.count({ where: { cashboxId: box.id, organizationId: scope.organizationId } });
+  if (used > 0) redirect(back.replace("deleted=1", "error=utilisee"));
+  await prisma.financeCashbox.delete({ where: { id: box.id } });
+  revalidatePath(BASE);
+  redirect(back);
+}
+
 export async function createFinanceCategory(formData: FormData) {
   const scope = await requireScope(formData);
   const name = txt(formData.get("name"), 80);
@@ -162,6 +176,20 @@ export async function toggleFinanceCategory(formData: FormData) {
   if (cat) await prisma.financeCategory.update({ where: { id: cat.id }, data: { active: !cat.active } });
   revalidatePath(BASE);
   redirect(backPath(formData, scope));
+}
+
+/** Supprime une catégorie — uniquement si aucune écriture ne s'y rattache (sinon : désactiver). */
+export async function deleteFinanceCategory(formData: FormData) {
+  const scope = await requireScope(formData);
+  const id = txt(formData.get("id"));
+  const back = backPath(formData, scope, "deleted");
+  const cat = await prisma.financeCategory.findFirst({ where: { id, ...scope.filter } });
+  if (!cat) redirect(back.replace("deleted=1", "error=introuvable"));
+  const used = await prisma.financeEntry.count({ where: { categoryId: cat.id, organizationId: scope.organizationId } });
+  if (used > 0) redirect(back.replace("deleted=1", "error=utilisee"));
+  await prisma.financeCategory.delete({ where: { id: cat.id } });
+  revalidatePath(BASE);
+  redirect(back);
 }
 
 /* ----------------------------- Facturation interne ----------------------------- */
