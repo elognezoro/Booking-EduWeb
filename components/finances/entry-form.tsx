@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createFinanceEntry } from "@/app/actions/finances";
 import { PAYMENT_METHODS, PAYMENT_METHOD_KEYS, type EntryKind } from "@/lib/finances/constants";
 import { ENS_DEPARTMENTS, isConsultationDocumentaire, CONSULTATION_DEFAULT_AMOUNT } from "@/lib/finances/ens-academics";
 import { StudentPicker, type StudentOption } from "@/components/finances/student-picker";
+import { SaveEntryButton } from "@/components/finances/save-progress";
 
 const OTHER = "__AUTRE__";
 
@@ -240,7 +239,7 @@ export function EntryForm({
         )}
       </div>
       <div><Label htmlFor="note">Note</Label><Textarea id="note" name="note" rows={2} /></div>
-      <Button type="submit" className="w-full"><Plus className="size-4" /> Enregistrer</Button>
+      <SaveEntryButton kind={kind} />
     </form>
   );
 }
