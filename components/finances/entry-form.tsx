@@ -7,7 +7,7 @@ import { Input, Select, Textarea } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createFinanceEntry } from "@/app/actions/finances";
 import { PAYMENT_METHODS, PAYMENT_METHOD_KEYS, type EntryKind } from "@/lib/finances/constants";
-import { ENS_DEPARTMENTS, isConsultationDocumentaire } from "@/lib/finances/ens-academics";
+import { ENS_DEPARTMENTS, isConsultationDocumentaire, CONSULTATION_DEFAULT_AMOUNT } from "@/lib/finances/ens-academics";
 
 const OTHER = "__AUTRE__";
 
@@ -34,19 +34,30 @@ export function EntryForm({
   const [categoryId, setCategoryId] = React.useState(categories[0]?.id ?? "");
   const [dept, setDept] = React.useState("");
   const [section, setSection] = React.useState("");
+  // Montant piloté pour proposer le tarif par défaut de la consultation documentaire
+  // (10 000 FCFA) sans jamais écraser une saisie manuelle.
+  const defaultAmount = String(CONSULTATION_DEFAULT_AMOUNT);
+  const [amount, setAmount] = React.useState(() =>
+    categories[0] && isConsultationDocumentaire(categories[0].name) ? defaultAmount : ""
+  );
 
   const isOther = label === OTHER || categories.length === 0;
   const consultation = !isOther && isConsultationDocumentaire(label);
   const sections = ENS_DEPARTMENTS.find((d) => d.name === dept)?.sections ?? [];
 
   const onLabelChange = (value: string) => {
+    const wasConsultation = consultation;
     setLabel(value);
     // Synchronise la catégorie avec le libellé choisi (modifiable ensuite).
     const match = categories.find((c) => c.name === value);
     if (match) setCategoryId(match.id);
-    if (!isConsultationDocumentaire(value)) {
+    if (isConsultationDocumentaire(value)) {
+      // Tarif par défaut si le montant n'a pas été saisi manuellement.
+      if (amount === "" || amount === defaultAmount) setAmount(defaultAmount);
+    } else {
       setDept("");
       setSection("");
+      if (wasConsultation && amount === defaultAmount) setAmount("");
     }
   };
 
@@ -124,7 +135,22 @@ export function EntryForm({
       )}
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div><Label htmlFor="amount" required>Montant (FCFA)</Label><Input id="amount" name="amount" type="number" min={1} required /></div>
+        <div>
+          <Label htmlFor="amount" required>Montant (FCFA)</Label>
+          <Input
+            id="amount"
+            name="amount"
+            type="number"
+            min={1}
+            required
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+          {consultation && (
+            <p className="mt-1 text-xs text-muted-foreground">Tarif par défaut : 10 000 FCFA — modifiable.</p>
+          )}
+        </div>
+        {/* Date : pré-remplie à la date du jour. */}
         <div><Label htmlFor="date">Date</Label><Input id="date" name="date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></div>
       </div>
 

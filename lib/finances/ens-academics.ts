@@ -35,3 +35,6 @@ export const ENS_DEPARTMENTS: AcademicDepartment[] = [
 export function isConsultationDocumentaire(label: string): boolean {
   return label.trim().toLowerCase() === "consultation documentaire";
 }
+
+/** Tarif proposé par défaut pour une consultation documentaire (FCFA) — modifiable à la saisie. */
+export const CONSULTATION_DEFAULT_AMOUNT = 10_000;
