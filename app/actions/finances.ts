@@ -8,6 +8,7 @@ import { resolveFinanceScope, type FinanceScope } from "@/lib/finances/scope";
 import { nextFinanceNumber } from "@/lib/finances/numbering";
 import { normalizeMethod, normalizeCashboxKind, type EntryKind } from "@/lib/finances/constants";
 import { importCertelPayments } from "@/lib/finances/certel";
+import { sendFinanceReceiptEmail } from "@/lib/finances/receipt-mail";
 
 /*
  * Toutes les actions du module Finances :
@@ -39,6 +40,10 @@ const int = (v: unknown): number => {
   return Number.isFinite(n) ? n : 0;
 };
 const txt = (v: unknown, max = 200): string => String(v ?? "").trim().slice(0, max);
+const email = (v: unknown): string | null => {
+  const s = String(v ?? "").trim().toLowerCase().slice(0, 160);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s) ? s : null;
+};
 const parseDate = (v: unknown): Date => {
   const s = String(v ?? "");
   const d = /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(s + "T12:00:00") : new Date(s);
@@ -69,7 +74,8 @@ export async function createFinanceEntry(formData: FormData) {
 
   const number = await nextFinanceNumber(scope.organizationId, scope.filter.departmentId, kind === "INCOME" ? "REC" : "DEP");
   const user = await requirePermission("finances.manage");
-  await prisma.financeEntry.create({
+  const payerEmail = kind === "INCOME" ? email(formData.get("thirdPartyEmail")) : null;
+  const entry = await prisma.financeEntry.create({
     data: {
       ...scope.filter,
       kind,
@@ -79,6 +85,7 @@ export async function createFinanceEntry(formData: FormData) {
       method: normalizeMethod(formData.get("method")),
       date: parseDate(formData.get("date")),
       thirdParty: txt(formData.get("thirdParty")) || null,
+      thirdPartyEmail: payerEmail,
       reference: txt(formData.get("reference"), 80) || null,
       note: txt(formData.get("note"), 500) || null,
       cashboxId,
@@ -86,6 +93,8 @@ export async function createFinanceEntry(formData: FormData) {
       createdById: user.id,
     },
   });
+  // Envoi automatique du reçu au payeur (non bloquant : l'écriture reste valable même si l'e-mail échoue).
+  if (payerEmail) await sendFinanceReceiptEmail(entry.id).catch(() => {});
   revalidatePath(BASE);
   redirect(back);
 }
@@ -197,8 +206,14 @@ export async function settleFinanceInvoice(formData: FormData) {
 
   const user = await requirePermission("finances.manage");
   const number = await nextFinanceNumber(scope.organizationId, scope.filter.departmentId, "REC");
-  await prisma.$transaction(async (tx) => {
-    await tx.financeEntry.create({
+  // Reçu envoyé au redevable : e-mail saisi au règlement, sinon celui du compte lié à la facture.
+  const debtorEmail =
+    email(formData.get("payerEmail")) ??
+    (inv.debtorUserId
+      ? await prisma.user.findUnique({ where: { id: inv.debtorUserId }, select: { email: true } }).then((u) => u?.email ?? null)
+      : null);
+  const entry = await prisma.$transaction(async (tx) => {
+    const created = await tx.financeEntry.create({
       data: {
         ...scope.filter,
         kind: "INCOME",
@@ -207,6 +222,7 @@ export async function settleFinanceInvoice(formData: FormData) {
         amount: paid,
         method: normalizeMethod(formData.get("method")),
         thirdParty: inv.debtorName,
+        thirdPartyEmail: debtorEmail,
         source: "INVOICE",
         invoiceId: inv.id,
         createdById: user.id,
@@ -217,7 +233,9 @@ export async function settleFinanceInvoice(formData: FormData) {
       where: { id: inv.id },
       data: { paidAmount, status: paidAmount >= inv.amount ? "PAID" : "PARTIAL" },
     });
+    return created;
   });
+  if (debtorEmail) await sendFinanceReceiptEmail(entry.id).catch(() => {});
   revalidatePath(BASE);
   redirect(back);
 }
@@ -242,4 +260,38 @@ export async function syncCertelFinance(formData: FormData) {
   const imported = await importCertelPayments();
   revalidatePath(BASE);
   redirect(`${BASE}?espace=${encodeURIComponent(scope?.space.key ?? "org")}&certel=${imported}`);
+}
+
+/* ----------------------------- Reçus ----------------------------- */
+
+/** Logo de l'espace (sous-direction) affiché sur les reçus à côté de celui de l'institution. */
+export async function setFinanceSpaceLogo(formData: FormData) {
+  const scope = await requireScope(formData);
+  const back = `/dashboard/finances/parametres?espace=${encodeURIComponent(scope.space.key)}`;
+  const deptId = scope.filter.departmentId;
+  if (!deptId) redirect(`${back}&error=espace`); // l'espace institution utilise le logo de l'institution
+  const raw = String(formData.get("logoUrl") || "");
+  if (raw === "__REMOVE__") {
+    await prisma.department.updateMany({ where: { id: deptId, organizationId: scope.organizationId }, data: { logoUrl: null } });
+  } else if (raw.startsWith("data:image/") && raw.length < 2_000_000) {
+    await prisma.department.updateMany({ where: { id: deptId, organizationId: scope.organizationId }, data: { logoUrl: raw } });
+  }
+  revalidatePath(BASE);
+  redirect(`${back}&saved=1`);
+}
+
+/** Renvoie le reçu d'un encaissement par e-mail (adresse saisie, mémorisée sur l'écriture). */
+export async function emailFinanceReceipt(formData: FormData) {
+  const scope = await requireScope(formData);
+  const id = txt(formData.get("id"));
+  const to = email(formData.get("to"));
+  const back = `/finances/recu/${encodeURIComponent(id)}`;
+  const entry = await prisma.financeEntry.findFirst({ where: { id, kind: "INCOME", ...scope.filter } });
+  if (!entry) redirect("/dashboard/finances?denied=1");
+  if (!to) redirect(`${back}?error=email`);
+  if (to !== entry.thirdPartyEmail) {
+    await prisma.financeEntry.update({ where: { id: entry.id }, data: { thirdPartyEmail: to } });
+  }
+  const ok = await sendFinanceReceiptEmail(entry.id, to).catch(() => false);
+  redirect(`${back}?${ok ? "sent=1" : "error=envoi"}`);
 }

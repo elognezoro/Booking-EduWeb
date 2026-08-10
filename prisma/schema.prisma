@@ -265,6 +265,7 @@ model Department {
   code           String?
   level          Int? // rang d'affichage (alignement) : 0=Direction,1=Sous-Direction,2=Service,3=Sous-service ; null = auto (profondeur du parent)
   headId         String? // responsable du service (un utilisateur membre désigné)
+  logoUrl        String? // logo de la sous-direction (data URL base64) — affiché sur les reçus à côté de celui de l'institution
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   site         Site?        @relation(fields: [siteId], references: [id])
@@ -1160,6 +1161,7 @@ model FinanceEntry {
   method         String    @default("CASH") // CASH | MOBILE_MONEY | CHEQUE | TRANSFER | CARD
   date           DateTime  @default(now())
   thirdParty     String? // payeur / bénéficiaire
+  thirdPartyEmail String? // e-mail du payeur — envoi automatique du reçu (encaissements)
   reference      String? // n° de pièce justificative
   note           String?
   source         String    @default("MANUAL") // MANUAL | CERTEL | INVOICE

@@ -1,4 +1,5 @@
-import { Coins, Receipt, Plus, Trash2, CheckCircle2, AlertTriangle, Wallet } from "lucide-react";
+import Link from "next/link";
+import { Coins, Receipt, Plus, Trash2, CheckCircle2, AlertTriangle, Wallet, ReceiptText } from "lucide-react";
 import { requirePermission } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -118,6 +119,11 @@ export async function EntriesView({
                     <span className={`font-bold ${kind === "INCOME" ? "text-available-fg" : "text-unavailable-fg"}`}>
                       {kind === "INCOME" ? "+" : "−"}{fmtMoney(e.amount)}
                     </span>
+                    {kind === "INCOME" && (
+                      <Button asChild variant="outline" size="sm" title="Ouvrir le reçu imprimable">
+                        <Link href={`/finances/recu/${e.id}`} target="_blank"><ReceiptText className="size-4" /> Reçu</Link>
+                      </Button>
+                    )}
                     {scope.canManage && e.source !== "CERTEL" && (
                       <form action={deleteFinanceEntry}>
                         <input type="hidden" name="espace" value={scope.space.key} />
@@ -172,6 +178,13 @@ export async function EntriesView({
                   </div>
                 )}
                 <div><Label htmlFor="thirdParty">{kind === "INCOME" ? "Payeur" : "Bénéficiaire"}</Label><Input id="thirdParty" name="thirdParty" placeholder="Nom du tiers (facultatif)" /></div>
+                {kind === "INCOME" && (
+                  <div>
+                    <Label htmlFor="thirdPartyEmail">E-mail du payeur</Label>
+                    <Input id="thirdPartyEmail" name="thirdPartyEmail" type="email" placeholder="adresse@exemple.ci (facultatif)" />
+                    <p className="mt-1 text-xs text-muted-foreground">Si renseigné, le reçu (avec son numéro) lui est envoyé automatiquement par e-mail.</p>
+                  </div>
+                )}
                 <div><Label htmlFor="reference">N° de pièce</Label><Input id="reference" name="reference" placeholder="Réf. justificatif (facultatif)" /></div>
                 <div><Label htmlFor="note">Note</Label><Textarea id="note" name="note" rows={2} /></div>
                 <Button type="submit" className="w-full"><Plus className="size-4" /> Enregistrer</Button>

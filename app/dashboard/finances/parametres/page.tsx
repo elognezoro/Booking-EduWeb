@@ -18,7 +18,8 @@ import { prisma } from "@/lib/prisma";
 import { resolveFinanceScope } from "@/lib/finances/scope";
 import { CASHBOX_KINDS, type CashboxKind } from "@/lib/finances/constants";
 import { CASHBOX_PRESETS, CATEGORY_PRESETS, remainingPresets } from "@/lib/finances/presets";
-import { createFinanceCashbox, toggleFinanceCashbox, createFinanceCategory, toggleFinanceCategory } from "@/app/actions/finances";
+import { createFinanceCashbox, toggleFinanceCashbox, createFinanceCategory, toggleFinanceCategory, setFinanceSpaceLogo } from "@/app/actions/finances";
+import { CertificateImageUpload } from "@/components/certificates/image-upload";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { SpacePicker } from "@/components/finances/space-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,10 +60,13 @@ export default async function Page({
   }
 
   // Cloisonnement strict : chaque requête inclut le filtre de l'espace courant.
-  const [cashboxes, incomeCategories, expenseCategories] = await Promise.all([
+  const [cashboxes, incomeCategories, expenseCategories, dept] = await Promise.all([
     prisma.financeCashbox.findMany({ where: { ...scope.filter }, orderBy: { createdAt: "asc" } }),
     prisma.financeCategory.findMany({ where: { ...scope.filter, kind: "INCOME" }, orderBy: { name: "asc" } }),
     prisma.financeCategory.findMany({ where: { ...scope.filter, kind: "EXPENSE" }, orderBy: { name: "asc" } }),
+    scope.filter.departmentId
+      ? prisma.department.findUnique({ where: { id: scope.filter.departmentId }, select: { name: true, logoUrl: true } })
+      : Promise.resolve(null),
   ]);
 
   const hiddenScope = (
@@ -331,6 +335,41 @@ export default async function Page({
           </CardContent>
         </Card>
       </div>
+
+      {/* ===================== LOGO DE L'ESPACE (reçus) ===================== */}
+      {scope.canManage && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base"><WalletCards className="size-4" /> Identité de l'espace — reçus</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {dept ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Ce logo apparaît sur les <strong>reçus d'encaissement</strong> de cet espace, à côté de celui de
+                  l'institution.
+                </p>
+                <form action={setFinanceSpaceLogo} className="space-y-3">
+                  <input type="hidden" name="espace" value={scope.space.key} />
+                  <CertificateImageUpload
+                    name="logoUrl"
+                    label={`Logo de « ${dept.name} »`}
+                    initial={dept.logoUrl}
+                    hint="PNG/JPEG/WebP — fond clair recommandé."
+                  />
+                  <Button type="submit" size="sm"><CheckCircle2 className="size-4" /> Enregistrer le logo</Button>
+                </form>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                L'espace « Institution » utilise le <strong>logo de l'institution</strong> sur ses reçus — modifiable dans{" "}
+                <Link href="/dashboard/admin/organization" className="font-semibold text-primary hover:underline">Administration › Organisation</Link>.
+                Sélectionnez une sous-direction (en haut à droite) pour définir son logo propre.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex items-start gap-2 rounded-xl border border-border bg-secondary/30 px-4 py-3 text-sm text-muted-foreground">
         <Info className="mt-0.5 size-4 shrink-0 text-primary" />

@@ -252,6 +252,16 @@ export default async function Page({
                               ))}
                             </Select>
                           </div>
+                          <div>
+                            <Label htmlFor={`payerEmail-${inv.id}`} className="text-xs">E-mail du redevable (reçu auto)</Label>
+                            <Input
+                              id={`payerEmail-${inv.id}`}
+                              type="email"
+                              name="payerEmail"
+                              placeholder="facultatif"
+                              className="h-9 w-52 text-sm"
+                            />
+                          </div>
                           <Button type="submit" size="sm">
                             <HandCoins className="size-4" /> Encaisser
                           </Button>
