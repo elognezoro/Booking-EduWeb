@@ -280,7 +280,7 @@ async function SuperAdminSection() {
         <div className="flex items-center gap-3">
           <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-white/10"><Globe2 className="size-6" /></span>
           <div>
-            <p className="font-bold">Supervision plateforme EduWeb</p>
+            <p className="font-bold">EduWeb Booking</p>
             <p className="text-sm text-white/70">Vue globale de toutes les organisations abonnées.</p>
           </div>
         </div>
