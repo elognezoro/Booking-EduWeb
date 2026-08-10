@@ -39,6 +39,7 @@ import {
   Receipt,
   BookOpenCheck,
   SlidersHorizontal,
+  ScrollText,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -140,6 +141,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Diagnostics CERTEL", href: "/dashboard/platform/certel", icon: GraduationCap, permission: "platform.manage" },
       { label: "Tarifs CERTEL", href: "/dashboard/platform/certel-tarifs", icon: CreditCard, permission: "platform.manage" },
       { label: "Évaluations", href: "/dashboard/platform/evaluations", icon: ClipboardCheck, permission: "platform.manage" },
+      { label: "Traçabilité finances", href: "/dashboard/platform/finances-audit", icon: ScrollText, permission: "platform.manage" },
       { label: "Sécurité & sessions", href: "/dashboard/platform/securite", icon: ShieldCheck, permission: "platform.manage" },
     ],
   },

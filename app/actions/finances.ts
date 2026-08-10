@@ -12,6 +12,7 @@ import { sendFinanceReceiptEmail } from "@/lib/finances/receipt-mail";
 import { ENS_DEPARTMENTS } from "@/lib/finances/ens-academics";
 import { DEMO_STUDENTS } from "@/lib/finances/demo-students";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
+import { audit } from "@/lib/audit";
 
 /*
  * Toutes les actions du module Finances :
@@ -100,6 +101,18 @@ export async function createFinanceEntry(formData: FormData) {
       createdById: user.id,
     },
   });
+  // Traçabilité (journal d'audit — consultation réservée à l'administrateur système).
+  await audit({
+    organizationId: scope.organizationId,
+    userId: user.id,
+    action: "FINANCE_ENTRY_CREATE",
+    entityType: "FinanceEntry",
+    entityId: entry.id,
+    newValue: {
+      number, kind, label, amount, method: entry.method, espace: scope.space.label,
+      thirdParty: entry.thirdParty, thirdPartyEmail: payerEmail, cashboxId, categoryId,
+    },
+  });
   // Envoi automatique du reçu au payeur (non bloquant : l'écriture reste valable même si l'e-mail échoue).
   if (payerEmail) await sendFinanceReceiptEmail(entry.id).catch(() => {});
   revalidatePath(BASE);
@@ -125,6 +138,20 @@ export async function deleteFinanceEntry(formData: FormData) {
       }
     }
     await tx.financeEntry.delete({ where: { id: entry.id } });
+  });
+  // Traçabilité de la suppression : instantané complet de l'écriture supprimée.
+  const deleter = await requirePermission("finances.manage");
+  await audit({
+    organizationId: scope.organizationId,
+    userId: deleter.id,
+    action: "FINANCE_ENTRY_DELETE",
+    entityType: "FinanceEntry",
+    entityId: entry.id,
+    oldValue: {
+      number: entry.number, kind: entry.kind, label: entry.label, amount: entry.amount,
+      method: entry.method, date: entry.date, source: entry.source, espace: scope.space.label,
+      thirdParty: entry.thirdParty, invoiceId: entry.invoiceId,
+    },
   });
   revalidatePath(BASE);
   redirect(back);
@@ -163,6 +190,15 @@ export async function deleteFinanceCashbox(formData: FormData) {
   const used = await prisma.financeEntry.count({ where: { cashboxId: box.id, organizationId: scope.organizationId } });
   if (used > 0) redirect(back.replace("deleted=1", "error=utilisee"));
   await prisma.financeCashbox.delete({ where: { id: box.id } });
+  const user = await requirePermission("finances.manage");
+  await audit({
+    organizationId: scope.organizationId,
+    userId: user.id,
+    action: "FINANCE_CASHBOX_DELETE",
+    entityType: "FinanceCashbox",
+    entityId: box.id,
+    oldValue: { name: box.name, kind: box.kind, espace: scope.space.label },
+  });
   revalidatePath(BASE);
   redirect(back);
 }
@@ -195,6 +231,15 @@ export async function deleteFinanceCategory(formData: FormData) {
   const used = await prisma.financeEntry.count({ where: { categoryId: cat.id, organizationId: scope.organizationId } });
   if (used > 0) redirect(back.replace("deleted=1", "error=utilisee"));
   await prisma.financeCategory.delete({ where: { id: cat.id } });
+  const user = await requirePermission("finances.manage");
+  await audit({
+    organizationId: scope.organizationId,
+    userId: user.id,
+    action: "FINANCE_CATEGORY_DELETE",
+    entityType: "FinanceCategory",
+    entityId: cat.id,
+    oldValue: { name: cat.name, kind: cat.kind, espace: scope.space.label },
+  });
   revalidatePath(BASE);
   redirect(back);
 }
@@ -211,7 +256,7 @@ export async function createFinanceInvoice(formData: FormData) {
   const dueRaw = String(formData.get("dueDate") || "");
   const user = await requirePermission("finances.manage");
   const number = await nextFinanceNumber(scope.organizationId, scope.filter.departmentId, "FAC");
-  await prisma.financeInvoice.create({
+  const invoice = await prisma.financeInvoice.create({
     data: {
       ...scope.filter,
       number,
@@ -222,6 +267,14 @@ export async function createFinanceInvoice(formData: FormData) {
       note: txt(formData.get("note"), 500) || null,
       createdById: user.id,
     },
+  });
+  await audit({
+    organizationId: scope.organizationId,
+    userId: user.id,
+    action: "FINANCE_INVOICE_CREATE",
+    entityType: "FinanceInvoice",
+    entityId: invoice.id,
+    newValue: { number, debtorName, label, amount, espace: scope.space.label },
   });
   revalidatePath(BASE);
   redirect(back);
@@ -270,6 +323,14 @@ export async function settleFinanceInvoice(formData: FormData) {
     });
     return created;
   });
+  await audit({
+    organizationId: scope.organizationId,
+    userId: user.id,
+    action: "FINANCE_INVOICE_SETTLE",
+    entityType: "FinanceInvoice",
+    entityId: inv.id,
+    newValue: { invoice: inv.number, entryNumber: number, amount: paid, debtorName: inv.debtorName, thirdPartyEmail: debtorEmail, espace: scope.space.label },
+  });
   if (debtorEmail) await sendFinanceReceiptEmail(entry.id).catch(() => {});
   revalidatePath(BASE);
   redirect(back);
@@ -281,6 +342,15 @@ export async function cancelFinanceInvoice(formData: FormData) {
   const inv = await prisma.financeInvoice.findFirst({ where: { id, ...scope.filter } });
   if (inv && inv.status !== "PAID") {
     await prisma.financeInvoice.update({ where: { id: inv.id }, data: { status: "CANCELLED" } });
+    const user = await requirePermission("finances.manage");
+    await audit({
+      organizationId: scope.organizationId,
+      userId: user.id,
+      action: "FINANCE_INVOICE_CANCEL",
+      entityType: "FinanceInvoice",
+      entityId: inv.id,
+      oldValue: { number: inv.number, debtorName: inv.debtorName, amount: inv.amount, paidAmount: inv.paidAmount, espace: scope.space.label },
+    });
   }
   revalidatePath(BASE);
   redirect(backPath(formData, scope));
@@ -368,6 +438,14 @@ export async function importFinanceStudentsCsv(formData: FormData) {
   }
   if (data.length === 0) redirect(`${back}&error=csv`);
   await prisma.financeStudent.createMany({ data });
+  const importer = await requirePermission("finances.manage");
+  await audit({
+    organizationId: scope.organizationId,
+    userId: importer.id,
+    action: "FINANCE_STUDENTS_IMPORT",
+    entityType: "FinanceStudent",
+    newValue: { count: data.length, fichier: file.name },
+  });
   revalidatePath(BASE);
   redirect(`${back}&students=${data.length}`);
 }
@@ -381,6 +459,14 @@ export async function seedDemoFinanceStudents(formData: FormData) {
   await prisma.financeStudent.createMany({
     data: DEMO_STUDENTS.map((s) => ({ organizationId: scope.organizationId, ...s, demo: true })),
   });
+  const seeder = await requirePermission("finances.manage");
+  await audit({
+    organizationId: scope.organizationId,
+    userId: seeder.id,
+    action: "FINANCE_STUDENTS_DEMO",
+    entityType: "FinanceStudent",
+    newValue: { count: DEMO_STUDENTS.length },
+  });
   revalidatePath(BASE);
   redirect(`${back}&studentsdemo=${DEMO_STUDENTS.length}`);
 }
@@ -392,6 +478,14 @@ export async function deleteFinanceStudents(formData: FormData) {
   const mode = formData.get("mode") === "all" ? "all" : "demo";
   const res = await prisma.financeStudent.deleteMany({
     where: { organizationId: scope.organizationId, ...(mode === "demo" ? { demo: true } : {}) },
+  });
+  const user = await requirePermission("finances.manage");
+  await audit({
+    organizationId: scope.organizationId,
+    userId: user.id,
+    action: "FINANCE_STUDENTS_DELETE",
+    entityType: "FinanceStudent",
+    oldValue: { mode, count: res.count },
   });
   revalidatePath(BASE);
   redirect(`${back}&studentsdel=${res.count}`);
@@ -410,5 +504,14 @@ export async function emailFinanceReceipt(formData: FormData) {
     await prisma.financeEntry.update({ where: { id: entry.id }, data: { thirdPartyEmail: to } });
   }
   const ok = await sendFinanceReceiptEmail(entry.id, to).catch(() => false);
+  const user = await requirePermission("finances.manage");
+  await audit({
+    organizationId: scope.organizationId,
+    userId: user.id,
+    action: "FINANCE_RECEIPT_EMAIL",
+    entityType: "FinanceEntry",
+    entityId: entry.id,
+    newValue: { number: entry.number, to, ok, espace: scope.space.label },
+  });
   redirect(`${back}?${ok ? "sent=1" : "error=envoi"}`);
 }
