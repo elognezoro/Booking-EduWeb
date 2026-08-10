@@ -169,8 +169,8 @@ export default async function ReceiptPage({
             <p className="text-sm text-black/70">
               Fait à {org.city || "—"}, le <span className="font-semibold text-black">{dateLong}</span>
             </p>
-            <p className="mt-2 text-base font-black uppercase tracking-widest text-red-600 print:text-red-600">COMPTABILITE</p>
-            <p className="mt-8 border-t border-black/40 px-8 pt-1 text-sm font-semibold">Le caissier / La caissière</p>
+            <p className="mt-8 text-base font-black uppercase tracking-widest text-red-600 print:text-red-600">COMPTABILITE</p>
+            <p className="border-t border-black/40 px-8 pt-1 text-sm font-semibold">Le caissier / La caissière</p>
           </div>
         </div>
 
