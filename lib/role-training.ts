@@ -938,6 +938,206 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
       }
     ]
   },
+  "ENSEIGNANT_CHERCHEUR": {
+    "title": "Formation à la prise en main — Enseignant-chercheur",
+    "intro": "Bienvenue dans la formation à la prise en main du rôle « Enseignant-chercheur » d'EduWeb Booking. Ce rôle réunit deux facettes complémentaires. Côté enseignement, vous réservez les ressources pédagogiques de votre établissement (salles, salles multimédias, matériels) et vous suivez vos demandes dans votre calendrier. Côté recherche, vous exploitez la bibliothèque numérique — consulter, télécharger, citer, réserver ou emprunter un document —, vous déposez vos propres publications (articles, mémoires, rapports, supports de cours) et vous apportez un regard d'expert en émettant des avis scientifiques sur les travaux de votre institution. Comme tout utilisateur connecté, vous accédez aussi à CERTEL, la formation certifiante au numérique et à l'intelligence artificielle. En revanche, la validation des réservations, la gestion du fonds documentaire (vérification, publication, archivage) et l'administration ne relèvent pas de votre profil : il est normal que ces menus n'apparaissent pas dans votre barre latérale. Les modules suivent l'ordre logique d'un usage réel et citent les libellés exacts des menus et boutons. Pour le confort de lecture, les textes s'affichent dans une police d'au moins 13 px et chaque contenu narratif propose un bouton « Écouter ». Réalisez chaque action dans l'application au fur et à mesure, puis validez vos acquis avec l'auto-évaluation finale.",
+    "modules": [
+      {
+        "title": "Module 1 — Découvrir votre espace et votre double mission",
+        "objective": "Vous saurez vous repérer dans votre barre latérale et situer ce qui relève — ou non — de votre rôle.",
+        "content": [
+          "Connectez-vous puis ouvrez « Tableau de bord » dans la section « Principal » de la barre latérale ; cette section réunit aussi « Accueil », « Calendrier », « Salles multimédias », « Mes réservations », « Sport cérébral », « Espace formation », « Formation CERTEL » et « Mon compte ».",
+          "Dans la section « Gestion », vous disposez de l'entrée « Ressources » : c'est le catalogue réservable de votre établissement (salles, salles multimédias, matériels, services).",
+          "Dépliez la section « Bibliothèque » : vous y trouvez cinq entrées — « Bibliothèque », « Explorer », « Déposer », « Documents » et « Réservations doc. ».",
+          "Retenez votre double mission : réserver les ressources pédagogiques pour vos cours, TD, examens et soutenances, puis alimenter et expertiser la bibliothèque numérique (dépôts de publications, avis scientifiques).",
+          "Les menus de validation des réservations (« À valider »), de gestion documentaire (« À vérifier », « Emprunts », « Collections », « Domaines ») et la section « Administration » n'apparaissent pas chez vous : ils relèvent d'autres rôles.",
+          "Sur téléphone, retrouvez ces mêmes accès via la barre d'onglets en bas de l'écran, le bouton flottant d'action et le menu latéral coulissant."
+        ]
+      },
+      {
+        "title": "Module 2 — Réserver une ressource pédagogique avec l'assistant",
+        "objective": "Vous saurez trouver une ressource réservable et soumettre une demande complète avec l'assistant en six étapes.",
+        "content": [
+          "Ouvrez « Ressources » (section « Gestion ») et affinez avec la barre « Rechercher par nom, code ou lieu… » et les filtres « Toutes les catégories », « Tous les statuts » et « Tous les sites » ; la fiche d'une ressource indique sa capacité, sa localisation et son état (« Disponible maintenant », « Occupée actuellement », « Non réservable »).",
+          "Lancez la demande avec le bouton « Réserver » d'une ressource réservable, ou cliquez sur « + Nouvelle réservation » dans la barre latérale.",
+          "Étape « Catégorie » puis étape « Ressource » : sélectionnez d'abord la catégorie, puis la ressource souhaitée, en cliquant « Continuer » à chaque fois (ce sont deux étapes distinctes).",
+          "Étape « Motif » : renseignez l'« Intitulé », le « Type d'usage » (par exemple Pédagogique, Examen, Soutenance ou Conférence), l'« Effectif / participants » et le « Motif » — seul le « Motif » est obligatoire.",
+          "Étape « Créneau » : saisissez les dates et heures de début et de fin puis cliquez sur « Vérifier la disponibilité » ; si « Ce créneau est disponible. Vous pouvez continuer. » s'affiche, poursuivez, sinon appliquez le « Créneau proposé » ou corrigez vos dates.",
+          "Étape « Détails » (« Besoins spécifiques », case « J'ai besoin d'une assistance technique », « Note pour le validateur ») puis étape « Confirmation » : cliquez sur « Soumettre la demande » — le message « Votre demande de réservation a été enregistrée. » confirme l'envoi."
+        ]
+      },
+      {
+        "title": "Module 3 — Salles multimédias, calendrier et suivi de vos réservations",
+        "objective": "Vous saurez réserver des postes informatiques pour vos TD, lire votre calendrier et gérer le cycle de vie de vos réservations.",
+        "content": [
+          "Dans le menu « Principal », ouvrez « Salles multimédias » : le plan des postes s'affiche en temps réel (postes verts libres, postes rouges occupés) ; cliquez sur « Réserver des postes » pour quelques postes ou sur « Réserver la salle » pour un cours en salle entière.",
+          "Dans l'assistant, à l'étape « Créneau », basculez au besoin entre « Réserver des postes » et « Réserver toute la salle », cliquez sur « Vérifier la disponibilité », puis sélectionnez vos postes verts sous « Choisissez vos postes » (le compteur « poste(s) sélectionné(s) » se met à jour).",
+          "Ouvrez « Calendrier » : la vue mensuelle affiche vos réservations jour par jour ; utilisez « Aujourd'hui » et les flèches pour naviguer, et cliquez sur une journée pour ouvrir son détail.",
+          "Ouvrez « Mes réservations » : vos demandes sont classées en « À venir » et « Historique » ; retrouvez-en une avec la recherche et le filtre « Tous les statuts », puis cliquez sur une ligne pour ouvrir sa fiche.",
+          "Une fois la demande validée et le créneau arrivé, cliquez sur « Je suis arrivé » dans le panneau « Actions », puis sur « Activité terminée » à la fin de la séance.",
+          "Pour renoncer à une réservation encore à venir, cliquez sur « Annuler la réservation » puis confirmez : le créneau est libéré ; la cloche de notifications, en haut à droite, vous signale chaque décision de validation."
+        ]
+      },
+      {
+        "title": "Module 4 — Explorer, consulter et citer la documentation",
+        "objective": "Vous saurez rechercher un document, le lire en ligne, le télécharger, copier sa référence APA et réserver un exemplaire physique.",
+        "content": [
+          "Ouvrez « Explorer » (section « Bibliothèque ») et recherchez avec « Titre, auteur, mot-clé, code… », ou affinez avec les filtres « Tous les types », « Toutes collections », « Tous domaines » et « Tout accès ».",
+          "Sur la fiche d'un document, dans l'encadré « Accès au document », cliquez sur « Consulter » pour le lire en ligne : la lecture est en lecture seule, avec un filigrane à votre nom, l'impression et la copie étant désactivées.",
+          "Pour travailler hors ligne, cliquez sur « Télécharger » lorsque le document l'autorise, ou sur « Payer et débloquer » s'il est en téléchargement payant (paiement simulé de démonstration).",
+          "Pour vos bibliographies, utilisez l'encadré « Citer ce document » et le bouton « Copier » : la référence est fournie au format APA.",
+          "Pour un exemplaire physique, cliquez sur « Réserver / Emprunter », choisissez « Consultation sur place » ou « Emprunt physique » puis « Envoyer la demande » ; si le document est restreint, le bouton devient « Demander l'accès » (précisez votre motif).",
+          "Suivez vos demandes documentaires dans « Réservations doc. » : le statut passe de « En attente » à « Approuvée » ou « Refusée », et la cloche de notifications vous prévient de la décision."
+        ]
+      },
+      {
+        "title": "Module 5 — Déposer vos publications et suivre leur validation",
+        "objective": "Vous saurez déposer un article, un mémoire ou un support de cours avec l'assistant en sept étapes, puis suivre son statut.",
+        "content": [
+          "Dans la section « Bibliothèque », cliquez sur « Déposer » pour ouvrir l'assistant en sept étapes : « Type », « Métadonnées », « Auteurs », « Résumé », « Fichier », « Droits », « Vérification ».",
+          "Étape « Type » : choisissez le type de document (Article scientifique, Mémoire, Thèse, Rapport, Support pédagogique…), puis la « Collection » et le « Domaine », tous deux obligatoires, avant de cliquer sur « Continuer ».",
+          "Étapes « Métadonnées », « Auteurs » et « Résumé » : saisissez le « Titre » (obligatoire, au moins 3 caractères), l'« Auteur principal » (obligatoire), les co-auteurs et le directeur éventuels, puis le « Résumé » et les « Mots-clés (séparés par des virgules) ».",
+          "Étape « Fichier » : glissez-déposez votre fichier (PDF recommandé ; facultatif au dépôt, il pourra être ajouté plus tard) ; pour un article scientifique, complétez les champs « Revue » et « DOI » qui apparaissent à cette étape.",
+          "Étape « Droits » : choisissez le « Niveau d'accès » et cochez ou non « Autoriser le téléchargement du fichier » ; à l'étape « Vérification », cliquez sur « Soumettre le dépôt » — le message « Votre dépôt a été enregistré et soumis à validation. » confirme l'envoi au documentaliste.",
+          "Suivez chaque dépôt depuis sa fiche — ouverte après la soumission, puis accessible via la cloche de notifications — où l'« Historique & avis » retrace les statuts (« Soumis », « À corriger », « Validé », « Publié »…) ; votre document rejoint la liste « Documents » une fois validé ou publié, et s'il passe à « À corriger », retournez sur « Déposer » pour soumettre la version corrigée en le signalant dans le résumé ou les mots-clés."
+        ]
+      },
+      {
+        "title": "Module 6 — Émettre votre avis scientifique d'expert",
+        "objective": "Vous saurez enregistrer un avis scientifique motivé (Favorable ou Réservé) sur un travail de votre institution.",
+        "content": [
+          "En tant qu'enseignant-chercheur, vous portez un regard d'expert sur le FOND d'un mémoire, d'un article ou d'un rapport ; la validation documentaire proprement dite (métadonnées, code définitif, publication, archivage) reste du ressort du bibliothécaire / documentaliste.",
+          "Votre avis ne peut porter que sur les documents de votre PROPRE institution : c'est une exigence du contrôle d'accès, et le bouton d'avis n'apparaît que dans ce cas.",
+          "Retrouvez le document via « Explorer » ou « Documents », ouvrez sa fiche, puis lisez le « Résumé », les « Métadonnées » et les « Mots-clés » ; au besoin, cliquez sur « Consulter » ou « Télécharger » pour l'étudier avant de vous prononcer.",
+          "Dans l'encadré « Validation documentaire », cliquez sur « Avis scientifique » : choisissez la « Décision » (champ obligatoire) — « Favorable », sélectionné par défaut, ou « Réservé » — puis motivez votre position dans le champ « Commentaire » (facultatif, mais vivement recommandé).",
+          "Cliquez sur « Enregistrer l'avis » pour valider (« Annuler » permet de renoncer sans rien enregistrer) : votre avis apparaît aussitôt dans l'« Historique & avis » de la fiche, à votre nom et daté, sous la mention « Avis scientifique favorable » ou « Avis scientifique réservé »."
+        ]
+      },
+      {
+        "title": "Module 7 — Se former avec CERTEL et gérer votre compte",
+        "objective": "Vous saurez accéder à la formation certifiante CERTEL, sécuriser votre compte et trouver de l'aide.",
+        "content": [
+          "CERTEL est la formation certifiante au numérique et à l'intelligence artificielle, ouverte à tout utilisateur connecté : depuis le tableau de bord, ouvrez « Formation CERTEL » dans la section « Principal », ou passez par le menu public « CERTEL ».",
+          "Commencez par le diagnostic GRATUIT qui situe votre niveau ; le parcours compte 3 niveaux interactifs de 6 modules chacun, avec leçons audio, exercices auto-corrigés à VÉRIFICATION IMMÉDIATE et évaluation CHRONOMÉTRÉE.",
+          "L'évaluation certifiante ne dévoile les corrigés qu'À LA FIN ; la réussite délivre un CERTIFICAT PDF au format paysage. L'inscription est PAYANTE par Mobile Money (Wave, Orange Money, MTN, Moov) ou par carte ; tant qu'aucun prix n'est défini, l'accès reste gratuit.",
+          "Ouvrez « Mon compte » puis, dans « Changer mon mot de passe », saisissez le « Mot de passe actuel », le « Nouveau mot de passe » (au moins 8 caractères) et sa confirmation avant de cliquer sur « Mettre à jour le mot de passe ».",
+          "En cas de difficulté, ouvrez « Support » ou « Centre d'aide » dans la section « Aide » : le « Centre d'aide » affiche le guide adapté à votre rôle, téléchargeable en PDF ou en Word ; l'espace « Sport cérébral » reste accessible pour entretenir vos réflexes entre deux cours."
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "Où ouvrez-vous le catalogue des ressources réservables (salles, salles multimédias, matériels, services) ?",
+        "options": [
+          "Dans le menu « Bibliothèque », via « Explorer »",
+          "Dans la section « Gestion » de la barre latérale, via « Ressources »",
+          "Dans la section « Administration »",
+          "Dans « Réservations doc. »"
+        ],
+        "answer": 1,
+        "explanation": "Le catalogue réservable se trouve dans « Ressources » (section « Gestion »), avec recherche et filtres ; « Explorer » concerne les documents de la bibliothèque, pas les salles ni les matériels."
+      },
+      {
+        "question": "À l'étape « Motif » de l'assistant de réservation, quel est le seul champ réellement obligatoire ?",
+        "options": [
+          "L'« Intitulé »",
+          "Le « Type d'usage »",
+          "L'« Effectif / participants »",
+          "Le « Motif »"
+        ],
+        "answer": 3,
+        "explanation": "À l'étape « Motif », vous pouvez renseigner l'intitulé, le type d'usage (Pédagogique, Examen, Soutenance…) et l'effectif, mais seul le champ « Motif » est obligatoire pour continuer."
+      },
+      {
+        "question": "À l'étape « Créneau », sur quel bouton cliquez-vous pour savoir si vos dates conviennent ?",
+        "options": [
+          "« Soumettre la demande »",
+          "« Vérifier la disponibilité »",
+          "« Réserver la salle »",
+          "« Continuer »"
+        ],
+        "answer": 1,
+        "explanation": "Le bouton « Vérifier la disponibilité » teste le créneau saisi : si « Ce créneau est disponible. Vous pouvez continuer. » s'affiche, vous poursuivez ; sinon, vous appliquez le « Créneau proposé » ou corrigez vos dates."
+      },
+      {
+        "question": "Votre réservation est validée et le créneau est arrivé : que faites-vous d'abord dans le panneau « Actions » ?",
+        "options": [
+          "Cliquer sur « Activité terminée »",
+          "Cliquer sur « Annuler la réservation »",
+          "Cliquer sur « Je suis arrivé »",
+          "Attendre la cloche de notifications"
+        ],
+        "answer": 2,
+        "explanation": "À l'arrivée, vous confirmez votre présence avec « Je suis arrivé » ; « Activité terminée » se clique à la fin de la séance, et « Annuler la réservation » ne concerne qu'une réservation encore à venir."
+      },
+      {
+        "question": "Comment récupérez-vous la référence bibliographique d'un document au format APA ?",
+        "options": [
+          "Via l'encadré « Citer ce document » et le bouton « Copier »",
+          "Via le bouton « Télécharger »",
+          "Via « Historique & avis »",
+          "Via « Réserver / Emprunter »"
+        ],
+        "answer": 0,
+        "explanation": "L'encadré « Citer ce document » propose la référence au format APA, que vous copiez d'un clic grâce au bouton « Copier » — un gain de temps pour vos bibliographies."
+      },
+      {
+        "question": "Combien d'étapes comporte l'assistant « Déposer » pour soumettre une publication ?",
+        "options": [
+          "Trois étapes",
+          "Cinq étapes",
+          "Six étapes",
+          "Sept étapes"
+        ],
+        "answer": 3,
+        "explanation": "L'assistant « Déposer une ressource » se déroule en sept étapes : Type, Métadonnées, Auteurs, Résumé, Fichier, Droits et Vérification."
+      },
+      {
+        "question": "Quels champs spécifiques apparaissent à l'étape « Fichier » lorsque vous déposez un article scientifique ?",
+        "options": [
+          "« Revue » et « DOI »",
+          "« Collection » et « Domaine »",
+          "« Niveau d'accès » et « Prix de téléchargement »",
+          "« Auteur principal » et « Directeur »"
+        ],
+        "answer": 0,
+        "explanation": "Pour un article scientifique, les champs « Revue » et « DOI » apparaissent à l'étape « Fichier » ; la « Collection » et le « Domaine » se choisissent dès l'étape « Type », et les droits à l'étape « Droits »."
+      },
+      {
+        "question": "Dans la fenêtre « Avis scientifique », qu'est-ce qui est obligatoire pour enregistrer votre avis ?",
+        "options": [
+          "Le « Commentaire » uniquement",
+          "La « Décision » (« Favorable » ou « Réservé »), le commentaire restant facultatif",
+          "La « Décision » et le « Commentaire »",
+          "Rien : l'avis s'enregistre automatiquement à la fermeture"
+        ],
+        "answer": 1,
+        "explanation": "Seule la « Décision » est obligatoire — « Favorable » (sélectionné par défaut) ou « Réservé » ; le « Commentaire » est facultatif mais vivement recommandé, et l'avis n'est validé qu'en cliquant sur « Enregistrer l'avis »."
+      },
+      {
+        "question": "Pour quels documents le bouton « Avis scientifique » apparaît-il ?",
+        "options": [
+          "Pour tous les documents de la plateforme, sans restriction",
+          "Pour les seuls documents que vous avez vous-même déposés",
+          "Pour les documents de votre propre institution uniquement",
+          "Pour les documents publics uniquement"
+        ],
+        "answer": 2,
+        "explanation": "Votre avis ne peut porter que sur les documents de votre propre institution : c'est une exigence du contrôle d'accès, et le bouton n'apparaît que dans ce cas."
+      },
+      {
+        "question": "Comment accédez-vous à la formation CERTEL et que coûte le diagnostic de niveau ?",
+        "options": [
+          "Elle est réservée aux administrateurs ; le diagnostic est payant",
+          "Par « Formation CERTEL » dans « Principal » (ou le menu public « CERTEL »), ouverte à tout utilisateur connecté ; le diagnostic de niveau est gratuit",
+          "Uniquement depuis « Déposer » ; le diagnostic coûte un abonnement annuel",
+          "Par « Réservations doc. » ; il n'existe pas de diagnostic"
+        ],
+        "answer": 1,
+        "explanation": "CERTEL est ouverte à tout utilisateur connecté via « Formation CERTEL » dans la section « Principal » ou le menu public « CERTEL », et débute par un diagnostic gratuit avant les 3 niveaux interactifs."
+      }
+    ]
+  },
   "TECHNICIAN": {
     "title": "Formation à la prise en main — Technicien / agent d'appui",
     "intro": "Cette formation vous rend autonome dans votre rôle de technicien / agent d'appui (clé TECHNICIAN) sur EduWeb Booking. Votre profil donne un accès en consultation étendu : vous surveillez l'état des ressources, suivez les maintenances planifiées, repérez les incidents, lisez le calendrier d'occupation et l'ensemble des réservations de tout l'établissement, et consultez les salles multimédias et la bibliothèque numérique en lecture, afin de planifier vos interventions au bon moment et sans gêner les usagers. Point important à garder en tête tout au long de la formation : la plateforme ne vous expose pas, à ce jour, d'écran pour saisir vous-même une déclaration, une prise en charge ou une clôture d'incident, ni pour créer ou modifier une fiche de maintenance. Ces enregistrements sont saisis dans l'outil par un responsable de ressource ou un administrateur, à partir de vos constats et comptes rendus de terrain. Vos écrans servent donc à diagnostiquer, repérer, préparer vos interventions, puis vérifier le retour en service. Vous ne pouvez ni créer de réservation, ni modifier la configuration des ressources, ni administrer l'établissement. Comme tout utilisateur connecté, vous avez aussi accès à CERTEL, la formation certifiante au numérique et à l'intelligence artificielle, pour monter en compétences. Enfin, pour le confort de lecture, les textes d'aide et de formation respectent une taille de police d'au moins 13 px et un lecteur audio « Écouter » accompagne les contenus narratifs. À la fin du parcours, une auto-évaluation (QCM) vous permettra de vérifier votre compréhension.",

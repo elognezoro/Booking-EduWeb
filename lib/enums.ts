@@ -18,6 +18,7 @@ export const ROLES = [
   "RESOURCE_MANAGER",
   "VALIDATOR",
   "REQUESTER",
+  "ENSEIGNANT_CHERCHEUR",
   "TECHNICIAN",
   "VISITOR",
   // EduWeb Booking Library
@@ -34,6 +35,7 @@ export const ROLE_META: Record<RoleKey, LabelMeta & { color: string }> = {
   RESOURCE_MANAGER: { label: "Responsable de ressource", tone: "available", color: "#0B5A45", description: "Gère ses ressources et valide les demandes associées." },
   VALIDATOR: { label: "Validateur hiérarchique", tone: "pending", color: "#F97316", description: "Approuve ou refuse les demandes de réservation." },
   REQUESTER: { label: "Utilisateur demandeur", tone: "info", color: "#064B3A", description: "Réserve des ressources et suit ses demandes." },
+  ENSEIGNANT_CHERCHEUR: { label: "Enseignant-chercheur", tone: "info", color: "#B45309", description: "Réserve les ressources pédagogiques, dépose des publications et émet des avis scientifiques." },
   TECHNICIAN: { label: "Technicien / agent d'appui", tone: "neutral", color: "#475569", description: "Traite les incidents et la maintenance des ressources." },
   VISITOR: { label: "Visiteur externe", tone: "neutral", color: "#94A3B8", description: "Accès en consultation limité (ressources publiques)." },
   LIBRARIAN: { label: "Bibliothécaire / Documentaliste", tone: "info", color: "#0891B2", description: "Vérifie, complète, valide, publie ou archive les dépôts documentaires." },

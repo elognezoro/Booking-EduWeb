@@ -206,7 +206,7 @@ async function main() {
   const manager = await createUser({ email: "responsable.salles@ens.ci", firstName: "Aïcha", lastName: "Traoré", role: "RESOURCE_MANAGER", organizationId: org.id, departmentId: aprid.id, functionTitle: "Responsable des salles" });
   const validator = await createUser({ email: "validateur.aprid@ens.ci", firstName: "Jean", lastName: "Brou", role: "VALIDATOR", organizationId: org.id, departmentId: aprid.id, functionTitle: "Chef de service" });
   const technician = await createUser({ email: "technicien.aprid@ens.ci", firstName: "Moussa", lastName: "Diallo", role: "TECHNICIAN", organizationId: org.id, departmentId: labo.id, functionTitle: "Technicien informatique" });
-  const teacher = await createUser({ email: "enseignant.demo@ens.ci", firstName: "Fatou", lastName: "Bamba", role: "REQUESTER", organizationId: org.id, departmentId: aprid.id, functionTitle: "Enseignante-chercheuse" });
+  const teacher = await createUser({ email: "enseignant.demo@ens.ci", firstName: "Fatou", lastName: "Bamba", role: "ENSEIGNANT_CHERCHEUR", organizationId: org.id, departmentId: aprid.id, functionTitle: "Enseignante-chercheuse" });
   const teacher2 = await createUser({ email: "formateur.demo@ens.ci", firstName: "Serge", lastName: "Kouassi", role: "REQUESTER", organizationId: org.id, departmentId: labo.id, functionTitle: "Formateur" });
 
   // Demande de compte en attente de validation (auto-inscription)
@@ -631,7 +631,7 @@ async function main() {
     ["Responsable de ressource", manager.email],
     ["Validateur", validator.email],
     ["Technicien", technician.email],
-    ["Enseignant (demandeur)", teacher.email],
+    ["Enseignante-chercheuse", teacher.email],
     ["Formateur (demandeur)", teacher2.email],
     ["Documentaliste (Library)", documentalist.email],
     ["Déposant (Library)", depositor.email],

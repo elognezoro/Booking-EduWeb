@@ -309,7 +309,7 @@ model User {
 model Role {
   id             String  @id @default(cuid())
   organizationId String?
-  key            String  // SUPER_ADMIN | ORG_ADMIN | RESOURCE_MANAGER | VALIDATOR | REQUESTER | TECHNICIAN | VISITOR
+  key            String  // clé de rôle applicative — liste complète : ROLES dans lib/enums.ts (12 rôles)
   name           String
   description    String?
   color          String?

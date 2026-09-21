@@ -12,7 +12,8 @@ export async function GET() {
 
   const lines = [
     "prenom,nom,email,fonction,role,matricule",
-    "Awa,Koné,awa.kone@institution.ci,Enseignante,REQUESTER,",
+    "Awa,Koné,awa.kone@institution.ci,Enseignante-chercheuse,ENSEIGNANT_CHERCHEUR,",
+    "Adjoua,Kouamé,adjoua.kouame@institution.ci,Secrétaire,REQUESTER,",
     "Koffi,Yao,koffi.yao@institution.ci,Responsable des salles,RESOURCE_MANAGER,",
     "Aya,Traoré,aya.traore@ens.ci,Étudiante,READER,23-B-P17498IPS/SP",
     "Moussa,Diallo,moussa.diallo@ens.ci,Étudiant,READER,23-A-P17500SVT/SP",

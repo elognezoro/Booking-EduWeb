@@ -7,13 +7,15 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ROLES } from "@/lib/enums";
+import { PERMISSIONS } from "@/lib/permissions";
 
 export const metadata: Metadata = { title: "Fonctionnalités" };
 
 const FEATURES = [
   { icon: Boxes, t: "Ressources configurables", d: "Catégories libres avec champs dynamiques : salles, matériels, véhicules, documents, services." },
   { icon: CalendarCheck, t: "Calendrier multi-vues", d: "Jour, semaine, mois, par ressource ou par service. Code couleur par statut." },
-  { icon: ShieldCheck, t: "Rôles & permissions fines", d: "7 rôles prédéfinis, 24 permissions. L'interface masque ce qui n'est pas autorisé." },
+  { icon: ShieldCheck, t: "Rôles & permissions fines", d: `${ROLES.length} rôles prédéfinis, ${PERMISSIONS.length} permissions. L'interface masque ce qui n'est pas autorisé.` },
   { icon: Layers, t: "Workflows de validation", d: "Automatique, simple, hiérarchique, multi-niveaux ou conditionnelle." },
   { icon: Bell, t: "Notifications e-mail", d: "Accusés de réception, validations, refus, rappels et alertes." },
   { icon: BarChart3, t: "Statistiques & KPI", d: "Taux d'occupation, ressources saturées, temps moyen de validation." },

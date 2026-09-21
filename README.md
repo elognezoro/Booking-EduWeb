@@ -14,7 +14,7 @@ et espaces. Application web SaaS multi-organisation, généraliste et extensible
 
 - 🏠 **Site public** moderne : accueil, fonctionnalités, tarifs, démo, contact.
 - 🔐 **Authentification** par e-mail/mot de passe (JWT sécurisé, sessions httpOnly).
-- 🛡️ **7 rôles & 25 permissions** — l'interface masque ce qui n'est pas autorisé (RBAC).
+- 🛡️ **12 rôles & 37 permissions** — l'interface masque ce qui n'est pas autorisé (RBAC).
 - 🏛️ **Multi-organisation** : sites, services, isolation des données par `organizationId`.
 - 📦 **Ressources génériques & configurables** : catégories, champs, règles de réservation.
 - 📅 **Réservation en étapes** avec détection de conflits et suggestion de créneau alternatif.
@@ -76,7 +76,8 @@ Mot de passe commun : **`password123`**
 | Responsable de ressource | `responsable.salles@ens.ci` |
 | Validateur | `validateur.aprid@ens.ci` |
 | Technicien | `technicien.aprid@ens.ci` |
-| Utilisateur demandeur | `enseignant.demo@ens.ci` |
+| Enseignant-chercheur | `enseignant.demo@ens.ci` |
+| Utilisateur demandeur | `formateur.demo@ens.ci` |
 | Bibliothécaire / Documentaliste | `documentaliste.aprid@ens.ci` |
 | Déposant (bibliothèque) | `deposant.demo@ens.ci` |
 | Validateur scientifique | `validateur.scientifique@ens.ci` |

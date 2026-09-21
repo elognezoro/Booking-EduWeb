@@ -13,7 +13,7 @@ export const TRAINING_CONTENT: TrainingContent = {
       },
       {
         "titre": "Public visé",
-        "texte": "Ce support s'adresse à l'ensemble des utilisateurs de la plateforme, du gestionnaire de la plateforme jusqu'au lecteur occasionnel. EduWeb Booking distingue onze rôles, chacun disposant d'un périmètre de permissions précis : « Super Administrateur EduWeb » (supervision de la plateforme et des organisations abonnées), « Administrateur d'organisation » (paramétrage et pilotage d'un établissement), « Responsable de ressource » (gestion de ses ressources et validation des demandes associées), « Validateur hiérarchique » (approbation des demandes de réservation), « Utilisateur demandeur » (réservation et suivi des demandes), « Technicien / agent d'appui » (traitement des incidents et de la maintenance des ressources), « Visiteur externe » (consultation limitée et accès public au Sport cérébral), puis quatre rôles propres à la bibliothèque : « Bibliothécaire / Documentaliste » (chaîne de traitement documentaire : vérification, validation, publication ou archivage des dépôts), « Déposant » (dépôt de ressources documentaires et suivi de leur statut), « Validateur scientifique » (avis scientifique sur un mémoire, un article ou un rapport) et « Lecteur interne » (consultation du fonds documentaire autorisé de son organisation). Chaque utilisateur ne voit, dans la barre latérale, que les menus correspondant aux permissions de son rôle."
+        "texte": "Ce support s'adresse à l'ensemble des utilisateurs de la plateforme, du gestionnaire de la plateforme jusqu'au lecteur occasionnel. EduWeb Booking distingue douze rôles, chacun disposant d'un périmètre de permissions précis : « Super Administrateur EduWeb » (supervision de la plateforme et des organisations abonnées), « Administrateur d'organisation » (paramétrage et pilotage d'un établissement), « Responsable de ressource » (gestion de ses ressources et validation des demandes associées), « Validateur hiérarchique » (approbation des demandes de réservation), « Utilisateur demandeur » (réservation et suivi des demandes), « Enseignant-chercheur » (réservation des ressources pédagogiques, dépôt de publications scientifiques et avis d'expert), « Technicien / agent d'appui » (traitement des incidents et de la maintenance des ressources), « Visiteur externe » (consultation limitée et accès public au Sport cérébral), puis quatre rôles propres à la bibliothèque : « Bibliothécaire / Documentaliste » (chaîne de traitement documentaire : vérification, validation, publication ou archivage des dépôts), « Déposant » (dépôt de ressources documentaires et suivi de leur statut), « Validateur scientifique » (avis scientifique sur un mémoire, un article ou un rapport) et « Lecteur interne » (consultation du fonds documentaire autorisé de son organisation). Chaque utilisateur ne voit, dans la barre latérale, que les menus correspondant aux permissions de son rôle."
       },
       {
         "titre": "Périmètre fonctionnel",
@@ -86,7 +86,7 @@ export const TRAINING_CONTENT: TrainingContent = {
       },
       {
         "terme": "Rôle",
-        "definition": "Profil attribué à un utilisateur, déterminant ses permissions et les menus visibles. La plateforme compte onze rôles, du « Super Administrateur EduWeb » au « Lecteur interne ». La matrice des droits est consultable dans « Rôles & permissions »."
+        "definition": "Profil attribué à un utilisateur, déterminant ses permissions et les menus visibles. La plateforme compte douze rôles, du « Super Administrateur EduWeb » au « Lecteur interne ». La matrice des droits est consultable dans « Rôles & permissions »."
       },
       {
         "terme": "Permission",
@@ -193,7 +193,7 @@ export const TRAINING_CONTENT: TrainingContent = {
       "Disposer d'un compte EduWeb Booking actif et de ses identifiants (l'espace public « Sport cérébral » étant, lui, accessible sans connexion).",
       "Savoir utiliser un navigateur web récent depuis un poste connecté à Internet.",
       "Maîtriser les manipulations de base : connexion, glisser-déposer de fichiers, saisie dans des formulaires.",
-      "Connaître le rôle qui vous a été attribué dans votre établissement (parmi les 11 rôles de la plateforme).",
+      "Connaître le rôle qui vous a été attribué dans votre établissement (parmi les 12 rôles de la plateforme).",
       "Pour les parcours « Administration » et « Supervision plateforme » : disposer respectivement des droits d'administrateur d'organisation ou de super administrateur.",
       "Avoir reçu le mot de passe initial « password123 » (à remplacer dès la première connexion).",
       "Pour la formation certifiante CERTEL : être connecté à la plateforme (aucun prérequis de niveau ; un diagnostic de niveau gratuit oriente vers le niveau adapté) et, lorsqu'un tarif est défini par le super administrateur, s'être acquitté de l'inscription au niveau visé par Mobile Money (Wave, Orange Money, MTN, Moov) ou carte bancaire."
@@ -201,7 +201,7 @@ export const TRAINING_CONTENT: TrainingContent = {
     "finalite": "À l'issue de la formation, chaque participant est autonome dans l'usage d'EduWeb Booking pour les missions relevant de son rôle : réserver et gérer des ressources (salles, équipements, salles multimédias avec plan de postes), participer à la chaîne de validation des réservations, exploiter et alimenter la bibliothèque numérique (dépôt, validation documentaire, consultation, téléchargement, réservation et emprunt), s'exercer sur l'espace public « Sport cérébral », rejoindre ou — pour les profils habilités — organiser une compétition, et, pour les rôles concernés, administrer un établissement ou superviser l'ensemble de la plateforme multi-établissements (Gouvernement → Ministères → Établissements, abonnements et formules). Tout utilisateur connecté peut en outre accéder à la formation certifiante CERTEL au numérique et à l'intelligence artificielle (tableau de bord → « Principal » → « Formation CERTEL », ou menu public « CERTEL ») : après un diagnostic de niveau gratuit, il suit l'un des trois niveaux de six modules — leçons illustrées avec lecture audio, exercices auto-corrigés à vérification immédiate et évaluations chronométrées — puis présente l'évaluation certifiante (projet de synthèse, examen dont les corrigés s'affichent à la fin et mise en situation) pour obtenir, en cas de réussite, un certificat au format PDF paysage. La formation vise une utilisation conforme, tracée, sécurisée et accessible de l'application, ainsi que la montée en compétences numériques et en intelligence artificielle des utilisateurs.",
     "objectifsGeneraux": [
       {
-        "objectif": "Identifier l'architecture multi-établissements (Gouvernement → Ministères → Établissements), les 11 rôles, la structure « Organisation › Site › Service › Ressources » et l'organisation de la barre latérale (« Principal », « Gestion », « Bibliothèque », « Administration », « Plateforme », « Aide »), y compris l'accès à la « Formation CERTEL » depuis la section « Principal ».",
+        "objectif": "Identifier l'architecture multi-établissements (Gouvernement → Ministères → Établissements), les 12 rôles, la structure « Organisation › Site › Service › Ressources » et l'organisation de la barre latérale (« Principal », « Gestion », « Bibliothèque », « Administration », « Plateforme », « Aide »), y compris l'accès à la « Formation CERTEL » depuis la section « Principal ».",
         "niveauBloom": "Connaître"
       },
       {
@@ -1143,6 +1143,47 @@ export const TRAINING_CONTENT: TrainingContent = {
         ]
       },
       {
+        "roleKey": "ENSEIGNANT_CHERCHEUR",
+        "duree": "3 h : 1 h 30 sur la réservation des ressources pédagogiques (assistant, salles multimédias, suivi), 1 h 30 sur la bibliothèque numérique (consultation, dépôt de publications, avis scientifique).",
+        "prerequis": [
+          "Disposer d'un compte actif portant le rôle « Enseignant-chercheur » et avoir changé le mot de passe initial « password123 ».",
+          "Exercer une activité d'enseignement et de recherche dans l'établissement (cours, TD, séminaires, encadrement, publications).",
+          "Savoir se connecter et naviguer dans les sections « Principal », « Gestion », « Bibliothèque » et « Aide » de la barre latérale.",
+          "Comprendre la différence entre l'avis scientifique (regard d'expert sur le fond) et le contrôle documentaire (métadonnées, codification, publication) assuré par le bibliothécaire / documentaliste.",
+          "Avoir identifié les ressources utiles à ses enseignements (salles, salles multimédias, matériels) et ses publications à déposer."
+        ],
+        "objectifs": [
+          "Réserver une ressource pédagogique avec l'assistant en six étapes (« Catégorie », « Ressource », « Motif », « Créneau », « Détails », « Confirmation ») et vérifier la disponibilité d'un créneau.",
+          "Réserver des postes dans une salle multimédia (plan des postes en temps réel, « Réserver des postes » ou « Réserver la salle ») pour un TD ou un cours.",
+          "Suivre ses réservations dans « Calendrier » et « Mes réservations » et en gérer le cycle de vie (« Je suis arrivé », « Activité terminée », « Annuler la réservation »).",
+          "Explorer la bibliothèque numérique, consulter un document en ligne, le télécharger lorsque c'est autorisé et copier sa référence APA via « Citer ce document ».",
+          "Déposer une publication scientifique avec l'assistant « Déposer » en sept étapes et suivre sa validation depuis la fiche du dépôt (« Historique & avis ») et la cloche de notifications.",
+          "Émettre un avis scientifique motivé (« Favorable » ou « Réservé ») sur un document de son institution via l'encadré « Validation documentaire »."
+        ],
+        "competences": [
+          "Planifier ses enseignements et ses travaux de recherche en réservant les ressources adaptées (salles, postes informatiques, matériels).",
+          "Exploiter le fonds documentaire numérique pour nourrir ses cours et ses recherches (recherche, filtres, consultation filigranée, citation APA).",
+          "Valoriser sa production scientifique en la déposant dans la bibliothèque de l'établissement avec des métadonnées soignées.",
+          "Conduire une expertise scientifique structurée et formuler un avis argumenté, daté et traçable dans l'« Historique & avis ».",
+          "Situer son double périmètre (réservation + bibliothèque) et coopérer avec le validateur des réservations et le documentaliste sans empiéter sur leurs rôles."
+        ],
+        "atelier": [
+          "Repérer dans la barre latérale les sections accessibles (« Principal », « Gestion » : « Ressources » ; « Bibliothèque » : « Bibliothèque », « Explorer », « Déposer », « Documents », « Réservations doc. » ; « Aide ») et constater l'absence des menus de validation et d'administration.",
+          "Réserver une salle pour un cours : « + Nouvelle réservation », choisir la catégorie puis la ressource, renseigner le « Motif », « Vérifier la disponibilité », soumettre la demande et retrouver le message de confirmation.",
+          "Réserver des postes dans une salle multimédia depuis « Salles multimédias » (postes verts libres, postes rouges occupés), puis suivre la demande dans « Mes réservations ».",
+          "Rechercher un document dans « Explorer », le lire via « Consulter », copier sa référence APA via « Citer ce document » et réserver un exemplaire physique via « Réserver / Emprunter ».",
+          "Déposer un article scientifique avec l'assistant « Déposer » (renseigner « Revue » et « DOI » à l'étape « Fichier »), puis vérifier son statut sur la fiche du dépôt, ouverte après la soumission ou depuis la cloche de notifications.",
+          "Émettre un avis scientifique sur un document de son institution (« Avis scientifique » → « Favorable » ou « Réservé » + « Commentaire » → « Enregistrer l'avis ») et le retrouver dans l'« Historique & avis »."
+        ],
+        "evaluation": [
+          "Mise en situation : réserver une salle multimédia pour un TD (postes sélectionnés sur le plan) — critère : demande soumise avec le message « Votre demande de réservation a été enregistrée. ».",
+          "Mise en situation : déposer une publication complète (type, métadonnées, auteurs, résumé, fichier, droits) — critère : fiche du dépôt affichant le statut « Soumis », ouverte depuis la confirmation de dépôt ou la cloche de notifications.",
+          "Mise en situation : émettre un avis scientifique motivé sur un document de son institution — critère : avis enregistré et visible dans l'« Historique & avis ».",
+          "Contrôle de compréhension : distinguer ce qui relève de l'enseignant-chercheur (réserver, déposer, expertiser) de ce qui relève du validateur hiérarchique et du documentaliste.",
+          "Auto-évaluation : réussir le quiz du rôle dans « Formation » avec au moins 70 % de bonnes réponses."
+        ]
+      },
+      {
         "roleKey": "READER",
         "duree": "2 heures : 45 min de présentation, 1 h 15 d'atelier pratique de consultation et de réservation.",
         "prerequis": [
@@ -1766,7 +1807,7 @@ export const TRAINING_CONTENT: TrainingContent = {
         {
           "phase": "Accueil et objectifs",
           "duree": "15 min",
-          "activite": "Présenter EduWeb Booking et ses trois volets (réservation de ressources, bibliothèque numérique, espace « Sport cérébral »), situer la hiérarchie Gouvernement › Ministères › Établissements et les abonnements (Pilote / Standard / Premium / National). Énoncer les objectifs de la session avec des verbes d'action (se connecter, paramétrer, réserver, valider, importer). Identifier le rôle de chaque participant parmi les 11 rôles."
+          "activite": "Présenter EduWeb Booking et ses trois volets (réservation de ressources, bibliothèque numérique, espace « Sport cérébral »), situer la hiérarchie Gouvernement › Ministères › Établissements et les abonnements (Pilote / Standard / Premium / National). Énoncer les objectifs de la session avec des verbes d'action (se connecter, paramétrer, réserver, valider, importer). Identifier le rôle de chaque participant parmi les 12 rôles."
         },
         {
           "phase": "Première connexion et sécurisation du compte",

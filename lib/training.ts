@@ -141,6 +141,7 @@ export const ROLE_TRAINING_ORDER: RoleKey[] = [
   "RESOURCE_MANAGER",
   "VALIDATOR",
   "REQUESTER",
+  "ENSEIGNANT_CHERCHEUR",
   "TECHNICIAN",
   "VISITOR",
   "LIBRARIAN",
@@ -153,7 +154,7 @@ export const ROLE_TRAINING_ORDER: RoleKey[] = [
 export const ROLE_FAMILIES: { famille: string; roles: RoleKey[] }[] = [
   { famille: "Pilotage de la plateforme", roles: ["SUPER_ADMIN"] },
   { famille: "Administration d'établissement", roles: ["ORG_ADMIN"] },
-  { famille: "Réservation de ressources", roles: ["RESOURCE_MANAGER", "VALIDATOR", "REQUESTER"] },
+  { famille: "Réservation de ressources", roles: ["RESOURCE_MANAGER", "VALIDATOR", "REQUESTER", "ENSEIGNANT_CHERCHEUR"] },
   { famille: "Appui & maintenance", roles: ["TECHNICIAN"] },
   { famille: "Accès public", roles: ["VISITOR"] },
   { famille: "Bibliothèque numérique", roles: ["LIBRARIAN", "DEPOSITOR", "SCIENTIFIC_VALIDATOR", "READER"] },

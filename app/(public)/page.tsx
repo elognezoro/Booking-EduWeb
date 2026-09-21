@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ROLES } from "@/lib/enums";
+import { PERMISSIONS } from "@/lib/permissions";
 import {
   ArrowRight,
   CalendarCheck,
@@ -248,8 +250,8 @@ export default async function HomePage() {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { n: "9", l: "ressources pilotes" },
-                { n: "7", l: "rôles configurés" },
-                { n: "24", l: "permissions fines" },
+                { n: String(ROLES.length), l: "rôles configurés" },
+                { n: String(PERMISSIONS.length), l: "permissions fines" },
                 { n: "100%", l: "traçabilité" },
               ].map((k) => (
                 <div key={k.l} className="rounded-2xl bg-white/10 p-5 text-center backdrop-blur">

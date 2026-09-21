@@ -172,6 +172,18 @@ export const ROLE_PERMISSIONS: Record<RoleKey, Permission[]> = {
     "documents.download",
     "documents.reserve",
   ],
+  ENSEIGNANT_CHERCHEUR: [
+    "resources.read",
+    "bookings.create",
+    "bookings.read_own",
+    "bookings.cancel_own",
+    "calendar.read",
+    "documents.read",
+    "documents.create",
+    "documents.science_review",
+    "documents.download",
+    "documents.reserve",
+  ],
   TECHNICIAN: [
     "resources.read",
     "bookings.read_all",

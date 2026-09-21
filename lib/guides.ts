@@ -732,6 +732,74 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
       }
     ]
   },
+  "ENSEIGNANT_CHERCHEUR": {
+    "title": "Guide de l'enseignant-chercheur",
+    "intro": "Ce support de formation s'adresse aux utilisateurs dotés du rôle « Enseignant-chercheur » (clé ENSEIGNANT_CHERCHEUR) d'EduWeb Booking. Ce rôle réunit, dans un même profil, les besoins quotidiens de l'enseignement et de la recherche : réserver une salle, une salle multimédia ou du matériel pour vos cours, vos séminaires et vos travaux de recherche, alimenter la bibliothèque numérique en publications scientifiques (articles, mémoires, thèses, rapports), et apporter, lorsque vous êtes sollicité, un avis scientifique motivé sur un document déposé par un pair. L'objectif pédagogique de ce guide est de vous rendre pleinement autonome sur ces trois missions, en citant les libellés exacts des menus et des boutons de l'application. Dans la barre latérale, vous disposez notamment de « Ressources », « Calendrier », « Salles multimédias » et « Mes réservations » (côté réservations), ainsi que de la section « Bibliothèque » (« Bibliothèque », « Explorer », « Déposer », « Documents », « Réservations doc. »). Comme tout utilisateur connecté, vous accédez aussi à CERTEL, la formation certifiante au numérique et à l'intelligence artificielle, via le menu public « CERTEL ». Bon à savoir : sur l'ensemble des formations et des guides, le texte s'affiche dans une taille d'au moins 13 px et un lecteur audio « Écouter » vous permet d'entendre les contenus narratifs.",
+    "can": [
+      "Parcourir le catalogue des ressources de l'établissement depuis « Ressources » (menu « Gestion »), avec recherche et filtres (catégorie, statut, site).",
+      "Réserver une salle, une salle multimédia (postes ou salle entière) ou du matériel pour vos cours et vos travaux de recherche, à l'aide de l'assistant de réservation en six étapes.",
+      "Visualiser vos créneaux dans le « Calendrier » (vue mensuelle), naviguer de mois en mois et ouvrir le détail d'une journée.",
+      "Suivre l'état de vos demandes (en attente, validée, refusée) depuis « Mes réservations », confirmer votre présence (« Je suis arrivé »), clôturer une activité (« Activité terminée ») et annuler une réservation encore à venir.",
+      "Explorer la bibliothèque numérique, consulter les documents autorisés en ligne et les télécharger lorsque c'est permis, afin de nourrir vos enseignements et vos recherches.",
+      "Déposer vos publications scientifiques (article scientifique, mémoire, thèse, rapport, support pédagogique…) avec l'assistant « Déposer » en sept étapes, puis suivre leur validation par le documentaliste.",
+      "Émettre, lorsque vous êtes sollicité, un avis scientifique « Favorable » ou « Réservé » sur un document de votre institution, avec un commentaire argumenté.",
+      "Réserver un document pour une consultation sur place ou un emprunt physique, demander l'accès à un document restreint, et suivre vos demandes dans « Réservations doc. ».",
+      "Vous entraîner sur l'espace « Sport cérébral » (scores, progression, badges, défi du jour) et rejoindre une compétition à l'aide d'un code de session.",
+      "Évaluer gratuitement votre niveau numérique et IA grâce au diagnostic CERTEL, suivre la formation certifiante interactive par niveau (leçons audio, exercices auto-corrigés, évaluations chronométrées) et obtenir un certificat de réussite en PDF.",
+      "Gérer votre compte et changer votre mot de passe depuis « Mon compte », et télécharger ce guide en PDF ou en Word depuis le « Centre d'aide »."
+    ],
+    "sections": [
+      {
+        "title": "Réserver une ressource pour vos cours et vos travaux de recherche",
+        "steps": [
+          "Dans la barre latérale, cliquez sur « + Nouvelle réservation » (ou sur le bouton « Réserver » en haut de l'écran) pour ouvrir l'assistant de réservation en six étapes.",
+          "Étape « Catégorie » : sélectionnez la catégorie de ressource (salle de cours, salle multimédia, matériel, service), puis cliquez sur « Continuer ».",
+          "Étape « Ressource » : choisissez la ressource souhaitée (le nom, le code et, le cas échéant, la capacité et le lieu sont affichés), puis « Continuer » ; pour repérer une salle avant de réserver, vous pouvez aussi passer par « Ressources » (menu « Gestion ») ou par « Salles multimédias » (menu « Principal »), qui affiche le plan des postes en temps réel.",
+          "Étape « Motif » : renseignez l'« Intitulé » (par exemple le nom du cours ou du projet de recherche), le « Type d'usage », l'« Effectif / participants » et le « Motif » (seul le « Motif » est obligatoire), puis « Continuer ».",
+          "Étape « Créneau » : indiquez la « Date de début », l'« Heure de début », la « Date de fin » et l'« Heure de fin », puis cliquez sur « Vérifier la disponibilité » ; si le créneau est occupé, appliquez le « Créneau proposé » ou corrigez vos dates.",
+          "Pour une salle multimédia, choisissez entre « Réserver des postes » (cliquez sur les postes verts du plan pour les sélectionner) et « Réserver toute la salle ».",
+          "Étape « Détails » : précisez les « Besoins spécifiques » (vidéoprojecteur, logiciels, visioconférence…), cochez « J'ai besoin d'une assistance technique » si nécessaire, ajoutez une « Note pour le validateur », puis « Continuer ».",
+          "Étape « Confirmation » : vérifiez le récapitulatif, puis cliquez sur « Soumettre la demande » ; le message « Votre demande de réservation a été enregistrée. » confirme l'envoi, et la décision du validateur vous parvient via la cloche de notifications."
+        ]
+      },
+      {
+        "title": "Déposer une publication scientifique dans la bibliothèque",
+        "steps": [
+          "Dans la section « Bibliothèque » de la barre latérale, cliquez sur « Déposer » (ou sur le bouton « Déposer » présent en haut des pages « Bibliothèque », « Explorer » et « Documents ») : l'assistant « Déposer une ressource » en sept étapes s'ouvre.",
+          "Étape « Type » : choisissez le type de document (Article scientifique, Mémoire, Thèse, Rapport, Support pédagogique…), sélectionnez la « Collection » et le « Domaine » (tous deux obligatoires), puis cliquez sur « Continuer ».",
+          "Étape « Métadonnées » : saisissez le « Titre » (obligatoire, au moins 3 caractères), puis si besoin l'« Année », la « Langue », les « Pages » et le « Niveau / diplôme (mémoire, thèse…) ».",
+          "Étape « Auteurs » : renseignez l'« Auteur principal » (obligatoire), les « Co-auteurs (séparés par des virgules) » et, le cas échéant, le « Directeur / encadreur ».",
+          "Étape « Résumé » : rédigez le « Résumé » et indiquez les « Mots-clés (séparés par des virgules) » — soignez-les : ils conditionnent la visibilité de votre publication dans les recherches.",
+          "Étape « Fichier » : joignez le fichier (PDF recommandé ; formats acceptés PDF, DOC, DOCX, ODT, PPT, PPTX, EPUB) — il est facultatif au dépôt et pourra être ajouté plus tard ; pour un article scientifique, complétez les champs « Revue » et « DOI » qui apparaissent.",
+          "Étape « Droits » : choisissez le « Niveau d'accès », cochez ou non « Autoriser le téléchargement du fichier », indiquez les « Exemplaires physiques disponibles » et le « Prix de téléchargement (FCFA) » (0 = gratuit).",
+          "Étape « Vérification » : contrôlez le récapitulatif puis cliquez sur « Soumettre le dépôt » ; un code provisoire est attribué et le message « Votre dépôt a été enregistré et soumis à validation. » confirme l'envoi.",
+          "Suivez ensuite votre dépôt depuis sa fiche — ouverte automatiquement après la soumission, puis accessible via la cloche de notifications : la rubrique « Historique & avis » détaille les décisions du documentaliste (validation, publication, demande de correction) ; votre document rejoint les listes « Documents » et « Explorer » une fois validé ou publié."
+        ]
+      },
+      {
+        "title": "Émettre un avis scientifique lorsque vous êtes sollicité",
+        "steps": [
+          "En tant qu'enseignant-chercheur, vous pouvez être sollicité pour expertiser le fond d'un mémoire, d'un article ou d'un rapport déposé dans la bibliothèque de votre institution ; votre avis éclaire le documentaliste, qui reste seul chargé du cycle documentaire (validation, codification, publication).",
+          "Retrouvez le document concerné depuis « Explorer » (recherche « Titre, auteur, mot-clé, code… » et filtres) ou depuis « Documents » (vue en tableau avec code et statut).",
+          "Sur la fiche, examinez le « Résumé », le bloc « Métadonnées » et les « Mots-clés », puis cliquez sur « Consulter » dans l'encadré « Accès au document » pour lire le texte intégral à l'écran ; si le téléchargement est autorisé, utilisez « Télécharger » pour l'étudier hors ligne.",
+          "Repérez l'encadré « Validation documentaire » et cliquez sur le bouton « Avis scientifique » ; il n'apparaît que pour les documents de votre propre institution.",
+          "Dans la fenêtre « Avis scientifique », choisissez la « Décision » (champ obligatoire) en cochant « Favorable » (sélectionné par défaut) ou « Réservé », puis motivez votre position dans le champ « Commentaire » (facultatif mais vivement recommandé).",
+          "Cliquez sur « Enregistrer l'avis » : votre avis apparaît aussitôt dans l'« Historique & avis » du document, à votre nom et daté, sous la mention « Avis scientifique favorable » ou « Avis scientifique réservé »."
+        ]
+      },
+      {
+        "title": "Suivre vos réservations et vos demandes documentaires",
+        "steps": [
+          "Dans le menu « Principal », ouvrez « Calendrier » : la vue mensuelle affiche vos réservations jour par jour ; cliquez sur « Aujourd'hui » pour revenir au mois en cours, ou sur une journée pour en ouvrir le détail.",
+          "Ouvrez « Mes réservations » : vos demandes sont classées en « À venir » et « Historique » ; utilisez la barre de recherche et le filtre « Tous les statuts » pour retrouver une demande précise.",
+          "Cliquez sur une réservation pour ouvrir sa fiche (« Détails de la réservation », « Motif & besoins », « Suivi de la demande »).",
+          "Une fois la demande validée et le créneau arrivé, cliquez sur « Je suis arrivé » dans le panneau « Actions », puis, à la fin de l'activité, sur « Activité terminée ».",
+          "Pour renoncer à une réservation encore à venir, cliquez sur « Annuler la réservation », puis confirmez : le créneau est alors libéré pour vos collègues.",
+          "Côté bibliothèque, suivez vos demandes documentaires (consultation sur place, emprunt physique, demande d'accès) dans « Réservations doc. » : chaque demande passe de « En attente » à « Approuvée » ou « Refusée », et la cloche de notifications vous prévient de chaque décision."
+        ]
+      }
+    ]
+  },
   "TECHNICIAN": {
     "title": "Guide du technicien / agent d'appui",
     "intro": "",
