@@ -9,8 +9,9 @@ import { NAV_SECTIONS, type NavItem } from "./nav-config";
 import { cn } from "@/lib/utils";
 
 function isVisible(item: NavItem, perms: Set<string>) {
-  if (item.flag) return perms.has(item.flag); // jeton serveur (ex. responsable d'entité)
-  if (!item.permission) return true;
+  // Jeton serveur (ex. responsable d'entité, surveillant de salle) : suffit à ouvrir l'item.
+  if (item.flag && perms.has(item.flag)) return true;
+  if (!item.permission) return !item.flag; // item à jeton seul : visible uniquement via le jeton
   const list = Array.isArray(item.permission) ? item.permission : [item.permission];
   return list.some((p) => perms.has(p));
 }

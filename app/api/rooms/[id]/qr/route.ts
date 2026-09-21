@@ -3,13 +3,17 @@ import QRCode from "qrcode";
 import { prisma } from "@/lib/prisma";
 import { APP_URL } from "@/lib/mail";
 
+/** QR d'émargement d'une salle multimédia : pointe vers la page publique d'arrivée. */
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  const doc = await prisma.documentResource.findUnique({ where: { id: params.id }, select: { id: true } });
-  if (!doc) return NextResponse.json({ error: "Document introuvable." }, { status: 404 });
+  const salle = await prisma.resource.findFirst({
+    where: { id: params.id, category: { code: "SM" } },
+    select: { id: true },
+  });
+  if (!salle) return NextResponse.json({ error: "Salle introuvable." }, { status: 404 });
 
-  const target = `${APP_URL}/dashboard/library/documents/${doc.id}`;
+  const target = `${APP_URL}/salles/${salle.id}/emargement`;
   const png = await QRCode.toBuffer(target, {
-    width: 240,
+    width: 480,
     margin: 1,
     color: { dark: "#064B3A", light: "#FFFFFF" },
   });

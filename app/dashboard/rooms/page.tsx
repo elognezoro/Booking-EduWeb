@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MonitorPlay, CalendarPlus, Users, CheckCircle2, AlertTriangle, DoorOpen } from "lucide-react";
+import { MonitorPlay, CalendarPlus, Users, CheckCircle2, AlertTriangle, DoorOpen, ClipboardCheck } from "lucide-react";
 import { requirePermission, getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSeatMap } from "@/lib/booking-rules";
@@ -12,6 +12,7 @@ import { SeatMap, SeatLegend } from "@/components/rooms/seat-map";
 import { ResourceStatusBadge } from "@/components/status-badges";
 import { AddRoomButton } from "@/components/rooms/add-room-button";
 import { RoomManageBar } from "@/components/rooms/room-manage-bar";
+import { RoomSupervisorsButton } from "@/components/rooms/room-supervisors-button";
 
 export const dynamic = "force-dynamic";
 
@@ -23,10 +24,39 @@ export default async function RoomsPage({ searchParams }: { searchParams: { adde
   const canUpdate = user!.permissions.has("resources.update");
   const canDelete = user!.permissions.has("resources.delete");
 
+  const orgId = user!.organizationId ?? "";
   const rooms = await prisma.resource.findMany({
-    where: { organizationId: user!.organizationId ?? "", category: { code: "SM" }, status: { not: "ARCHIVED" } },
+    where: { organizationId: orgId, category: { code: "SM" }, status: { not: "ARCHIVED" } },
     orderBy: { name: "asc" },
+    include: { supervisors: { include: { user: { select: { id: true, firstName: true, lastName: true, department: { select: { name: true } } } } } } },
   });
+
+  // Candidats surveillants : agents actifs de la sous-direction de rattachement de chaque salle.
+  const [allDepts, orgAgents] = canUpdate
+    ? await Promise.all([
+        prisma.department.findMany({ where: { organizationId: orgId }, select: { id: true, parentId: true } }),
+        prisma.user.findMany({
+          where: { organizationId: orgId, status: "ACTIVE" },
+          select: { id: true, firstName: true, lastName: true, departmentId: true, department: { select: { name: true } } },
+          orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
+        }),
+      ])
+    : [[], []];
+  const childrenOf = new Map<string | null, string[]>();
+  for (const d of allDepts) {
+    const list = childrenOf.get(d.parentId) ?? [];
+    list.push(d.id);
+    childrenOf.set(d.parentId, list);
+  }
+  const subtreeOf = (rootId: string) => {
+    const out = new Set<string>([rootId]);
+    const stack = [rootId];
+    while (stack.length) {
+      const cur = stack.pop()!;
+      for (const child of childrenOf.get(cur) ?? []) if (!out.has(child)) { out.add(child); stack.push(child); }
+    }
+    return out;
+  };
 
   const now = new Date();
   const roomsWithSeats = await Promise.all(
@@ -44,7 +74,18 @@ export default async function RoomsPage({ searchParams }: { searchParams: { adde
         title="Salles multimédias — plan des postes"
         description="Disponibilité des postes en temps réel. Cliquez sur « Réserver » pour choisir vos postes."
         icon={<span className="inline-flex size-11 items-center justify-center rounded-2xl bg-primary-50 text-primary"><MonitorPlay className="size-6" /></span>}
-        actions={canManage && <AddRoomButton />}
+        actions={
+          (canManage || canUpdate) && (
+            <div className="flex flex-wrap gap-2">
+              {canUpdate && (
+                <Button asChild variant="outline">
+                  <Link href="/dashboard/rooms/registre"><ClipboardCheck className="size-4" /> Registre de présence</Link>
+                </Button>
+              )}
+              {canManage && <AddRoomButton />}
+            </div>
+          )
+        }
       />
 
       {searchParams.added && <Banner tone="ok">Salle ajoutée avec succès.</Banner>}
@@ -96,6 +137,22 @@ export default async function RoomsPage({ searchParams }: { searchParams: { adde
                     <Button asChild variant="outline" className="w-full">
                       <Link href={`/dashboard/bookings/new?resourceId=${room.id}&mode=room`}><DoorOpen className="size-4" /> Réserver la salle</Link>
                     </Button>
+                  </div>
+                )}
+
+                {canUpdate && (
+                  <div className="mt-3 w-full">
+                    <RoomSupervisorsButton
+                      room={{ id: room.id, name: room.name }}
+                      supervisors={room.supervisors.map((s) => ({ id: s.user.id, name: `${s.user.firstName} ${s.user.lastName}`, dept: s.user.department?.name ?? null }))}
+                      candidates={(() => {
+                        const scope = room.departmentId ? subtreeOf(room.departmentId) : null;
+                        const already = new Set(room.supervisors.map((s) => s.userId));
+                        return orgAgents
+                          .filter((a) => !already.has(a.id) && (!scope || (a.departmentId && scope.has(a.departmentId))))
+                          .map((a) => ({ id: a.id, name: `${a.firstName} ${a.lastName}`, dept: a.department?.name ?? null }));
+                      })()}
+                    />
                   </div>
                 )}
 

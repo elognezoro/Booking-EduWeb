@@ -17,7 +17,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ? await prisma.organization.findMany({ orderBy: [{ isPlatform: "desc" }, { name: "asc" }], select: { id: true, name: true, isPlatform: true } })
     : [];
 
-  const [pending, libraryReview, accountRequests, notifications, unread, headOf] = await Promise.all([
+  const [pending, libraryReview, accountRequests, notifications, unread, headOf, supervisorOf] = await Promise.all([
     user.permissions.has("bookings.validate")
       ? prisma.booking.count({
           where: { ...orgFilter, status: { in: ["SUBMITTED", "PENDING_VALIDATION"] } },
@@ -41,6 +41,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     user.organizationId
       ? prisma.department.count({ where: { organizationId: user.organizationId, headId: user.id } })
       : Promise.resolve(0),
+    // Surveillant de salle multimédia (salles actives de son établissement) → « Registre des salles ».
+    user.organizationId
+      ? prisma.roomSupervisor.count({
+          where: { userId: user.id, resource: { organizationId: user.organizationId, status: { not: "ARCHIVED" } } },
+        })
+      : Promise.resolve(0),
   ]);
 
   const inactivityMinutes = await getInactivityLogoutMinutes();
@@ -57,7 +63,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
         firstName: user.firstName,
         lastName: user.lastName,
       }}
-      permissions={[...Array.from(user.permissions), ...(headOf > 0 ? ["entity.head"] : [])]}
+      permissions={[
+        ...Array.from(user.permissions),
+        ...(headOf > 0 ? ["entity.head"] : []),
+        ...(supervisorOf > 0 ? ["room.supervisor"] : []),
+      ]}
       counts={{ pending, libraryReview, accountRequests }}
       institutionSwitcher={
         institutions.length > 0 ? <InstitutionSwitcher institutions={institutions} activeOrgId={user.organizationId} /> : undefined

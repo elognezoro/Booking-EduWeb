@@ -82,6 +82,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Boxes,
     items: [
       { label: "Ressources", href: "/dashboard/resources", icon: Boxes, permission: "resources.read" },
+      { label: "Registre des salles", href: "/dashboard/rooms/registre", icon: UserCheck, permission: "resources.update", flag: "room.supervisor" },
       { label: "Habilitations", href: "/dashboard/habilitations", icon: KeyRound, flag: "entity.head" },
       { label: "Catégories", href: "/dashboard/resource-categories", icon: Tags, permission: "resource_categories.manage" },
       { label: "Réservations", href: "/dashboard/bookings", icon: ClipboardList, permission: "bookings.read_all", exact: true },

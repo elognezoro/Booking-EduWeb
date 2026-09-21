@@ -300,6 +300,7 @@ model User {
   headOf           Department[]        @relation("DepartmentHead")
   roles            UserRole[]
   managedResources Resource[]          @relation("ResourceManager")
+  supervisedRooms  RoomSupervisor[]    @relation("SupervisedRooms")
   bookings         Booking[]           @relation("BookingRequester")
   validations      BookingValidation[]
   notifications    Notification[]
@@ -413,6 +414,69 @@ model Resource {
   bookings     Booking[]
   incidents    Incident[]
   maintenances Maintenance[]
+  visits       RoomVisit[]
+  supervisors  RoomSupervisor[]
+  openings     RoomOpening[]
+}
+
+// Ouverture / fermeture d'une salle multimédia par son surveillant, horodatées et
+// géolocalisées (position GPS captée par le téléphone au moment de l'action).
+model RoomOpening {
+  id             String    @id @default(cuid())
+  organizationId String
+  resourceId     String
+  openedById     String
+  openedAt       DateTime  @default(now())
+  openLat        Float?
+  openLng        Float?
+  openAccuracy   Float? // précision GPS (mètres)
+  closedById     String?
+  closedAt       DateTime?
+  closeLat       Float?
+  closeLng       Float?
+  closeAccuracy  Float?
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId, openedAt])
+  @@index([organizationId, openedAt])
+}
+
+// Surveillants affectés à une salle multimédia (plusieurs possibles par salle) :
+// choisis parmi les agents de la sous-direction en charge des salles, ils reçoivent
+// les notifications d'arrivée et tiennent le registre de présence.
+model RoomSupervisor {
+  resourceId String
+  userId     String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user       User     @relation("SupervisedRooms", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, userId])
+}
+
+// Registre de présence des salles multimédias : émargement à l'arrivée (QR code
+// affiché dans la salle, champs du formulaire APRID), départ pointé par le surveillant.
+model RoomVisit {
+  id             String    @id @default(cuid())
+  organizationId String
+  resourceId     String
+  userId         String? // compte connecté au moment du flash (auto-remplissage)
+  studentId      String? // fiche étudiante retrouvée (matricule)
+  lastName       String
+  firstName      String
+  gender         String? // HOMME | FEMME
+  statut         String // ETUDIANT | ENSEIGNANT | PAT
+  matricule      String?
+  filiere        String? // filière (référentiel CFI)
+  section        String? // discipline / spécialité
+  arrivedAt      DateTime  @default(now())
+  leftAt         DateTime?
+  recordedById   String? // surveillant ayant pointé le départ
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, resourceId, arrivedAt])
+  @@index([resourceId, leftAt])
 }
 
 model Booking {

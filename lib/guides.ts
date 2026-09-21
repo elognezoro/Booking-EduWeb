@@ -423,6 +423,20 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
         ]
       },
       {
+        "title": "Tenir le registre de présence des salles (QR d'émargement)",
+        "steps": [
+          "Sur la page « Salles multimédias », cliquez sur « Surveillants » au bas de la carte d'une salle : affectez-lui un ou plusieurs surveillants, choisis parmi les agents de la sous-direction en charge des salles (chaque agent affecté est prévenu par notification et e-mail, et peut être retiré d'un clic sur la croix).",
+          "Sur la page « Salles multimédias », cliquez sur « Registre de présence » (ou ouvrez « Registre des salles » dans la section « Gestion » de la barre latérale) : la page liste les personnes actuellement en salle et le journal des passages de la journée.",
+          "Cliquez sur « Affiches QR » puis imprimez le document : une page par salle, avec le QR code d'émargement à placarder à l'entrée de la salle correspondante.",
+          "À son arrivée, l'occupant flashe le QR avec son téléphone : le formulaire d'émargement s'ouvre (nom, prénoms, genre, statut, filière) — pré-rempli automatiquement s'il est connecté à son compte, fiche étudiante comprise — et son heure d'arrivée est horodatée par la plateforme.",
+          "À chaque arrivée, les surveillants affectés à la salle sont avertis par la cloche de notifications et par e-mail (à défaut : le responsable désigné de la salle, sinon les responsables de ressources, sinon les administrateurs de l'établissement).",
+          "Lorsque la personne quitte la salle, ouvrez le registre, retrouvez-la sous « Présents actuellement » et cliquez sur « Départ » : l'heure de départ et la durée de présence sont enregistrées.",
+          "Dans « Ouverture & fermeture des salles », le surveillant clique sur « Ouvrir la salle » en arrivant et « Fermer la salle » en partant : l'heure est horodatée et sa position GPS est captée automatiquement par son téléphone (avec son accord) — chaque session du jour garde l'ouverture, la fermeture et les positions.",
+          "Utilisez les filtres « Salle » et « Journée » pour consulter l'historique ; chaque passage conserve l'arrivée, le départ et la durée.",
+          "La section « Statistiques d'exploitation » (période réglable, 30 derniers jours par défaut) totalise passages, visiteurs uniques, durée moyenne et temps de présence cumulé, avec la répartition par statut, les filières les plus représentées et le détail par salle — un surveillant simple agent accède au registre pour ses seules salles, tandis que chaque utilisateur retrouve ses propres passages sur « Mon compte »."
+        ]
+      },
+      {
         "title": "Rendre une ressource indisponible (maintenance, panne)",
         "steps": [
           "Dans le menu « Gestion », ouvrez « Ressources », ouvrez la fiche de la ressource concernée, puis cliquez sur « Modifier ».",
