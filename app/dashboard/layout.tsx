@@ -17,7 +17,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     ? await prisma.organization.findMany({ orderBy: [{ isPlatform: "desc" }, { name: "asc" }], select: { id: true, name: true, isPlatform: true } })
     : [];
 
-  const [pending, libraryReview, accountRequests, notifications, unread] = await Promise.all([
+  const [pending, libraryReview, accountRequests, notifications, unread, headOf] = await Promise.all([
     user.permissions.has("bookings.validate")
       ? prisma.booking.count({
           where: { ...orgFilter, status: { in: ["SUBMITTED", "PENDING_VALIDATION"] } },
@@ -37,6 +37,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
       take: 8,
     }),
     prisma.notification.count({ where: { userId: user.id, readAt: null, status: { not: "READ" } } }),
+    // Responsable d'entité (Department.headId) → débloque l'espace « Habilitations ».
+    user.organizationId
+      ? prisma.department.count({ where: { organizationId: user.organizationId, headId: user.id } })
+      : Promise.resolve(0),
   ]);
 
   const inactivityMinutes = await getInactivityLogoutMinutes();
@@ -53,7 +57,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         firstName: user.firstName,
         lastName: user.lastName,
       }}
-      permissions={Array.from(user.permissions)}
+      permissions={[...Array.from(user.permissions), ...(headOf > 0 ? ["entity.head"] : [])]}
       counts={{ pending, libraryReview, accountRequests }}
       institutionSwitcher={
         institutions.length > 0 ? <InstitutionSwitcher institutions={institutions} activeOrgId={user.organizationId} /> : undefined

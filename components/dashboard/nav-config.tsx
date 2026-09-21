@@ -40,6 +40,7 @@ import {
   BookOpenCheck,
   SlidersHorizontal,
   ScrollText,
+  KeyRound,
   type LucideIcon,
 } from "lucide-react";
 import type { Permission } from "@/lib/permissions";
@@ -49,6 +50,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   permission?: Permission | Permission[]; // visible si l'une des permissions est accordée
+  flag?: string; // jeton serveur hors permissions (ex. "entity.head" = responsable d'entité)
   badge?: "pending" | "notifications" | "libraryReview" | "accountRequests";
   exact?: boolean;
 }
@@ -80,6 +82,7 @@ export const NAV_SECTIONS: NavSection[] = [
     icon: Boxes,
     items: [
       { label: "Ressources", href: "/dashboard/resources", icon: Boxes, permission: "resources.read" },
+      { label: "Habilitations", href: "/dashboard/habilitations", icon: KeyRound, flag: "entity.head" },
       { label: "Catégories", href: "/dashboard/resource-categories", icon: Tags, permission: "resource_categories.manage" },
       { label: "Réservations", href: "/dashboard/bookings", icon: ClipboardList, permission: "bookings.read_all", exact: true },
       { label: "À valider", href: "/dashboard/bookings/pending", icon: ClipboardCheck, permission: "bookings.validate", badge: "pending" },

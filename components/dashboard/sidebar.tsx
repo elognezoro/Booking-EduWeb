@@ -9,6 +9,7 @@ import { NAV_SECTIONS, type NavItem } from "./nav-config";
 import { cn } from "@/lib/utils";
 
 function isVisible(item: NavItem, perms: Set<string>) {
+  if (item.flag) return perms.has(item.flag); // jeton serveur (ex. responsable d'entité)
   if (!item.permission) return true;
   const list = Array.isArray(item.permission) ? item.permission : [item.permission];
   return list.some((p) => perms.has(p));

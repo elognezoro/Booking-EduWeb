@@ -37,6 +37,9 @@ const ACTIONS: Record<string, { label: string; tone: Tone }> = {
   SCOLARITE_ACCOUNT_CREATE: { label: "Compte étudiant créé", tone: "available" },
   SCOLARITE_ACCOUNT_LINK: { label: "Compte étudiant relié", tone: "info" },
   SCOLARITE_ACCOUNT_SELF: { label: "Compte étudiant auto-activé", tone: "available" },
+  // ---- Habilitations (responsables d'entité) ----
+  HABILITATION_GRANT: { label: "Habilitation attribuée", tone: "available" },
+  HABILITATION_REVOKE: { label: "Habilitation retirée", tone: "unavailable" },
 };
 
 interface Details {
@@ -48,6 +51,8 @@ interface Details {
   fullName?: string; matricule?: string | null; department?: string; section?: string;
   year?: number; academicYear?: string; de?: string; vers?: string;
   diplomes?: number; passages?: number; ignores?: number;
+  // Habilitations
+  role?: string; membre?: string; entite?: string; responsable?: string;
 }
 
 /** Résumé lisible d'une entrée du journal (à partir du JSON old/new). */
@@ -55,6 +60,10 @@ function summarize(v: Details): string {
   const parts: string[] = [];
   if (v.kind === "INCOME") parts.push("Encaissement");
   if (v.kind === "EXPENSE") parts.push("Dépense");
+  if (v.membre) parts.push(v.membre);
+  if (v.role) parts.push(`rôle « ${v.role} »`);
+  if (v.entite) parts.push(`entité ${v.entite}`);
+  if (v.responsable) parts.push(`par ${v.responsable}`);
   if (v.fullName) parts.push(v.fullName);
   if (v.matricule) parts.push(String(v.matricule));
   if (v.section) parts.push(v.section);
@@ -90,7 +99,7 @@ export default async function FinancesAuditPage({ searchParams }: { searchParams
   const logs = await prisma.auditLog.findMany({
     where: actionFilter
       ? { action: actionFilter }
-      : { OR: [{ action: { startsWith: "FINANCE_" } }, { action: { startsWith: "SCOLARITE_" } }] },
+      : { OR: [{ action: { startsWith: "FINANCE_" } }, { action: { startsWith: "SCOLARITE_" } }, { action: { startsWith: "HABILITATION_" } }] },
     orderBy: { createdAt: "desc" },
     take: 300,
   });
@@ -114,8 +123,8 @@ export default async function FinancesAuditPage({ searchParams }: { searchParams
         <ArrowLeft className="size-4" /> Supervision EduWeb
       </Link>
       <PageHeader
-        title="Traçabilité finances & scolarité"
-        description="Journal rigoureux des encaissements, dépenses, règlements, enrôlements, promotions et suppressions — visible uniquement par l'administrateur système."
+        title="Traçabilité finances, scolarité & habilitations"
+        description="Journal rigoureux des encaissements, dépenses, règlements, enrôlements, promotions, suppressions et habilitations déléguées — visible uniquement par l'administrateur système."
         icon={<span className="inline-flex size-11 items-center justify-center rounded-2xl bg-advanced-soft text-advanced-fg"><ScrollText className="size-6" /></span>}
       />
 

@@ -27,7 +27,7 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
       "Configurer l'espace Sport cérébral : disponibilité de chaque jeu (Ouvert à tous, Connexion requise, Abonnement requis, Indisponible) avec conditions de temps (période, plage horaire, jours), sélection « découverte » pour les non-abonnés, banque de questions, ordre, consignes et audio des jeux.",
       "Tenir les finances par espaces cloisonnés (institution et sous-directions) : encaissements avec reçus numérotés envoyés par e-mail, dépenses, facturation interne, caisses et catégories, journal et tableau de bord.",
       "Gérer la Scolarité : enrôler les étudiants selon les filières réelles du CFI (formation en deux années), importer les listes par CSV, effectuer les passages d'année et créer les comptes de connexion.",
-      "Consulter la « Traçabilité », réservée à l'administrateur système : journal complet des opérations financières et de scolarité, avec auteur, horodatage et instantané des suppressions.",
+      "Consulter la « Traçabilité », réservée à l'administrateur système : journal complet des opérations financières, de scolarité et des habilitations déléguées par les responsables d'entité, avec auteur, horodatage et instantané des suppressions.",
       "Consulter et purger le journal des diagnostics CERTEL, avec suppression en sélection multiple.",
       "Définir les tarifs et remises des trois niveaux de formation CERTEL, accorder ou révoquer un accès manuellement, et suivre le journal des inscriptions et paiements (Mobile Money — Wave, Orange Money, MTN, Moov — ou carte bancaire).",
       "Régler le comportement des évaluations de toutes les formations : vérification immédiate des réponses en mode formatif, et affichage des corrigés des évaluations sommatives à la fin de l'examen.",
@@ -170,11 +170,11 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
         ]
       },
       {
-        "title": "Consulter la traçabilité (finances & scolarité)",
+        "title": "Consulter la traçabilité (finances, scolarité & habilitations)",
         "steps": [
           "Dépliez « Plateforme » puis ouvrez « Traçabilité » : cette page vous est strictement réservée — même un gestionnaire disposant de tous les droits Finances ou Scolarité ne peut pas la consulter.",
           "Chaque opération y figure avec son auteur (nom et e-mail), l'horodatage à la seconde, l'établissement, l'espace concerné et un résumé lisible (numéros de pièces, montants, campagnes…).",
-          "Filtrez par type d'opération grâce aux pastilles : écriture créée ou supprimée, règlement encaissé, facture annulée, enrôlement CSV, passage d'année, fiches purgées, reçus envoyés… ; les 300 opérations les plus récentes sont affichées.",
+          "Filtrez par type d'opération grâce aux pastilles : écriture créée ou supprimée, règlement encaissé, facture annulée, enrôlement CSV, passage d'année, fiches purgées, reçus envoyés, « Habilitation attribuée » et « Habilitation retirée » (rôle délégué par un responsable d'entité, avec le membre, l'entité et le responsable) ; les 300 opérations les plus récentes sont affichées.",
           "Retenez que les suppressions conservent l'instantané complet de l'élément effacé : une écriture ou une fiche étudiante supprimée reste intégralement reconstituable depuis ce journal, qui n'est pas modifiable."
         ]
       },
@@ -275,6 +275,15 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
           "Sous « Ajouter des agents », utilisez le champ de recherche puis cochez les personnes souhaitées ; le bouton « Tout sélectionner » coche d'un coup la liste filtrée.",
           "Cliquez sur « Ajouter (N) » pour rattacher en une fois tous les agents cochés ; vous pouvez choisir des membres de l'établissement comme des personnes inscrites « sans institution » (elles sont alors rattachées à votre établissement).",
           "Dans la liste « Agents », retirez une personne avec la croix en bout de ligne ; sous « Responsable », sélectionnez l'agent à désigner comme responsable du service (le changement est enregistré immédiatement)."
+        ]
+      },
+      {
+        "title": "Déléguer des habilitations aux responsables d'entité",
+        "steps": [
+          "Tout agent désigné « Responsable » d'une entité (sous-direction, service, filière…) voit apparaître l'entrée « Habilitations » dans la section « Gestion » de sa barre latérale : il peut y attribuer ou retirer des rôles aux membres de son périmètre (son entité et toute sa descendance).",
+          "La délégation est bornée automatiquement : un responsable ne peut accorder que des rôles dont il détient déjà tous les droits (aucune élévation), jamais les rôles Administrateur d'organisation ou Super Administrateur, et chaque membre conserve toujours au moins un rôle.",
+          "Chaque attribution ou retrait notifie le membre concerné (cloche et e-mail) et s'inscrit au journal de traçabilité de la plateforme, où l'administrateur système garde une vue complète des habilitations déléguées ; de votre côté, la page « Utilisateurs » reflète à tout moment les rôles effectifs de chaque membre.",
+          "Pour activer ou révoquer cette capacité, il vous suffit de désigner ou de changer le « Responsable » de l'entité dans la fenêtre « Membres » de « Sites & services » — aucun autre réglage n'est nécessaire."
         ]
       },
       {

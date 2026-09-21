@@ -236,7 +236,7 @@ export const ROLE_TRAINING: Record<RoleKey, RoleTraining> = {
         "objective": "Vous saurez désigner responsables et agents d'un service, puis créer des comptes un par un ou par cohorte CSV.",
         "content": [
           "Dans « Sites & services », cliquez sur l'icône représentant des personnes en regard d'un service pour ouvrir la fenêtre « Membres ».",
-          "Sous « Ajouter des agents », recherchez et cochez les personnes (le bouton « Tout sélectionner » coche la liste filtrée), cliquez « Ajouter (N) », puis sous « Responsable » désignez l'agent responsable du service.",
+          "Sous « Ajouter des agents », recherchez et cochez les personnes (le bouton « Tout sélectionner » coche la liste filtrée), cliquez « Ajouter (N) », puis sous « Responsable » désignez l'agent responsable du service — ce responsable obtient alors l'espace « Habilitations » (section « Gestion ») pour déléguer des rôles aux membres de son périmètre, sans élévation de droits.",
           "Pour un compte individuel, ouvrez « Utilisateurs », remplissez dans « Nouvel utilisateur » le « Prénom », le « Nom », l'« E-mail » (et au besoin la « Fonction »), choisissez le « Rôle » (tous sauf Super Administrateur) et le « Service », puis cliquez « Créer l'utilisateur » (mot de passe par défaut « password123 »).",
           "Pour une cohorte, repérez « Import par cohorte (CSV) », cliquez « Télécharger le modèle CSV » et complétez les colonnes prenom, nom, email, fonction, role, matricule.",
           "Glissez-déposez le fichier dans la zone prévue puis cliquez « Importer » ; la colonne « role » accepte la clé (ex. RESOURCE_MANAGER) ou le libellé, une valeur vide ou inconnue donnant « Demandeur », et les comptes importés sont créés actifs avec « password123 ».",

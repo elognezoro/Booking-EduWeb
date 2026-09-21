@@ -1,6 +1,7 @@
-import { HelpCircle, BookOpenCheck, LifeBuoy, Download, GraduationCap, FileText, ChevronDown, Library } from "lucide-react";
+import { HelpCircle, BookOpenCheck, LifeBuoy, Download, GraduationCap, FileText, ChevronDown, Library, KeyRound } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,10 @@ export default async function HelpPage() {
   // Les administrateurs (système ou d'établissement) accèdent aux guides de TOUS les rôles.
   const canSeeAllGuides = user.permissions.has("users.manage");
   const allRoles = (ROLES as readonly RoleKey[]).filter((r) => r in ROLE_GUIDES);
+  // Responsable d'entité → encart vers l'espace « Habilitations ».
+  const isEntityHead = user.organizationId
+    ? (await prisma.department.count({ where: { organizationId: user.organizationId, headId: user.id } })) > 0
+    : false;
 
   return (
     <div className="formation-scope space-y-6">
@@ -78,6 +83,24 @@ export default async function HelpPage() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Responsable d'entité : délégation d'habilitations */}
+      {isEntityHead && (
+        <Card className="border-primary/30 bg-primary-50/40">
+          <CardContent className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground"><KeyRound className="size-6" /></span>
+              <div>
+                <h3 className="font-bold text-foreground">Vous êtes responsable d'entité</h3>
+                <p className="text-sm text-muted-foreground">Attribuez ou retirez des rôles aux membres de votre périmètre (votre entité et sa descendance) — sans élévation de droits, avec notification et traçabilité.</p>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Button asChild><Link href="/dashboard/habilitations"><KeyRound className="size-4" /> Ouvrir les habilitations</Link></Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Support de formation académique complet */}

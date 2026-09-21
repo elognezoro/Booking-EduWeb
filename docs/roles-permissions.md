@@ -33,6 +33,17 @@ Catalogue (clé → libellé) défini dans `lib/permissions.ts` :
 `library.manage`, `documents.read|create|review|science_review|download|reserve`, `library.statistics`,
 `finances.read|manage`, `scolarite.read|manage`.
 
+## Habilitations déléguées (responsables d'entité)
+
+En complément de l'administration centrale, tout utilisateur désigné **responsable d'une entité**
+(`Department.headId` — sous-direction, service, filière…) dispose de la page **Gestion › Habilitations**
+(`/dashboard/habilitations`) pour **attribuer ou retirer des rôles** aux membres de son périmètre
+(l'entité et toute sa descendance). Bornes automatiques : jamais les rôles Super Administrateur ou
+Administrateur d'organisation, uniquement des rôles dont le responsable détient déjà tous les droits
+(aucune élévation), un membre conserve toujours au moins un rôle, et chaque opération est notifiée
+au membre et journalisée (actions `HABILITATION_*`, visibles de l'administrateur système sur la page
+Traçabilité).
+
 ## Matrice
 
 La matrice complète (rôle × permission) est consultable et **modifiable** dans l'application :
