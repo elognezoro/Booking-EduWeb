@@ -9,7 +9,7 @@ import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
 import { isEnsMatricule } from "@/lib/utils";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
-import { ENS_DEPARTMENTS } from "@/lib/finances/ens-academics";
+import { ENS_DEPARTMENTS, ENS_FILIERES } from "@/lib/finances/ens-academics";
 import { DEMO_STUDENTS } from "@/lib/finances/demo-students";
 import { currentAcademicYear, nextAcademicYear, normalizeAcademicYear } from "@/lib/scolarite/constants";
 
@@ -288,12 +288,51 @@ export async function deleteStudentsBulk(formData: FormData) {
   redirect(`${BASE}?deleted=${res.count}`);
 }
 
+/* ----------------------------- Affectation à la filière (structure) ----------------------------- */
+
+/**
+ * Garantit que la filière diplômante existe comme SERVICE de la structure de l'institution
+ * (sous le niveau « Centre de la Formation Initiale ») et renvoie son id — pour rattacher
+ * automatiquement chaque étudiant activé à sa filière (User.departmentId).
+ * Créations idempotentes (get-or-create) ; en cas de course, la première fiche trouvée fait foi.
+ */
+async function ensureFiliereDepartmentId(organizationId: string, filiereName: string): Promise<string | null> {
+  const name = filiereName.trim();
+  if (!name) return null;
+  try {
+    // 1) Niveau « Centre de la Formation Initiale » (parentId null).
+    let cfi = await prisma.department.findFirst({
+      where: { organizationId, parentId: null, name: "Centre de la Formation Initiale" },
+      orderBy: { id: "asc" },
+    });
+    if (!cfi) {
+      cfi = await prisma.department.create({
+        data: { organizationId, parentId: null, name: "Centre de la Formation Initiale", code: "CFI" },
+      });
+    }
+    // 2) Service = filière diplômante, sous le CFI.
+    let filiere = await prisma.department.findFirst({
+      where: { organizationId, parentId: cfi.id, name },
+      orderBy: { id: "asc" },
+    });
+    if (!filiere) {
+      const code = ENS_FILIERES.find((f) => f.name === name)?.code ?? null;
+      filiere = await prisma.department.create({ data: { organizationId, parentId: cfi.id, name, code } });
+    }
+    return filiere.id;
+  } catch {
+    return null; // l'affectation ne doit jamais bloquer la création du compte
+  }
+}
+
 /* ----------------------------- Activation en libre-service (public) ----------------------------- */
 
 export interface StudentActivationState {
   error?: string;
   success?: boolean;
   email?: string;
+  /** Un compte existant (même e-mail) a été rattaché à la fiche : mot de passe HABITUEL inchangé. */
+  linked?: boolean;
 }
 
 const VERIFY_TTL_MS = 48 * 60 * 60 * 1000; // 48 h (même durée que l'auto-inscription)
@@ -333,7 +372,76 @@ export async function activateStudentAccount(
   if (student.status !== "ACTIVE") return { error: "Cette fiche n'est plus active. Rapprochez-vous de la Scolarité." };
 
   const existing = await prisma.user.findUnique({ where: { email: em } });
-  if (existing) return { error: "Un compte existe déjà avec cette adresse e-mail — utilisez-en une autre, ou connectez-vous avec celle-ci." };
+  if (existing) {
+    // Étudiant qui s'était déjà créé un compte (au lieu de l'activer) : on RELIE ce compte à sa
+    // fiche — affectation automatique à l'institution et à la filière — sans toucher à son mot
+    // de passe. Refusé seulement si le compte appartient à une AUTRE institution.
+    if (existing.organizationId && existing.organizationId !== student.organizationId) {
+      return { error: "Un compte existe déjà avec cette adresse e-mail dans une autre institution — utilisez une autre adresse ou rapprochez-vous de la Scolarité." };
+    }
+    const deptId = await ensureFiliereDepartmentId(student.organizationId, student.department);
+    const linkedNow = await prisma.student.updateMany({
+      where: { id: student.id, userId: null },
+      data: { userId: existing.id, email: em },
+    });
+    if (linkedNow.count === 0) return { error: "Un compte vient déjà d'être activé pour cette fiche." };
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        ...(existing.organizationId ? {} : { organizationId: student.organizationId }),
+        ...(existing.departmentId || !deptId ? {} : { departmentId: deptId }),
+        ...(existing.matricule ? {} : { matricule: student.matricule }),
+        ...(existing.functionTitle ? {} : { functionTitle: `Étudiant(e)${student.section ? ` — ${student.section}` : ""}` }),
+      },
+    });
+    await audit({
+      organizationId: student.organizationId,
+      userId: existing.id,
+      action: "SCOLARITE_ACCOUNT_LINK",
+      entityType: "Student",
+      entityId: student.id,
+      newValue: { self: true, fullName: student.fullName, matricule: student.matricule, to: em },
+    });
+    if (existing.status === "PENDING") {
+      // Compte jamais confirmé : on réémet un lien de confirmation pour finaliser l'activation.
+      const t = randomBytes(32).toString("hex");
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { emailVerifyToken: t, emailVerifyExpires: new Date(Date.now() + VERIFY_TTL_MS) },
+      });
+      const link = `${APP_URL}/api/auth/verify-email?token=${t}`;
+      await sendNotification({
+        userId: existing.id,
+        to: em,
+        type: "ACCOUNT_VERIFY",
+        subject: "Confirmez votre compte étudiant EduWeb Booking",
+        text: `Votre compte a été rattaché à votre fiche étudiante (matricule ${student.matricule}). Confirmez votre adresse e-mail pour l'activer : ${link}`,
+        html: renderEmail({
+          title: "Confirmez votre adresse e-mail",
+          intro: `Votre compte a été rattaché à votre fiche étudiante (matricule ${student.matricule}). Confirmez votre adresse e-mail pour l'activer — vous vous connecterez ensuite avec le mot de passe choisi lors de votre inscription initiale.`,
+          cta: { label: "Activer mon compte", href: link },
+          footer: "Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.",
+        }),
+      });
+      return { success: true, email: em };
+    }
+    // Compte déjà actif : simple notification de rattachement (identifiants inchangés).
+    await sendNotification({
+      userId: existing.id,
+      to: em,
+      type: "ACCOUNT_VERIFY",
+      subject: "Votre compte a été rattaché à votre fiche étudiante ENS",
+      text: `Votre compte EduWeb Booking a été rattaché à votre fiche étudiante (matricule ${student.matricule}, ${student.department}). Connectez-vous avec votre mot de passe habituel. Si vous n'êtes pas à l'origine de cette demande, contactez la Scolarité.`,
+      html: renderEmail({
+        title: "Compte rattaché à votre fiche étudiante",
+        intro: `Votre compte EduWeb Booking a été rattaché à votre fiche étudiante et affecté à votre institution et à votre filière. Connectez-vous avec votre mot de passe habituel — celui saisi lors du rattachement n'a pas été appliqué.`,
+        rows: [["Matricule", student.matricule ?? "—"], ["Filière", student.department + (student.section ? ` · ${student.section}` : "")]],
+        cta: { label: "Se connecter", href: `${APP_URL}/login` },
+        footer: "Si vous n'êtes pas à l'origine de cette demande, contactez la Scolarité de votre établissement.",
+      }),
+    });
+    return { success: true, email: em, linked: true };
+  }
 
   // Nom de famille en tête (convention des listes « NOM Prénoms »).
   const parts = student.fullName.trim().split(/\s+/);
@@ -342,15 +450,18 @@ export async function activateStudentAccount(
   const role = await prisma.role.findFirst({
     where: { key: "READER", OR: [{ organizationId: student.organizationId }, { organizationId: null }] },
   });
+  // Affectation automatique : institution de la fiche + filière diplômante (service du CFI).
+  const filiereDeptId = await ensureFiliereDepartmentId(student.organizationId, student.department);
   const token = randomBytes(32).toString("hex");
   const created = await prisma.user.create({
     data: {
       email: em,
       firstName,
       lastName,
-      functionTitle: "Étudiant(e)",
+      functionTitle: `Étudiant(e)${student.section ? ` — ${student.section}` : ""}`,
       matricule: student.matricule,
       organizationId: student.organizationId,
+      departmentId: filiereDeptId,
       status: "PENDING",
       passwordHash: await hashPassword(password),
       emailVerifyToken: token,
@@ -408,6 +519,16 @@ export async function createStudentAccount(formData: FormData) {
   const existing = await prisma.user.findUnique({ where: { email: s.email } });
   if (existing) {
     if (existing.organizationId && existing.organizationId !== user.organizationId) redirect(`${BASE}?error=email-autre-org`);
+    // Affectation automatique du compte relié : institution et filière si elles manquent.
+    const linkDeptId = existing.departmentId ? null : await ensureFiliereDepartmentId(user.organizationId, s.department);
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        ...(existing.organizationId ? {} : { organizationId: user.organizationId }),
+        ...(existing.departmentId || !linkDeptId ? {} : { departmentId: linkDeptId }),
+        ...(existing.matricule ? {} : { matricule: s.matricule }),
+      },
+    });
     await prisma.student.update({ where: { id: s.id }, data: { userId: existing.id } });
     await audit({
       organizationId: user.organizationId,
@@ -428,14 +549,17 @@ export async function createStudentAccount(formData: FormData) {
   const role = await prisma.role.findFirst({
     where: { key: "READER", OR: [{ organizationId: user.organizationId }, { organizationId: null }] },
   });
+  // Affectation automatique à la filière diplômante (service du CFI).
+  const filiereDeptId = await ensureFiliereDepartmentId(user.organizationId, s.department);
   const created = await prisma.user.create({
     data: {
       email: s.email,
       firstName,
       lastName,
-      functionTitle: "Étudiant(e)",
+      functionTitle: `Étudiant(e)${s.section ? ` — ${s.section}` : ""}`,
       matricule: s.matricule,
       organizationId: user.organizationId,
+      departmentId: filiereDeptId,
       status: "ACTIVE",
       passwordHash: await hashPassword("password123"),
       roles: role ? { create: { roleId: role.id } } : undefined,

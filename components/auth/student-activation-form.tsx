@@ -28,6 +28,26 @@ function SubmitButton() {
 export function StudentActivationForm() {
   const [state, formAction] = useFormState<StudentActivationState, FormData>(activateStudentAccount, {});
 
+  if (state.success && state.linked) {
+    return (
+      <div className="text-center">
+        <span className="mx-auto mb-4 inline-flex size-16 items-center justify-center rounded-2xl bg-available-soft text-available-fg">
+          <MailCheck className="size-8" />
+        </span>
+        <h1 className="text-2xl font-extrabold text-foreground">Compte rattaché à votre fiche ✅</h1>
+        <p className="mt-3 text-muted-foreground">
+          Un compte existait déjà avec l'adresse {state.email ? <strong className="text-foreground">{state.email}</strong> : "indiquée"} :
+          il a été <strong className="text-foreground">rattaché à votre fiche étudiante</strong> et affecté à votre institution et à votre filière.
+        </p>
+        <p className="mt-2 text-sm font-semibold text-foreground">
+          Connectez-vous avec votre mot de passe habituel — celui saisi à l'instant n'a pas remplacé l'ancien.
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Mot de passe oublié ? Utilisez « Mot de passe oublié ? » sur la page de connexion.</p>
+        <Button asChild size="lg" className="mt-5"><a href="/login">Se connecter</a></Button>
+      </div>
+    );
+  }
+
   if (state.success) {
     return (
       <div className="text-center">
