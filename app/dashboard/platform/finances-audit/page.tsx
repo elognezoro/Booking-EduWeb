@@ -26,6 +26,16 @@ const ACTIONS: Record<string, { label: string; tone: Tone }> = {
   FINANCE_STUDENTS_IMPORT: { label: "Étudiants importés", tone: "info" },
   FINANCE_STUDENTS_DEMO: { label: "Étudiants de démo créés", tone: "neutral" },
   FINANCE_RECEIPT_EMAIL: { label: "Reçu envoyé par e-mail", tone: "info" },
+  // ---- Scolarité (enrôlement des étudiants) ----
+  SCOLARITE_STUDENT_CREATE: { label: "Étudiant enrôlé", tone: "available" },
+  SCOLARITE_STUDENT_DELETE: { label: "Fiche étudiante supprimée", tone: "unavailable" },
+  SCOLARITE_STUDENT_PROMOTE: { label: "Promotion d'année", tone: "info" },
+  SCOLARITE_PROMOTE_ALL: { label: "Passage d'année (masse)", tone: "advanced" },
+  SCOLARITE_STUDENTS_IMPORT: { label: "Enrôlement CSV", tone: "info" },
+  SCOLARITE_STUDENTS_DEMO: { label: "Fiches de démo créées", tone: "neutral" },
+  SCOLARITE_STUDENTS_DELETE: { label: "Fiches étudiantes purgées", tone: "unavailable" },
+  SCOLARITE_ACCOUNT_CREATE: { label: "Compte étudiant créé", tone: "available" },
+  SCOLARITE_ACCOUNT_LINK: { label: "Compte étudiant relié", tone: "info" },
 };
 
 interface Details {
@@ -33,6 +43,10 @@ interface Details {
   name?: string; debtorName?: string; thirdParty?: string; to?: string; amount?: number;
   paidAmount?: number; mode?: string; count?: number; fichier?: string; espace?: string;
   source?: string; ok?: boolean;
+  // Scolarité
+  fullName?: string; matricule?: string | null; department?: string; section?: string;
+  year?: number; academicYear?: string; de?: string; vers?: string;
+  diplomes?: number; passages?: number; ignores?: number;
 }
 
 /** Résumé lisible d'une entrée du journal (à partir du JSON old/new). */
@@ -40,6 +54,15 @@ function summarize(v: Details): string {
   const parts: string[] = [];
   if (v.kind === "INCOME") parts.push("Encaissement");
   if (v.kind === "EXPENSE") parts.push("Dépense");
+  if (v.fullName) parts.push(v.fullName);
+  if (v.matricule) parts.push(String(v.matricule));
+  if (v.section) parts.push(v.section);
+  if (typeof v.year === "number") parts.push(v.year === 1 ? "Première année" : "Deuxième année");
+  if (v.de && v.vers) parts.push(`${v.de} → ${v.vers}`);
+  if (typeof v.passages === "number") parts.push(`${v.passages} passage(s) en 2ᵉ année`);
+  if (typeof v.diplomes === "number") parts.push(`${v.diplomes} diplômé(s)`);
+  if (typeof v.ignores === "number" && v.ignores > 0) parts.push(`${v.ignores} ignoré(s)`);
+  if (v.academicYear) parts.push(`campagne ${v.academicYear}`);
   if (v.number) parts.push(`N° ${v.number}`);
   if (v.invoice) parts.push(`Facture ${v.invoice}${v.entryNumber ? ` → reçu ${v.entryNumber}` : ""}`);
   if (v.label) parts.push(v.label);
@@ -64,7 +87,9 @@ export default async function FinancesAuditPage({ searchParams }: { searchParams
 
   const actionFilter = searchParams.action && searchParams.action in ACTIONS ? searchParams.action : null;
   const logs = await prisma.auditLog.findMany({
-    where: { action: actionFilter ?? { startsWith: "FINANCE_" } },
+    where: actionFilter
+      ? { action: actionFilter }
+      : { OR: [{ action: { startsWith: "FINANCE_" } }, { action: { startsWith: "SCOLARITE_" } }] },
     orderBy: { createdAt: "desc" },
     take: 300,
   });
@@ -88,8 +113,8 @@ export default async function FinancesAuditPage({ searchParams }: { searchParams
         <ArrowLeft className="size-4" /> Supervision EduWeb
       </Link>
       <PageHeader
-        title="Traçabilité finances"
-        description="Journal rigoureux des encaissements, dépenses, règlements et suppressions — visible uniquement par l'administrateur système."
+        title="Traçabilité finances & scolarité"
+        description="Journal rigoureux des encaissements, dépenses, règlements, enrôlements, promotions et suppressions — visible uniquement par l'administrateur système."
         icon={<span className="inline-flex size-11 items-center justify-center rounded-2xl bg-advanced-soft text-advanced-fg"><ScrollText className="size-6" /></span>}
       />
 
