@@ -2,10 +2,12 @@ import Link from "next/link";
 import {
   CalendarDays, Clock, CheckCircle2, ClipboardList, Boxes, Percent, Users, TrendingUp,
   Plus, ArrowRight, Building2, Globe2, AlertTriangle, History, CalendarCheck2,
+  GraduationCap, UserPlus, UserCheck, Wallet,
 } from "lucide-react";
-import { requireUser } from "@/lib/auth";
+import { requireUser, type CurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOrgOverview, getPersonalOverview } from "@/lib/stats";
+import { fmtMoney } from "@/lib/money";
 import { startOfDay, endOfDay } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,8 +51,108 @@ export default async function DashboardPage() {
       </div>
 
       {isSuperAdmin && <SuperAdminSection />}
+      <PilotageSection user={user} />
       {isManager ? <ManagerDashboard organizationId={user.organizationId!} /> : <RequesterDashboard userId={user.id} />}
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Pilotage : activation étudiante, comptes, recettes du mois          */
+/* ------------------------------------------------------------------ */
+async function PilotageSection({ user }: { user: CurrentUser }) {
+  const orgId = user.organizationId;
+  const canScolarite = user.permissions.has("scolarite.read");
+  const canUsers = user.permissions.has("users.manage");
+  const canFinances = user.permissions.has("finances.read");
+  if (!orgId || (!canScolarite && !canUsers && !canFinances)) return null;
+
+  const now = new Date();
+  const d7 = new Date(now.getTime() - 7 * 864e5);
+  const d30 = new Date(now.getTime() - 30 * 864e5);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const isPlatform = user.permissions.has("platform.manage");
+
+  const [actifs, actives, annee1, annee2, new7, new30, pending, recettes] = await Promise.all([
+    canScolarite ? prisma.student.count({ where: { organizationId: orgId, status: "ACTIVE" } }) : 0,
+    canScolarite ? prisma.student.count({ where: { organizationId: orgId, status: "ACTIVE", userId: { not: null } } }) : 0,
+    canScolarite ? prisma.student.count({ where: { organizationId: orgId, status: "ACTIVE", year: 1 } }) : 0,
+    canScolarite ? prisma.student.count({ where: { organizationId: orgId, status: "ACTIVE", year: 2 } }) : 0,
+    canUsers ? prisma.user.count({ where: { organizationId: orgId, createdAt: { gte: d7 } } }) : 0,
+    canUsers ? prisma.user.count({ where: { organizationId: orgId, createdAt: { gte: d30 } } }) : 0,
+    // Comptes en attente de validation : périmètre global pour la plateforme, sinon l'institution.
+    canUsers ? prisma.user.count({ where: { status: "PENDING", ...(isPlatform ? {} : { organizationId: orgId }) } }) : 0,
+    canFinances
+      ? prisma.financeEntry.aggregate({
+          where: { organizationId: orgId, kind: "INCOME", date: { gte: monthStart } },
+          _sum: { amount: true },
+          _count: true,
+        })
+      : null,
+  ]);
+  const taux = actifs > 0 ? Math.round((actives / actifs) * 100) : 0;
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Pilotage</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {canScolarite && (
+          <Card className="flex flex-col p-5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold text-muted-foreground">Activation des comptes étudiants</p>
+              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary"><GraduationCap className="size-5" /></span>
+            </div>
+            <p className="mt-1 text-3xl font-black text-foreground">{taux}%</p>
+            <Progress value={taux} className="mt-2" />
+            <p className="mt-2 text-xs text-muted-foreground">
+              {actives} compte(s) activé(s) sur {actifs} étudiant(s) actif(s) · 1ʳᵉ année : {annee1} · 2ᵉ année : {annee2}
+            </p>
+            <Link href="/dashboard/scolarite" className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-semibold text-primary hover:underline">
+              Ouvrir la Scolarité <ArrowRight className="size-3.5" />
+            </Link>
+          </Card>
+        )}
+        {canUsers && (
+          <Card className="flex flex-col p-5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold text-muted-foreground">Nouveaux comptes créés</p>
+              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700"><UserPlus className="size-5" /></span>
+            </div>
+            <p className="mt-1 text-3xl font-black text-foreground">{new7}</p>
+            <p className="text-xs text-muted-foreground">ces 7 derniers jours · {new30} sur 30 jours</p>
+            <Link href="/dashboard/admin/users" className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-semibold text-primary hover:underline">
+              Voir les utilisateurs <ArrowRight className="size-3.5" />
+            </Link>
+          </Card>
+        )}
+        {canUsers && (
+          <Card className={`flex flex-col p-5 ${pending > 0 ? "border-pending/40 bg-pending-soft/30" : ""}`}>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold text-muted-foreground">Comptes en attente de validation</p>
+              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-pending-soft text-pending-fg"><UserCheck className="size-5" /></span>
+            </div>
+            <p className="mt-1 text-3xl font-black text-foreground">{pending}</p>
+            <p className="text-xs text-muted-foreground">{pending > 0 ? "Action requise : affectez ou refusez ces demandes." : "Aucune demande en attente."}</p>
+            <Link href="/dashboard/admin/account-requests" className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-semibold text-primary hover:underline">
+              Demandes de comptes <ArrowRight className="size-3.5" />
+            </Link>
+          </Card>
+        )}
+        {canFinances && (
+          <Card className="flex flex-col p-5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold text-muted-foreground">Recettes du mois</p>
+              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-available-soft text-available-fg"><Wallet className="size-5" /></span>
+            </div>
+            <p className="mt-1 text-2xl font-black text-foreground">{fmtMoney(recettes?._sum.amount ?? 0)}</p>
+            <p className="text-xs text-muted-foreground">{recettes?._count ?? 0} encaissement(s) ce mois-ci, tous espaces confondus</p>
+            <Link href="/dashboard/finances" className="mt-auto inline-flex items-center gap-1 pt-2 text-xs font-semibold text-primary hover:underline">
+              Ouvrir les Finances <ArrowRight className="size-3.5" />
+            </Link>
+          </Card>
+        )}
+      </div>
+    </section>
   );
 }
 
