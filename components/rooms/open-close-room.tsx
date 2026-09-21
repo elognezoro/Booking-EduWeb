@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useFormStatus } from "react-dom";
-import { DoorOpen, DoorClosed, Loader2, MapPin } from "lucide-react";
+import { DoorOpen, DoorClosed, Loader2, MapPin, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { openRoom, closeRoom } from "@/app/actions/room-attendance";
 
@@ -25,45 +25,62 @@ function ActionButton({ isOpen, locating, onClick }: { isOpen: boolean; locating
 }
 
 /**
- * Bouton « Ouvrir la salle » / « Fermer la salle » du surveillant : au clic, la
- * position GPS est captée automatiquement par le navigateur (avec accord de
- * l'utilisateur), puis l'action est horodatée côté serveur. Si la géolocalisation
- * est refusée ou indisponible, l'action passe quand même (position « non fournie »).
+ * Bouton « Ouvrir la salle » / « Fermer la salle » du surveillant. La position GPS
+ * est OBLIGATOIRE (anti-fraude) : elle est captée automatiquement au clic et, si la
+ * géolocalisation est refusée ou indisponible, l'action n'est PAS envoyée — un
+ * message invite à l'activer puis à réessayer. Le serveur vérifie en plus que la
+ * position tombe dans le périmètre institutionnel configuré.
  */
 export function OpenCloseRoomButton({ roomId, isOpen }: { roomId: string; isOpen: boolean }) {
   const formRef = React.useRef<HTMLFormElement>(null);
   const [locating, setLocating] = React.useState(false);
+  const [gpsError, setGpsError] = React.useState<string | null>(null);
 
-  const submitWith = (coords: GeolocationCoordinates | null) => {
+  const submitWith = (coords: GeolocationCoordinates) => {
     const form = formRef.current;
     if (!form) return;
-    (form.elements.namedItem("lat") as HTMLInputElement).value = coords ? String(coords.latitude) : "";
-    (form.elements.namedItem("lng") as HTMLInputElement).value = coords ? String(coords.longitude) : "";
-    (form.elements.namedItem("accuracy") as HTMLInputElement).value = coords ? String(coords.accuracy) : "";
+    (form.elements.namedItem("lat") as HTMLInputElement).value = String(coords.latitude);
+    (form.elements.namedItem("lng") as HTMLInputElement).value = String(coords.longitude);
+    (form.elements.namedItem("accuracy") as HTMLInputElement).value = String(coords.accuracy);
     form.requestSubmit();
   };
 
   const onClick = () => {
     if (locating) return;
-    if (typeof navigator !== "undefined" && navigator.geolocation) {
-      setLocating(true);
-      navigator.geolocation.getCurrentPosition(
-        (pos) => { setLocating(false); submitWith(pos.coords); },
-        () => { setLocating(false); submitWith(null); },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 }
-      );
-    } else {
-      submitWith(null);
+    setGpsError(null);
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGpsError("Géolocalisation indisponible sur cet appareil : impossible d'enregistrer l'action.");
+      return;
     }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setLocating(false); submitWith(pos.coords); },
+      (err) => {
+        setLocating(false);
+        setGpsError(
+          err.code === err.PERMISSION_DENIED
+            ? "Position obligatoire : autorisez la géolocalisation dans votre navigateur, puis réessayez."
+            : "Position introuvable pour le moment : rapprochez-vous d'une fenêtre ou activez le GPS, puis réessayez."
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 30_000 }
+    );
   };
 
   return (
-    <form ref={formRef} action={isOpen ? closeRoom : openRoom} className="inline-flex">
-      <input type="hidden" name="roomId" value={roomId} />
-      <input type="hidden" name="lat" defaultValue="" />
-      <input type="hidden" name="lng" defaultValue="" />
-      <input type="hidden" name="accuracy" defaultValue="" />
-      <ActionButton isOpen={isOpen} locating={locating} onClick={onClick} />
-    </form>
+    <div className="flex flex-col items-end gap-1">
+      <form ref={formRef} action={isOpen ? closeRoom : openRoom} className="inline-flex">
+        <input type="hidden" name="roomId" value={roomId} />
+        <input type="hidden" name="lat" defaultValue="" />
+        <input type="hidden" name="lng" defaultValue="" />
+        <input type="hidden" name="accuracy" defaultValue="" />
+        <ActionButton isOpen={isOpen} locating={locating} onClick={onClick} />
+      </form>
+      {gpsError && (
+        <p className="flex max-w-64 items-start gap-1 text-right text-xs font-semibold text-unavailable-fg">
+          <AlertCircle className="mt-0.5 size-3.5 shrink-0" /> {gpsError}
+        </p>
+      )}
+    </div>
   );
 }

@@ -98,6 +98,49 @@ export async function updateOrganization(formData: FormData) {
   redirect("/dashboard/admin/organization?saved=1");
 }
 
+/**
+ * Périmètre géographique institutionnel (anti-fraude du pointage des salles) :
+ * point de référence du campus + rayon autorisé. Les deux coordonnées vont ensemble ;
+ * les vider désactive le contrôle de zone (la position GPS reste obligatoire).
+ */
+export async function updateCampusPerimeter(formData: FormData) {
+  const user = await requirePermission("organization.manage");
+  const num = (v: FormDataEntryValue | null, min: number, max: number): number | null => {
+    const n = Number.parseFloat(String(v ?? "").replace(",", "."));
+    return Number.isFinite(n) && n >= min && n <= max ? n : null;
+  };
+  const lat = num(formData.get("campusLat"), -90, 90);
+  const lng = num(formData.get("campusLng"), -180, 180);
+  const radius = num(formData.get("campusRadiusM"), 50, 5000);
+  const latRaw = String(formData.get("campusLat") ?? "").trim();
+  const lngRaw = String(formData.get("campusLng") ?? "").trim();
+  const radiusRaw = String(formData.get("campusRadiusM") ?? "").trim();
+
+  // Valeurs incohérentes (une seule coordonnée, coordonnée invalide, ou rayon hors 50–5000 m) → erreur.
+  const wantsPoint = latRaw !== "" || lngRaw !== "";
+  if (wantsPoint && (lat == null || lng == null)) redirect("/dashboard/admin/organization?error=campus");
+  if (wantsPoint && radiusRaw !== "" && radius == null) redirect("/dashboard/admin/organization?error=campus");
+
+  await prisma.organization.update({
+    where: { id: user.organizationId! },
+    data: {
+      campusLat: wantsPoint ? lat : null,
+      campusLng: wantsPoint ? lng : null,
+      campusRadiusM: wantsPoint ? Math.round(radius ?? 300) : null,
+    },
+  });
+  await audit({
+    organizationId: user.organizationId,
+    userId: user.id,
+    action: "organization.campus",
+    entityType: "Organization",
+    entityId: user.organizationId,
+    newValue: wantsPoint ? { campusLat: lat, campusLng: lng, campusRadiusM: Math.round(radius ?? 300) } : { campus: "désactivé" },
+  });
+  revalidatePath("/dashboard/admin/organization");
+  redirect("/dashboard/admin/organization?saved=1");
+}
+
 /* ----------------------------- Sites & services ----------------------------- */
 export async function createSite(formData: FormData) {
   const user = await requirePermission("sites.manage");

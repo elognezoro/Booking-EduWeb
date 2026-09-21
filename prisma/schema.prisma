@@ -28,6 +28,11 @@ model Organization {
   primaryColor String?  @default("#064B3A")
   status       String   @default("ACTIVE")
   ministryId   String? // ministère de tutelle
+  // Périmètre géographique institutionnel (anti-fraude du pointage des salles) :
+  // position de référence du campus + rayon ; null = périmètre non configuré.
+  campusLat     Float?
+  campusLng     Float?
+  campusRadiusM Int? // rayon autorisé en mètres
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

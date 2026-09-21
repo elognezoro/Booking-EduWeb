@@ -39,7 +39,7 @@ const isIsoDay = (v?: string) => /^\d{4}-\d{2}-\d{2}$/.test(v ?? "");
 export default async function RegistreSallesPage({
   searchParams,
 }: {
-  searchParams: { salle?: string; date?: string; du?: string; au?: string; closed?: string; opened?: string; closedroom?: string; dejaouverte?: string };
+  searchParams: { salle?: string; date?: string; du?: string; au?: string; closed?: string; opened?: string; closedroom?: string; dejaouverte?: string; gps?: string; horszone?: string };
 }) {
   const user = await requireUser();
   const orgId = user.organizationId ?? "";
@@ -47,16 +47,19 @@ export default async function RegistreSallesPage({
   const supervised = await supervisedRoomIds(user);
   if (!isManager && supervised.length === 0) redirect("/dashboard?denied=1");
 
-  const salles = await prisma.resource.findMany({
-    where: {
-      organizationId: orgId,
-      category: { code: "SM" },
-      status: { not: "ARCHIVED" },
-      ...(isManager ? {} : { id: { in: supervised } }),
-    },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const [salles, orgCampus] = await Promise.all([
+    prisma.resource.findMany({
+      where: {
+        organizationId: orgId,
+        category: { code: "SM" },
+        status: { not: "ARCHIVED" },
+        ...(isManager ? {} : { id: { in: supervised } }),
+      },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.organization.findUnique({ where: { id: orgId }, select: { campusLat: true } }),
+  ]);
   const scopeIds = salles.map((s) => s.id);
   const salleFilter = salles.some((s) => s.id === searchParams.salle) ? searchParams.salle : undefined;
   const date = isIsoDay(searchParams.date) ? searchParams.date! : todayIso();
@@ -157,6 +160,16 @@ export default async function RegistreSallesPage({
           Cette salle est déjà ouverte.
         </div>
       )}
+      {searchParams.gps && (
+        <div className="flex items-center gap-2 rounded-xl border border-unavailable/30 bg-unavailable-soft px-4 py-3 text-sm font-semibold text-unavailable-fg">
+          Position GPS obligatoire : autorisez la géolocalisation sur votre appareil, puis recommencez l'ouverture ou la fermeture.
+        </div>
+      )}
+      {searchParams.horszone && (
+        <div className="flex items-center gap-2 rounded-xl border border-unavailable/30 bg-unavailable-soft px-4 py-3 text-sm font-semibold text-unavailable-fg">
+          Action refusée : vous êtes hors du périmètre institutionnel{Number.parseInt(searchParams.horszone, 10) > 0 ? ` (à ${Number.parseInt(searchParams.horszone, 10).toLocaleString("fr-FR")} m du point de référence du campus)` : ""}. L'ouverture et la fermeture d'une salle se font sur place ; la tentative a été consignée.
+        </div>
+      )}
 
       {/* Filtres */}
       <Card>
@@ -185,6 +198,17 @@ export default async function RegistreSallesPage({
           </form>
         </CardContent>
       </Card>
+
+      {isManager && orgCampus?.campusLat == null && (
+        <div className="flex items-start gap-2 rounded-xl border border-pending/30 bg-pending-soft px-4 py-3 text-sm text-foreground">
+          <span className="mt-0.5">⚠️</span>
+          <p>
+            <strong>Périmètre du campus non défini :</strong> la position GPS des surveillants est enregistrée, mais les
+            pointages hors zone ne sont pas encore bloqués.{" "}
+            <Link href="/dashboard/admin/organization" className="font-semibold text-primary hover:underline">Définir le périmètre sur la page Organisation</Link>.
+          </p>
+        </div>
+      )}
 
       {/* Ouverture / fermeture des salles (surveillants, avec position GPS) */}
       <Card>

@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, requireUser } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
 import { normalizeEnsMatricule } from "@/lib/utils";
 import { VISIT_STATUTS, VISIT_STATUT_LABELS as STATUT_LABELS, VISIT_TIME as HEURE, type VisitStatut } from "@/lib/rooms/attendance";
+import { campusOf, checkWithinPerimeter } from "@/lib/rooms/geofence";
 
 const PAGE_REGISTRE = "/dashboard/rooms/registre";
 
@@ -20,6 +22,15 @@ export interface RoomArrivalState {
 
 function esc(v: string) {
   return v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** IP de la requête (signal serveur indépendant du client, pour la détection a posteriori). */
+function requestIp(): string | null {
+  try {
+    return headers().get("x-forwarded-for")?.split(",")[0]?.trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -202,8 +213,46 @@ function parseCoord(v: FormDataEntryValue | null, min: number, max: number): num
 }
 
 /**
+ * Position GPS OBLIGATOIRE (anti-fraude) : sans coordonnées, l'action est refusée ;
+ * si le périmètre institutionnel est configuré (page Organisation), une position
+ * hors zone est refusée et la tentative est journalisée.
+ */
+async function requireCampusPosition(
+  user: { id: string; organizationId: string | null },
+  salle: { id: string; name: string },
+  formData: FormData,
+  back: string
+): Promise<{ lat: number; lng: number; accuracy: number | null }> {
+  const lat = parseCoord(formData.get("lat"), -90, 90);
+  const lng = parseCoord(formData.get("lng"), -180, 180);
+  const accuracy = parseCoord(formData.get("accuracy"), 0, 100_000);
+  if (lat == null || lng == null) redirect(`${back}?gps=1`);
+
+  const org = await prisma.organization.findUnique({
+    where: { id: user.organizationId! },
+    select: { campusLat: true, campusLng: true, campusRadiusM: true },
+  });
+  const campus = org ? campusOf(org) : null;
+  if (campus) {
+    const check = checkWithinPerimeter({ lat, lng, accuracy }, campus);
+    if (!check.ok) {
+      await audit({
+        organizationId: user.organizationId,
+        userId: user.id,
+        action: "room.geofence_denied",
+        entityType: "Resource",
+        entityId: salle.id,
+        newValue: { salle: salle.name, distanceM: check.distanceM, rayonM: campus.radiusM, position: `${lat},${lng}`, ip: requestIp() },
+      });
+      redirect(`${back}?horszone=${check.distanceM}`);
+    }
+  }
+  return { lat, lng, accuracy };
+}
+
+/**
  * Le surveillant « ouvre » la salle : horodatage serveur + position GPS captée par
- * son téléphone au moment de l'action (null si la géolocalisation est refusée).
+ * son téléphone au moment de l'action (OBLIGATOIRE : refusée = action bloquée ; hors périmètre institutionnel = refus consigné).
  */
 export async function openRoom(formData: FormData) {
   const user = await requireUser();
@@ -218,9 +267,7 @@ export async function openRoom(formData: FormData) {
   if (!salle) redirect(back);
   if (!(await canOperateRoom(user, salle.id))) redirect("/dashboard?denied=1");
 
-  const lat = parseCoord(formData.get("lat"), -90, 90);
-  const lng = parseCoord(formData.get("lng"), -180, 180);
-  const accuracy = parseCoord(formData.get("accuracy"), 0, 100_000);
+  const { lat, lng, accuracy } = await requireCampusPosition(user, salle, formData, back);
 
   // Transaction avec verrou sur la salle : deux « Ouvrir » simultanés ne créent qu'une session.
   const opening = await prisma.$transaction(async (tx) => {
@@ -238,7 +285,7 @@ export async function openRoom(formData: FormData) {
     action: "room.open",
     entityType: "Resource",
     entityId: salle.id,
-    newValue: { salle: salle.name, heure: HEURE.format(opening.openedAt), position: lat != null && lng != null ? `${lat},${lng} (±${Math.round(accuracy ?? 0)} m)` : "non fournie" },
+    newValue: { salle: salle.name, heure: HEURE.format(opening.openedAt), position: `${lat},${lng} (±${Math.round(accuracy ?? 0)} m)`, ip: requestIp() },
   });
   revalidatePath(back);
   redirect(`${back}?opened=1`);
@@ -258,26 +305,30 @@ export async function closeRoom(formData: FormData) {
   if (!salle) redirect(back);
   if (!(await canOperateRoom(user, salle.id))) redirect("/dashboard?denied=1");
 
-  const ouverte = await prisma.roomOpening.findFirst({
-    where: { resourceId: salle.id, closedAt: null },
-    orderBy: { openedAt: "desc" },
+  const { lat, lng, accuracy } = await requireCampusPosition(user, salle, formData, back);
+
+  // Transaction avec verrou sur la salle : deux « Fermer » simultanés ne clôturent qu'une fois.
+  const ouverte = await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT "id" FROM "Resource" WHERE "id" = ${salle.id} FOR UPDATE`;
+    const session = await tx.roomOpening.findFirst({
+      where: { resourceId: salle.id, closedAt: null },
+      orderBy: { openedAt: "desc" },
+    });
+    if (!session) return null;
+    await tx.roomOpening.update({
+      where: { id: session.id },
+      data: { closedById: user.id, closedAt: new Date(), closeLat: lat, closeLng: lng, closeAccuracy: accuracy },
+    });
+    return session;
   });
   if (!ouverte) redirect(back);
-
-  const lat = parseCoord(formData.get("lat"), -90, 90);
-  const lng = parseCoord(formData.get("lng"), -180, 180);
-  const accuracy = parseCoord(formData.get("accuracy"), 0, 100_000);
-  await prisma.roomOpening.update({
-    where: { id: ouverte.id },
-    data: { closedById: user.id, closedAt: new Date(), closeLat: lat, closeLng: lng, closeAccuracy: accuracy },
-  });
   await audit({
     organizationId: user.organizationId,
     userId: user.id,
     action: "room.close",
     entityType: "Resource",
     entityId: salle.id,
-    newValue: { salle: salle.name, ouverture: HEURE.format(ouverte.openedAt), fermeture: HEURE.format(new Date()), position: lat != null && lng != null ? `${lat},${lng} (±${Math.round(accuracy ?? 0)} m)` : "non fournie" },
+    newValue: { salle: salle.name, ouverture: HEURE.format(ouverte.openedAt), fermeture: HEURE.format(new Date()), position: `${lat},${lng} (±${Math.round(accuracy ?? 0)} m)`, ip: requestIp() },
   });
   revalidatePath(back);
   redirect(`${back}?closedroom=1`);
