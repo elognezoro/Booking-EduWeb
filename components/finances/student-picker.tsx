@@ -98,8 +98,7 @@ export function StudentPicker({
                     {s.demo && <span className="ml-1.5 rounded bg-pending-soft px-1.5 py-0.5 text-[10px] font-bold uppercase text-pending-fg">démo</span>}
                   </span>
                   <span className="block truncate text-xs text-muted-foreground">
-                    {s.matricule ? `${s.matricule} · ` : ""}{s.section}
-                    {s.year === 1 ? " · 1ʳᵉ année" : s.year === 2 ? " · 2ᵉ année" : ""}
+                    {[s.matricule, s.section, s.year === 1 ? "1ʳᵉ année" : s.year === 2 ? "2ᵉ année" : ""].filter(Boolean).join(" · ")}
                   </span>
                 </span>
               </button>

@@ -1220,6 +1220,10 @@ model Student {
   section        String // section / filière
   year           Int      @default(1) // 1 = Première année, 2 = Deuxième année
   academicYear   String // campagne d'enrôlement, ex. « 2026-2027 »
+  tdGroup        String? // groupe de travaux dirigés (ex. « G1 »), issu des listes officielles
+  gender         String? // M | F (listes officielles)
+  birthDate      String? // date de naissance « JJ/MM/AAAA » telle que fournie par la Scolarité centrale
+  redoublant     Boolean  @default(false)
   email          String?
   phone          String?
   status         String   @default("ACTIVE") // ACTIVE | DIPLOME | ARCHIVE

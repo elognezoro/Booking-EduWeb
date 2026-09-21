@@ -33,17 +33,21 @@ export function StudentForm({ academicYears, defaultAcademicYear }: { academicYe
         <Input id="s-mat" name="matricule" maxLength={40} placeholder={`Ex. ${ENS_MATRICULE_EXAMPLE} (facultatif)`} />
       </div>
       <div>
-        <Label htmlFor="s-dept" required>Département</Label>
+        <Label htmlFor="s-dept" required>Filière</Label>
         <Select id="s-dept" name="department" value={dept} onChange={(e) => onDept(e.target.value)}>
           {ENS_DEPARTMENTS.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
         </Select>
       </div>
-      <div>
-        <Label htmlFor="s-sec" required>Section / filière</Label>
-        <Select id="s-sec" name="section" value={section} onChange={(e) => setSection(e.target.value)}>
-          {sections.map((s) => <option key={s} value={s}>{s}</option>)}
-        </Select>
-      </div>
+      {sections.length > 0 ? (
+        <div>
+          <Label htmlFor="s-sec" required>Discipline / spécialité</Label>
+          <Select id="s-sec" name="section" value={section} onChange={(e) => setSection(e.target.value)}>
+            {sections.map((s) => <option key={s} value={s}>{s}</option>)}
+          </Select>
+        </div>
+      ) : (
+        <input type="hidden" name="section" value="" />
+      )}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <Label htmlFor="s-year" required>Année de formation</Label>
@@ -58,6 +62,7 @@ export function StudentForm({ academicYears, defaultAcademicYear }: { academicYe
           </Select>
         </div>
       </div>
+      <div><Label htmlFor="s-td">Groupe de TD</Label><Input id="s-td" name="tdGroup" maxLength={20} placeholder="Ex. G1 (facultatif)" /></div>
       <div><Label htmlFor="s-email">E-mail</Label><Input id="s-email" name="email" type="email" placeholder="Pour le compte de connexion et les reçus (facultatif)" /></div>
       <div><Label htmlFor="s-phone">Téléphone</Label><Input id="s-phone" name="phone" maxLength={30} placeholder="Facultatif" /></div>
       <Button type="submit" className="w-full"><UserPlus className="size-4" /> Enrôler l'étudiant</Button>

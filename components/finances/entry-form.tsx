@@ -111,11 +111,11 @@ export function EntryForm({
         )}
       </div>
 
-      {/* Cascade ENS : Département → Section/filière (consultation documentaire) */}
+      {/* Cascade ENS : Filière → Discipline/spécialité (consultation documentaire) */}
       {consultation && (
         <div className="space-y-3 rounded-xl border border-primary/20 bg-primary-50/40 p-3">
           <div>
-            <Label htmlFor="deptAcad" required>Département</Label>
+            <Label htmlFor="deptAcad" required>Filière</Label>
             <Select
               id="deptAcad"
               name="deptAcad"
@@ -123,28 +123,30 @@ export function EntryForm({
               value={dept}
               onChange={(e) => { setDept(e.target.value); setSection(""); }}
             >
-              <option value="" disabled>— Choisir un département —</option>
+              <option value="" disabled>— Choisir une filière —</option>
               {ENS_DEPARTMENTS.map((d) => (
                 <option key={d.name} value={d.name}>{d.name}</option>
               ))}
             </Select>
           </div>
-          <div>
-            <Label htmlFor="sectionAcad" required>Section / filière</Label>
-            <Select
-              id="sectionAcad"
-              name="sectionAcad"
-              required
-              value={section}
-              onChange={(e) => setSection(e.target.value)}
-              disabled={!dept}
-            >
-              <option value="" disabled>{dept ? "— Choisir une section —" : "Choisissez d'abord un département"}</option>
-              {sections.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </Select>
-          </div>
+          {(!dept || sections.length > 0) && (
+            <div>
+              <Label htmlFor="sectionAcad" required>Discipline / spécialité</Label>
+              <Select
+                id="sectionAcad"
+                name="sectionAcad"
+                required
+                value={section}
+                onChange={(e) => setSection(e.target.value)}
+                disabled={!dept}
+              >
+                <option value="" disabled>{dept ? "— Choisir une discipline —" : "Choisissez d'abord une filière"}</option>
+                {sections.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Select>
+            </div>
+          )}
         </div>
       )}
 
@@ -210,7 +212,7 @@ export function EntryForm({
             />
             <p className="mt-1 text-xs text-muted-foreground">
               {consultation && (dept || section)
-                ? "Liste filtrée selon le département et la section choisis."
+                ? "Liste filtrée selon la filière et la discipline choisies."
                 : "Recherchez dans la liste des étudiants, ou saisissez librement un nom."}
             </p>
           </>

@@ -56,8 +56,9 @@ export async function createStudent(formData: FormData) {
   const user = await requireScolarite();
   const fullName = txt(formData.get("fullName"), 120);
   const department = txt(formData.get("department"), 120);
+  // Discipline/spécialité optionnelle : certaines filières (Éducateurs, Inspecteurs…) n'en ont pas.
   const section = txt(formData.get("section"), 120);
-  if (!fullName || !department || !section) redirect(`${BASE}?error=invalide`);
+  if (!fullName || !department) redirect(`${BASE}?error=invalide`);
 
   let matricule: string | null = null;
   const rawMat = txt(formData.get("matricule"), 40).toUpperCase();
@@ -77,6 +78,7 @@ export async function createStudent(formData: FormData) {
       section,
       year: yearOf(formData.get("year")),
       academicYear: normalizeAcademicYear(formData.get("academicYear")),
+      tdGroup: txt(formData.get("tdGroup"), 20).toUpperCase() || null,
       email: email(formData.get("email")),
       phone: txt(formData.get("phone"), 30) || null,
     },
@@ -178,6 +180,7 @@ export async function importStudentsCsv(formData: FormData) {
   const iSec = findColumn(header, ["section", "filiere", "filière", "section/filiere", "section / filière"]);
   const iYear = findColumn(header, ["annee", "année", "year", "niveau"]);
   const iMail = findColumn(header, ["email", "e-mail", "mail", "courriel"]);
+  const iTd = findColumn(header, ["td", "groupe", "groupe td", "groupe de td"]);
   if (iName < 0 || iDept < 0) redirect(`${BASE}?error=colonnes`);
 
   const academicYear = normalizeAcademicYear(formData.get("academicYear"));
@@ -194,6 +197,7 @@ export async function importStudentsCsv(formData: FormData) {
   const data: {
     organizationId: string; fullName: string; matricule: string | null;
     department: string; section: string; year: number; academicYear: string; email: string | null;
+    tdGroup: string | null;
   }[] = [];
   for (const row of rows.slice(1)) {
     const fullName = (row[iName] ?? "").trim().slice(0, 120);
@@ -210,10 +214,11 @@ export async function importStudentsCsv(formData: FormData) {
       fullName,
       matricule,
       department: department.slice(0, 120),
-      section: (section || "—").slice(0, 120),
+      section: section.slice(0, 120), // "" = filière sans discipline
       year: iYear >= 0 ? yearOf((row[iYear] ?? "").trim()) : 1,
       academicYear,
       email: iMail >= 0 ? email(row[iMail]) : null,
+      tdGroup: iTd >= 0 ? (row[iTd] ?? "").trim().slice(0, 20).toUpperCase() || null : null,
     });
   }
   if (data.length === 0 && skipped === 0) redirect(`${BASE}?error=csv`);

@@ -149,12 +149,12 @@ export default async function ScolaritePage({
                 <div className="sm:col-span-2 lg:col-span-3">
                   <Input name="q" defaultValue={q} placeholder="Rechercher (nom ou matricule)…" aria-label="Recherche" />
                 </div>
-                <Select name="dept" defaultValue={fDept} aria-label="Département">
-                  <option value="">Tous les départements</option>
+                <Select name="dept" defaultValue={fDept} aria-label="Filière">
+                  <option value="">Toutes les filières</option>
                   {ENS_DEPARTMENTS.map((d) => <option key={d.name} value={d.name}>{d.name}</option>)}
                 </Select>
-                <Select name="section" defaultValue={fSection} aria-label="Section">
-                  <option value="">Toutes les sections</option>
+                <Select name="section" defaultValue={fSection} aria-label="Discipline">
+                  <option value="">Toutes les disciplines</option>
                   {sectionOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                 </Select>
                 <Select name="annee" defaultValue={fYear ? String(fYear) : ""} aria-label="Année">
@@ -186,7 +186,7 @@ export default async function ScolaritePage({
                     <tr className="border-b border-border bg-secondary/40 text-left text-xs uppercase tracking-wide text-muted-foreground">
                       <th className="px-4 py-2.5 font-bold">Étudiant</th>
                       <th className="px-4 py-2.5 font-bold">Matricule</th>
-                      <th className="px-4 py-2.5 font-bold">Département · Section</th>
+                      <th className="px-4 py-2.5 font-bold">Filière · Discipline · TD</th>
                       <th className="px-4 py-2.5 font-bold">Année</th>
                       <th className="px-4 py-2.5 font-bold">Campagne</th>
                       <th className="px-4 py-2.5 font-bold">Statut</th>
@@ -203,8 +203,10 @@ export default async function ScolaritePage({
                         </td>
                         <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-muted-foreground">{s.matricule ?? "—"}</td>
                         <td className="px-4 py-2.5 text-foreground">
-                          {s.department.replace(/^Département (des |de |d')?/i, "")}
-                          <span className="block text-xs text-muted-foreground">{s.section}</span>
+                          {s.department}
+                          <span className="block text-xs text-muted-foreground">
+                            {[s.section, s.tdGroup].filter(Boolean).join(" · ") || "—"}
+                          </span>
                         </td>
                         <td className="whitespace-nowrap px-4 py-2.5">
                           <Badge tone={s.year === 1 ? "info" : "advanced"}>{yearLabel(s.year, true)}</Badge>
