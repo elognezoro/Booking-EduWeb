@@ -24,7 +24,10 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
       "Voir TOUS les comptes en attente, quelle que soit leur institution (y compris ceux inscrits sans institution), et les affecter à un établissement et un rôle, ou les refuser.",
       "Attribuer ou retirer des permissions par rôle dans la matrice « Rôles & permissions » (le rôle Super administrateur et la supervision plateforme restant toujours réservés).",
       "Régler la sécurité des sessions : déconnexion automatique après inactivité (délai en minutes, 0 = désactivé, jusqu'à 480 minutes).",
-      "Configurer l'espace Sport cérébral : verrouillage par abonnement, sélection des jeux offerts, banque de questions, publication, ordre et consignes des jeux.",
+      "Configurer l'espace Sport cérébral : disponibilité de chaque jeu (Ouvert à tous, Connexion requise, Abonnement requis, Indisponible) avec conditions de temps (période, plage horaire, jours), sélection « découverte » pour les non-abonnés, banque de questions, ordre, consignes et audio des jeux.",
+      "Tenir les finances par espaces cloisonnés (institution et sous-directions) : encaissements avec reçus numérotés envoyés par e-mail, dépenses, facturation interne, caisses et catégories, journal et tableau de bord.",
+      "Gérer la Scolarité : enrôler les étudiants selon les filières réelles du CFI (formation en deux années), importer les listes par CSV, effectuer les passages d'année et créer les comptes de connexion.",
+      "Consulter la « Traçabilité », réservée à l'administrateur système : journal complet des opérations financières et de scolarité, avec auteur, horodatage et instantané des suppressions.",
       "Consulter et purger le journal des diagnostics CERTEL, avec suppression en sélection multiple.",
       "Définir les tarifs et remises des trois niveaux de formation CERTEL, accorder ou révoquer un accès manuellement, et suivre le journal des inscriptions et paiements (Mobile Money — Wave, Orange Money, MTN, Moov — ou carte bancaire).",
       "Régler le comportement des évaluations de toutes les formations : vérification immédiate des réponses en mode formatif, et affichage des corrigés des évaluations sommatives à la fin de l'examen.",
@@ -127,10 +130,11 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
       {
         "title": "Configurer l'espace Sport cérébral",
         "steps": [
-          "Ouvrez « Plateforme » puis « Réglages des jeux » : dans « Accès des visiteurs non abonnés », cochez ou décochez « Activer le verrouillage par abonnement » (si désactivé, tous les jeux sont accessibles à tout le monde, y compris les visiteurs anonymes ; les abonnés ont toujours accès à tout).",
-          "Réglez la « Sélection des jeux offerts » (Rotation aléatoire par jour ou Jeux fixes choisis) et, selon le mode, le « Nombre de jeux offerts » ou les jeux cochés, puis cliquez « Enregistrer les réglages » ; le défi du jour reste toujours jouable.",
-          "Depuis « Sport cérébral » (section « Principal »), cliquez « Banque de questions » (bouton réservé au super administrateur) pour ajouter des questions via « Nouvelle question » ou « Importer les questions » par CSV, et les activer, désactiver ou supprimer.",
-          "Cliquez « Gestion des jeux » : utilisez « Publier » / « Masquer », les flèches « Monter » / « Descendre » pour l'ordre, « Enregistrer la consigne » (laissée vide = consigne par défaut) et « Déposer » pour ajouter un audio de consigne (« Retirer l'audio » revient à la synthèse vocale)."
+          "Ouvrez « Plateforme » puis « Réglages des jeux » : dans « Disponibilité de chaque jeu », choisissez pour chacun « Ouvert à tous », « Connexion requise », « Abonnement requis » ou « Indisponible » — le réglage s'enregistre aussitôt et s'applique au hub public comme aux accès directs par lien.",
+          "Dans la carte « Sélection « découverte » », réglez ce qui est offert aux visiteurs non abonnés pour les jeux « Abonnement requis » : verrouillage par abonnement, rotation aléatoire ou jeux fixes choisis, puis cliquez « Enregistrer les réglages » ; le défi du jour reste toujours jouable.",
+          "Depuis « Sport cérébral » (section « Principal »), cliquez « Gestion des jeux » : disponibilité de chaque jeu, ordre (« Monter » / « Descendre »), « Enregistrer la consigne » (vide = consigne par défaut) et audio (« Déposer » / « Retirer l'audio », qui revient à la synthèse vocale).",
+          "Toujours dans « Gestion des jeux », dépliez « Conditions de temps » sur un jeu pour le limiter à une période (dates), une plage horaire quotidienne ou certains jours de la semaine (heure de Côte d'Ivoire) : hors créneau, le jeu est fermé au public avec l'affichage de ses créneaux, et vous y gardez accès pour prévisualiser.",
+          "Cliquez « Banque de questions » pour ajouter des questions (« Nouvelle question » ou import CSV), les activer, les désactiver ou les supprimer."
         ]
       },
       {
@@ -140,6 +144,38 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
           "Parcourez le journal : participant, profil (fonction, structure), score sur 100, niveau attribué et date.",
           "Cliquez « Voir » sur une ligne pour consulter le détail des réponses et de l'évaluation d'un participant.",
           "Pour faire le ménage, cochez une ou plusieurs lignes (ou utilisez la case « Tout sélectionner » de l'en-tête), cliquez « Supprimer la sélection », puis confirmez dans la fenêtre : la suppression est définitive."
+        ]
+      },
+      {
+        "title": "Tenir les finances par espace (institution et sous-directions)",
+        "steps": [
+          "Dépliez la section « Finances » : « Tableau de bord », « Encaissements », « Dépenses », « Facturation », « Journal » et « Paramètres fin. » ; en haut de chaque page, le sélecteur « Espace » (avec recherche rapide) bascule entre l'espace global de l'institution et chaque sous-direction — chaque espace est strictement cloisonné (écritures, caisses, catégories et numérotation propres).",
+          "Commencez par « Paramètres fin. » : créez vos caisses & comptes et vos catégories de recettes et de dépenses (les suggestions proposées se créent en un clic), et définissez le logo de la sous-direction qui apparaîtra sur les reçus à côté de celui de l'institution.",
+          "Dans « Encaissements », choisissez le « Libellé » dans la liste des catégories : « Consultation documentaire » ouvre la cascade Filière → Discipline et propose 10 000 FCFA par défaut ; le « Payeur » se recherche dans la liste des étudiants enrôlés (le matricule remplit automatiquement le « N° de pièce ») et, si son e-mail est renseigné, le reçu numéroté lui est envoyé automatiquement à l'enregistrement.",
+          "Cliquez « Reçu » sur une écriture pour ouvrir le document imprimable : en-tête aux deux logos, numéro d'identification unique (REC-année-0001), montant en chiffres et en toutes lettres, mention COMPTABILITE au-dessus de la signature ; le renvoi par e-mail est possible depuis cette page.",
+          "Dans « Facturation », créez des factures internes (FAC-…) et encaissez-les en un ou plusieurs règlements — chaque règlement génère son reçu — ou annulez-les ; « Journal » et « Tableau de bord » donnent la vue d'ensemble (évolution sur 12 mois, soldes par mode de paiement, impayés).",
+          "Retenez que les suppressions sont encadrées : une caisse ou une catégorie utilisée par des écritures ne peut être que désactivée, les recettes CERTEL synchronisées ne sont pas supprimables, et « Paramètres fin. » permet d'importer les paiements CERTEL dans l'espace plateforme."
+        ]
+      },
+      {
+        "title": "Gérer la Scolarité : enrôler les étudiants (deux années)",
+        "steps": [
+          "Dépliez « Scolarité » puis ouvrez « Étudiants & enrôlement » : la formation à l'ENS d'Abidjan dure deux années (Première et Deuxième année) ; les indicateurs comptent les actifs par année et les diplômés.",
+          "Filtrez la liste par recherche (nom ou matricule), filière et discipline (référentiel réel du Centre de la Formation Initiale : Professeurs de Lycée, de Collège, de CAFOP, Éducateurs, Inspecteurs, Conseillers…), année de formation, statut et campagne académique (ex. 2026-2027).",
+          "Pour enrôler un étudiant, remplissez « Nouvel étudiant » (nom, matricule au format ENS, filière → discipline, année, campagne, groupe de TD, e-mail) puis cliquez « Enrôler l'étudiant ».",
+          "Pour une promotion entière, utilisez « Enrôlement par CSV » : glissez-déposez le fichier (colonnes nom, matricule, departement, section, annee, email — « Modèle CSV » téléchargeable), choisissez la campagne, puis « Importer » ; les matricules déjà enrôlés sont ignorés, sans doublon possible.",
+          "Gérez le cycle de formation : « 2ᵉ année » fait passer un étudiant de Première en Deuxième année, « Diplômer » clôt son parcours, et « Effectuer le passage d'année » traite toute l'institution en une fois (les 2ᵉ année deviennent Diplômés, les 1ʳᵉ passent en 2ᵉ sur la campagne suivante).",
+          "Cliquez « Compte » sur une fiche disposant d'un e-mail pour créer — ou relier — son compte de connexion (rôle Lecteur, mot de passe initial « password123 ») ; les étudiants actifs alimentent automatiquement la liste des payeurs du module Finances.",
+          "Avant l'enrôlement réel, purgez les éventuelles fiches de démonstration (« Supprimer les fiches de démonstration ») ; « Vider tout l'enrôlement » reste disponible en dernier recours, et toutes les opérations sont tracées."
+        ]
+      },
+      {
+        "title": "Consulter la traçabilité (finances & scolarité)",
+        "steps": [
+          "Dépliez « Plateforme » puis ouvrez « Traçabilité » : cette page vous est strictement réservée — même un gestionnaire disposant de tous les droits Finances ou Scolarité ne peut pas la consulter.",
+          "Chaque opération y figure avec son auteur (nom et e-mail), l'horodatage à la seconde, l'établissement, l'espace concerné et un résumé lisible (numéros de pièces, montants, campagnes…).",
+          "Filtrez par type d'opération grâce aux pastilles : écriture créée ou supprimée, règlement encaissé, facture annulée, enrôlement CSV, passage d'année, fiches purgées, reçus envoyés… ; les 300 opérations les plus récentes sont affichées.",
+          "Retenez que les suppressions conservent l'instantané complet de l'élément effacé : une écriture ou une fiche étudiante supprimée reste intégralement reconstituable depuis ce journal, qui n'est pas modifiable."
         ]
       },
       {
@@ -195,7 +231,7 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
   },
   "ORG_ADMIN": {
     "title": "Guide de l'administrateur d'organisation",
-    "intro": "Ce support de formation s'adresse à l'administrateur d'organisation d'EduWeb Booking — dans l'interface, votre rôle porte exactement le libellé « Administrateur d'organisation ». C'est la personne qui pilote son établissement (désigné « institution » sur les pages publiques et « organisation » dans les écrans d'administration) : son identité et son logo, sa structure en sites et services, ses comptes utilisateurs et leurs rôles, ses ressources et réservations, sa bibliothèque, ses certificats et ses paramètres. Son objectif pédagogique est de vous rendre pleinement autonome, depuis la configuration initiale de l'organisation jusqu'au pilotage statistique, en suivant pas à pas les libellés réels de l'interface. Ce guide couvre uniquement les actions effectivement permises à votre rôle ; la section « Plateforme » (Supervision EduWeb, Gouvernement & ministères, Établissements, Réglages des jeux, Diagnostics CERTEL, Tarifs CERTEL, Évaluations, Sécurité & sessions) reste réservée à l'administrateur système (super administrateur), qui peut toutefois intervenir dans votre établissement via le sélecteur d'institution. Comme tout utilisateur connecté, vous accédez par ailleurs à la formation certifiante CERTEL via le menu public « CERTEL », et toutes les évaluations de la plateforme sont désormais chronométrées, avec vérification immédiate des réponses en mode formatif.",
+    "intro": "Ce support de formation s'adresse à l'administrateur d'organisation d'EduWeb Booking — dans l'interface, votre rôle porte exactement le libellé « Administrateur d'organisation ». C'est la personne qui pilote son établissement (désigné « institution » sur les pages publiques et « organisation » dans les écrans d'administration) : son identité et son logo, sa structure en sites et services, ses comptes utilisateurs et leurs rôles, ses ressources et réservations, sa bibliothèque, ses certificats et ses paramètres. Son objectif pédagogique est de vous rendre pleinement autonome, depuis la configuration initiale de l'organisation jusqu'au pilotage statistique, en suivant pas à pas les libellés réels de l'interface. Ce guide couvre uniquement les actions effectivement permises à votre rôle ; la section « Plateforme » (Supervision EduWeb, Gouvernement & ministères, Établissements, Réglages des jeux, Diagnostics CERTEL, Tarifs CERTEL, Évaluations, Traçabilité, Sécurité & sessions) reste réservée à l'administrateur système (super administrateur), qui peut toutefois intervenir dans votre établissement via le sélecteur d'institution. Comme tout utilisateur connecté, vous accédez par ailleurs à la formation certifiante CERTEL via le menu public « CERTEL », et toutes les évaluations de la plateforme sont désormais chronométrées, avec vérification immédiate des réponses en mode formatif.",
     "can": [
       "Paramétrer l'identité de votre organisation et téléverser son logo (« Administration › Organisation »), qui s'affiche ensuite à la place du sigle dans le sélecteur d'institutions.",
       "Structurer votre établissement en profondeur libre (Organisation › Site › Service › sous-services) et réorganiser l'arborescence par glisser-déposer dans « Sites & services ».",
@@ -206,6 +242,8 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
       "Régler les paramètres de réservation (langue, fuseau, horaires, jours ouvrés, validation automatique), consulter la matrice « Rôles & permissions » (en lecture seule) et suivre votre « Abonnement ».",
       "Gérer les catégories et les ressources, valider les réservations en attente (« À valider »), suivre les « Statistiques » et exporter des « Rapports ».",
       "Administrer la bibliothèque de bout en bout : déposer, vérifier les dépôts, gérer collections et domaines, suivre les emprunts et les statistiques documentaires.",
+      "Tenir les finances de votre institution par espaces cloisonnés (« Finances ») : encaissements avec reçus numérotés envoyés par e-mail au payeur, dépenses, facturation interne avec règlements partiels, caisses, catégories et journal — chaque sous-direction gère son espace isolément.",
+      "Gérer la Scolarité (« Étudiants & enrôlement ») : enrôler les étudiants selon les filières du Centre de la Formation Initiale (formation en deux années), importer les listes par CSV, effectuer les passages d'année et créer leurs comptes de connexion.",
       "Organiser des compétitions sur l'espace Sport cérébral, jouer aux jeux cognitifs et sécuriser votre propre accès depuis « Mon compte ».",
       "Suivre, comme tout utilisateur connecté, la formation certifiante CERTEL (numérique et IA) depuis le menu « CERTEL » : diagnostic de niveau gratuit, 3 niveaux interactifs avec lecture audio et exercices auto-corrigés, évaluations chronométrées et certificat PDF de réussite par niveau."
     ],
@@ -293,6 +331,29 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
           "Ouvrez « À vérifier » pour contrôler et publier les dépôts en attente de validation (un badge en signale le nombre).",
           "Organisez le fonds via « Collections » et « Domaines », et suivez la circulation dans « Réservations doc. » et « Emprunts ».",
           "Consultez « Statistiques doc. » pour piloter l'usage de la bibliothèque (consultations, téléchargements, emprunts)."
+        ]
+      },
+      {
+        "title": "Tenir les finances de l'institution (espaces cloisonnés)",
+        "steps": [
+          "Dépliez la section « Finances » : « Tableau de bord », « Encaissements », « Dépenses », « Facturation », « Journal » et « Paramètres fin. » ; le sélecteur « Espace » (avec recherche rapide) bascule entre l'espace global de l'institution et chaque sous-direction — chaque espace est strictement cloisonné (écritures, caisses, catégories et numérotation propres).",
+          "Commencez par « Paramètres fin. » : suivez le guide de démarrage, créez vos caisses & comptes et vos catégories de recettes et de dépenses (les suggestions se créent en un clic), et définissez le logo de la sous-direction qui apparaîtra sur les reçus à côté de celui de l'institution.",
+          "Dans « Encaissements », choisissez le « Libellé » dans la liste des catégories : « Consultation documentaire » ouvre la cascade Filière → Discipline et propose 10 000 FCFA par défaut ; le « Payeur » se recherche dans la liste des étudiants enrôlés (le matricule remplit le « N° de pièce ») et, si son e-mail est renseigné, le reçu numéroté lui est envoyé automatiquement à l'enregistrement.",
+          "Cliquez « Reçu » sur une écriture pour ouvrir le document imprimable (en-tête aux deux logos, numéro unique REC-année-0001, montant en toutes lettres, mention COMPTABILITE) ; le renvoi par e-mail est possible depuis cette page.",
+          "Dans « Facturation », créez des factures internes (FAC-…) et encaissez-les en un ou plusieurs règlements — chaque règlement génère son reçu — ou annulez-les ; « Journal » et « Tableau de bord » donnent la vue d'ensemble (évolution sur 12 mois, soldes par mode de paiement, impayés).",
+          "Retenez que les suppressions sont encadrées : une caisse ou une catégorie utilisée par des écritures ne peut être que désactivée, et toutes les opérations (saisies comme suppressions) sont tracées à l'attention de l'administrateur système."
+        ]
+      },
+      {
+        "title": "Enrôler les étudiants (Scolarité, deux années)",
+        "steps": [
+          "Dépliez « Scolarité » puis ouvrez « Étudiants & enrôlement » : la formation dure deux années (Première et Deuxième année) ; les indicateurs comptent les actifs par année et les diplômés.",
+          "Filtrez la liste par recherche (nom ou matricule), filière et discipline (référentiel du Centre de la Formation Initiale), année de formation, statut et campagne académique (ex. 2026-2027).",
+          "Pour enrôler un étudiant, remplissez « Nouvel étudiant » (nom, matricule, filière → discipline, année, campagne, groupe de TD, e-mail) puis cliquez « Enrôler l'étudiant ».",
+          "Pour une promotion entière, utilisez « Enrôlement par CSV » : glissez-déposez le fichier (colonnes nom, matricule, departement, section, annee, email — « Modèle CSV » téléchargeable), choisissez la campagne, puis « Importer » ; les matricules déjà enrôlés sont ignorés, sans doublon possible.",
+          "Gérez le cycle : « 2ᵉ année » fait passer un étudiant de Première en Deuxième année, « Diplômer » clôt son parcours, et « Effectuer le passage d'année » traite toute l'institution en une fois (2ᵉ année → Diplômés, 1ʳᵉ → 2ᵉ, campagne suivante).",
+          "Cliquez « Compte » sur une fiche disposant d'un e-mail pour créer — ou relier — son compte de connexion (rôle Lecteur, mot de passe initial « password123 ») ; les étudiants actifs alimentent automatiquement la liste des payeurs du module Finances.",
+          "Avant l'enrôlement réel, purgez les éventuelles fiches de démonstration ; toutes les opérations (imports, promotions, suppressions) sont tracées à l'attention de l'administrateur système."
         ]
       },
       {
