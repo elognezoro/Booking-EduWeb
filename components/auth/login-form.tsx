@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { LogIn, Loader2, AlertCircle, Building2, ArrowLeftRight, UserPlus, MailWarning } from "lucide-react";
+import { LogIn, Loader2, AlertCircle, Building2, ArrowLeftRight, UserPlus, MailWarning, Sparkles } from "lucide-react";
 import { loginAction, type LoginState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,15 +100,30 @@ export function LoginForm({ callbackUrl, institution, verifyNotice }: { callback
           <span className="absolute inset-x-0 top-1/2 -z-10 h-px bg-border" />
           <span className="bg-background px-3 text-xs font-medium text-muted-foreground">ou</span>
         </div>
+        {/* Bandeau scintillant : les étudiants enrôlés ACTIVENT leur compte (au lieu d'en créer un autre). */}
+        <a
+          href="/activation-etudiant"
+          className="relative block overflow-hidden rounded-xl border-2 border-[#f7c948] bg-gradient-to-r from-primary via-primary-600 to-primary-700 px-4 py-3 text-white transition-transform hover:scale-[1.01] animate-[glow-pulse_2s_ease-in-out_infinite]"
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shine-sweep_2.6s_linear_infinite]"
+          />
+          <span className="relative flex items-center justify-center gap-3">
+            <Sparkles className="size-5 shrink-0 animate-pulse text-[#f7c948]" />
+            <span className="text-center">
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-[#f7c948]">Étudiant(e) de l'ENS d'Abidjan ?</span>
+              <span className="block text-sm font-extrabold leading-tight">Activez votre compte étudiant — il existe déjà, ne créez pas un nouveau compte</span>
+            </span>
+            <Sparkles className="size-5 shrink-0 animate-pulse text-[#f7c948] [animation-delay:400ms]" />
+          </span>
+        </a>
+
         <Button asChild type="button" variant="outline" size="lg" className="w-full border-primary/40 text-primary hover:bg-primary-50">
           <a href={registerHref}>
             <UserPlus className="size-4" /> Créer un compte
           </a>
         </Button>
-        <p className="text-center text-sm text-muted-foreground">
-          Étudiant(e) de l'ENS d'Abidjan ?{" "}
-          <a href="/activation-etudiant" className="font-semibold text-primary hover:underline">Activez votre compte étudiant</a>
-        </p>
       </form>
 
       {!institution && (

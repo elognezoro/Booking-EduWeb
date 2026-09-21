@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { UserPlus, Loader2, AlertCircle, MailCheck, ShieldCheck } from "lucide-react";
+import { UserPlus, Loader2, AlertCircle, MailCheck, ShieldCheck, Sparkles } from "lucide-react";
 import { registerAccount, type RegisterState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,25 @@ export function RegisterForm() {
     <div>
       <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Créer un compte</h1>
       <p className="mt-2 text-muted-foreground">Renseignez vos informations ; un e-mail de confirmation vous sera envoyé pour activer votre compte immédiatement.</p>
+
+      {/* Garde-fou : un étudiant enrôlé a DÉJÀ une fiche — il doit l'activer, pas créer un doublon. */}
+      <a
+        href="/activation-etudiant"
+        className="relative mt-4 block overflow-hidden rounded-xl border-2 border-[#f7c948] bg-gradient-to-r from-primary via-primary-600 to-primary-700 px-4 py-3 text-white transition-transform hover:scale-[1.01] animate-[glow-pulse_2s_ease-in-out_infinite]"
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[shine-sweep_2.6s_linear_infinite]"
+        />
+        <span className="relative flex items-center justify-center gap-3">
+          <Sparkles className="size-5 shrink-0 animate-pulse text-[#f7c948]" />
+          <span className="text-center">
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-[#f7c948]">Étudiant(e) de l'ENS d'Abidjan ?</span>
+            <span className="block text-sm font-extrabold leading-tight">N'utilisez pas ce formulaire : votre compte existe déjà — activez-le ici</span>
+          </span>
+          <Sparkles className="size-5 shrink-0 animate-pulse text-[#f7c948] [animation-delay:400ms]" />
+        </span>
+      </a>
 
       <form action={formAction} className="mt-7 space-y-4">
         {state.error && (
