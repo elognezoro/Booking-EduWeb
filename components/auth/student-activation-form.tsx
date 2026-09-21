@@ -88,7 +88,7 @@ export function StudentActivationForm() {
           <Label htmlFor="sa-matricule" required>N° matricule</Label>
           <div className="relative">
             <Hash className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="sa-matricule" name="matricule" required maxLength={40} placeholder="Ex. 25-A-P10613PL/AN" className="pl-9 uppercase" autoComplete="off" />
+            <Input id="sa-matricule" name="matricule" required maxLength={40} placeholder="Ex. 25-A-P10613PL-AN" className="pl-9 uppercase" autoComplete="off" />
           </div>
           <p className="mt-1 text-xs text-muted-foreground">Tel qu'il figure sur les listes officielles de la Scolarité.</p>
         </div>

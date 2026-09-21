@@ -7,7 +7,7 @@ import { requirePermission, hashPassword, type CurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
-import { isEnsMatricule } from "@/lib/utils";
+import { isEnsMatricule, normalizeEnsMatricule } from "@/lib/utils";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import { ENS_DEPARTMENTS, ENS_FILIERES } from "@/lib/finances/ens-academics";
 import { DEMO_STUDENTS } from "@/lib/finances/demo-students";
@@ -63,7 +63,7 @@ export async function createStudent(formData: FormData) {
   if (!fullName || !department) redirect(`${BASE}?error=invalide`);
 
   let matricule: string | null = null;
-  const rawMat = txt(formData.get("matricule"), 40).toUpperCase();
+  const rawMat = normalizeEnsMatricule(txt(formData.get("matricule"), 40));
   if (rawMat) {
     if (!isEnsMatricule(rawMat)) redirect(`${BASE}?error=matricule`);
     const dup = await prisma.student.findFirst({ where: { organizationId: user.organizationId, matricule: rawMat } });
@@ -204,7 +204,7 @@ export async function importStudentsCsv(formData: FormData) {
   for (const row of rows.slice(1)) {
     const fullName = (row[iName] ?? "").trim().slice(0, 120);
     if (!fullName) continue;
-    const matricule = iMat >= 0 ? (row[iMat] ?? "").trim().slice(0, 40).toUpperCase() || null : null;
+    const matricule = iMat >= 0 ? normalizeEnsMatricule((row[iMat] ?? "").slice(0, 40)) || null : null;
     if (matricule && existing.has(matricule)) {
       skipped++;
       continue;
@@ -348,7 +348,7 @@ export async function activateStudentAccount(
   _prev: StudentActivationState,
   formData: FormData
 ): Promise<StudentActivationState> {
-  const matricule = txt(formData.get("matricule"), 40).toUpperCase();
+  const matricule = normalizeEnsMatricule(txt(formData.get("matricule"), 40));
   const birthRaw = String(formData.get("birthDate") ?? "").trim(); // champ date : AAAA-MM-JJ
   const em = email(formData.get("email"));
   const password = String(formData.get("password") ?? "");

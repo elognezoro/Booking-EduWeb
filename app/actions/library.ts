@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, getCurrentUser } from "@/lib/auth";
 import { stringifyJson } from "@/lib/json";
-import { slugify } from "@/lib/utils";
+import { slugify, normalizeEnsMatricule } from "@/lib/utils";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
 import { generateTemporaryCode, generateDocumentCode } from "@/lib/library/document-code";
@@ -55,7 +55,7 @@ export async function purchaseDownload(formData: FormData) {
 export async function claimStudentExemption(formData: FormData) {
   const user = await requirePermission("documents.download");
   const id = String(formData.get("id"));
-  const matricule = String(formData.get("matricule") || "").trim().toUpperCase();
+  const matricule = normalizeEnsMatricule(String(formData.get("matricule") || ""));
   const doc = await prisma.documentResource.findUnique({ where: { id } });
   if (!doc) redirect("/dashboard/library");
   const [org, dbUser] = await Promise.all([
@@ -65,7 +65,7 @@ export async function claimStudentExemption(formData: FormData) {
   const eligible =
     canDownloadDocument(user, doc).ok && doc.downloadPrice > 0 && !isDownloadPrivileged(user, doc) && org?.slug === "ens-abidjan";
   // Vérification : le matricule saisi doit correspondre à celui enregistré sur le compte.
-  const stored = (dbUser?.matricule ?? "").trim().toUpperCase();
+  const stored = normalizeEnsMatricule(dbUser?.matricule ?? "");
   const verified = stored.length > 0 && stored === matricule;
   if (eligible && verified) {
     const existing = await prisma.documentPurchase.findFirst({ where: { documentId: id, userId: user.id } });

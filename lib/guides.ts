@@ -1336,7 +1336,7 @@ export const ROLE_GUIDES: Record<RoleKey, RoleGuide> = {
           "Sur la fiche, repérez l'encadré « Accès au document ».",
           "Si le téléchargement est libre, cliquez sur « Télécharger ».",
           "Si un prix s'affiche sous « Téléchargement payant », cliquez sur « Payer et débloquer » ; le paiement est simulé (cadre de démonstration), puis le bouton « Télécharger · débloqué ✓ » apparaît.",
-          "À l'ENS d'Abidjan, lorsqu'un document est payant, l'encadré « Étudiant de l'ENS d'Abidjan ? » s'affiche : saisissez votre matricule (par exemple « 23-B-P17498IPS/SP ») puis cliquez sur « Télécharger » pour obtenir la gratuité ; le matricule saisi doit correspondre à celui enregistré sur votre compte étudiant, sans quoi le message « Matricule invalide ou non éligible. » apparaît.",
+          "À l'ENS d'Abidjan, lorsqu'un document est payant, l'encadré « Étudiant de l'ENS d'Abidjan ? » s'affiche : saisissez votre matricule (par exemple « 23-B-P17498IPS-SP ») puis cliquez sur « Télécharger » pour obtenir la gratuité ; le matricule saisi doit correspondre à celui enregistré sur votre compte étudiant, sans quoi le message « Matricule invalide ou non éligible. » apparaît.",
           "Si le fichier est restreint, un message précise la raison (par exemple « Consultation sur place uniquement », « Document restreint — demandez l'accès » ou « Document sous embargo »)."
         ]
       },

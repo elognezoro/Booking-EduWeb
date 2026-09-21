@@ -28,11 +28,16 @@ export function formatFamilyName(value: string): string {
   return value.trim().replace(/\s+/g, " ").toUpperCase();
 }
 
-/** Matricule (n° d'inscription) d'un étudiant de l'ENS d'Abidjan, ex. « 23-B-P17498IPS/SP ». */
-export const ENS_MATRICULE_EXAMPLE = "23-B-P17498IPS/SP";
-export const ENS_MATRICULE_REGEX = /^\d{2}-[A-Z0-9]+-[A-Z0-9]+\/[A-Z0-9]+$/;
+/** Matricule (n° d'inscription) d'un étudiant de l'ENS d'Abidjan, ex. « 23-B-P17498IPS-SP » (format des cartes d'étudiant). */
+export const ENS_MATRICULE_EXAMPLE = "23-B-P17498IPS-SP";
+// Tout en tirets (3 groupes ou plus : certaines filières — ED, IE, IO — n'ont pas de suffixe).
+export const ENS_MATRICULE_REGEX = /^\d{2}-[A-Z0-9]+-[A-Z0-9]+(-[A-Z0-9]+)*$/;
+/** Forme canonique d'un matricule : majuscules, sans espaces, « / » (anciennes listes) remplacé par le tiret des cartes. */
+export function normalizeEnsMatricule(value: string): string {
+  return value.trim().toUpperCase().replace(/\s+/g, "").replace(/\//g, "-");
+}
 export function isEnsMatricule(value: string): boolean {
-  return ENS_MATRICULE_REGEX.test(value.trim().toUpperCase());
+  return ENS_MATRICULE_REGEX.test(normalizeEnsMatricule(value));
 }
 
 export function pluralize(count: number, singular: string, plural?: string) {

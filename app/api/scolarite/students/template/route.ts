@@ -13,9 +13,9 @@ export async function GET() {
 
   const lines = [
     "nom,matricule,departement,section,annee,email",
-    "KOUASSI Aya Estelle,24-A-P12345ANG/SP,Département des Langues,Anglais,1,aya.kouassi@exemple.ci",
-    "TRAORE Moussa,23-B-P54321MAT/SP,Département Sciences et Technologie,Mathématiques,2,moussa.traore@exemple.ci",
-    "AKA N'Da Josiane,24-A-P67890LMO/SP,Département des Arts et Lettres,Lettres Modernes,1,",
+    "KOUASSI Aya Estelle,24-A-P12345ANG-SP,Département des Langues,Anglais,1,aya.kouassi@exemple.ci",
+    "TRAORE Moussa,23-B-P54321MAT-SP,Département Sciences et Technologie,Mathématiques,2,moussa.traore@exemple.ci",
+    "AKA N'Da Josiane,24-A-P67890LMO-SP,Département des Arts et Lettres,Lettres Modernes,1,",
   ];
   const csv = "﻿" + lines.join("\r\n") + "\r\n";
 

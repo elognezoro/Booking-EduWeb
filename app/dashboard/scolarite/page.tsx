@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 
 const ERRORS: Record<string, string> = {
   invalide: "Saisie invalide : nom, département et section sont obligatoires.",
-  matricule: "Matricule invalide — respectez le format ENS (ex. 23-B-P17498IPS/SP).",
+  matricule: "Matricule invalide — respectez le format ENS (ex. 23-B-P17498IPS-SP).",
   "matricule-existe": "Ce matricule est déjà enrôlé dans l'institution.",
   introuvable: "Fiche introuvable.",
   csv: "Fichier CSV illisible ou vide.",

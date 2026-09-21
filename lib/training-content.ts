@@ -1189,7 +1189,7 @@ export const TRAINING_CONTENT: TrainingContent = {
         "prerequis": [
           "Disposer d'un compte actif portant le rôle « Lecteur interne » et avoir changé le mot de passe initial « password123 ».",
           "Savoir se connecter à l'application et naviguer dans la barre latérale (sections « Principal », « Bibliothèque », « Aide »).",
-          "Pour les étudiants de l'ENS d'Abidjan : connaître son matricule (par exemple « 23-B-P17498IPS/SP ») tel qu'enregistré sur son compte pour bénéficier de la gratuité de téléchargement.",
+          "Pour les étudiants de l'ENS d'Abidjan : connaître son matricule (par exemple « 23-B-P17498IPS-SP ») tel qu'enregistré sur son compte pour bénéficier de la gratuité de téléchargement.",
           "Disposer d'une connexion adaptée à la consultation en ligne des documents (lecture seule filigranée, impression et copie désactivées).",
           "Comprendre les niveaux d'accès d'un document (« Public », « Interne », « Restreint », etc.) et leurs conséquences sur la consultation et le téléchargement."
         ],
@@ -1704,7 +1704,7 @@ export const TRAINING_CONTENT: TrainingContent = {
           "email — Adresse e-mail (obligatoire ; sert d'identifiant et doit être unique).",
           "fonction — Fonction ou poste (facultatif). Ex. : « Enseignante », « Responsable des salles ».",
           "role — Rôle attribué : clé du rôle (ex. RESOURCE_MANAGER) ou son libellé (ex. « Responsable de ressource ») ; une valeur vide ou inconnue donne le rôle « Demandeur », et la clé SUPER_ADMIN est refusée.",
-          "matricule — Matricule étudiant (facultatif ; surtout pour le rôle « Lecteur »). Ex. : « 23-B-P17498IPS/SP »."
+          "matricule — Matricule étudiant (facultatif ; surtout pour le rôle « Lecteur »). Ex. : « 23-B-P17498IPS-SP »."
         ],
         "etapes": [
           "Ouvrez « Administration » › « Utilisateurs ».",

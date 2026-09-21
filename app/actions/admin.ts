@@ -73,7 +73,7 @@ import { stringifyJson } from "@/lib/json";
 import { audit } from "@/lib/audit";
 import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
-import { formatGivenName, formatFamilyName, isEnsMatricule } from "@/lib/utils";
+import { formatGivenName, formatFamilyName, isEnsMatricule, normalizeEnsMatricule } from "@/lib/utils";
 
 /* ----------------------------- Organisation ----------------------------- */
 export async function updateOrganization(formData: FormData) {
@@ -285,7 +285,7 @@ export async function createUser(formData: FormData) {
   // Matricule étudiant ENS (optionnel) : validé au format réel s'il est renseigné.
   let matricule: string | null = null;
   if (data.matricule && data.matricule.trim()) {
-    const m = data.matricule.trim().toUpperCase();
+    const m = normalizeEnsMatricule(data.matricule);
     if (!isEnsMatricule(m)) redirect("/dashboard/admin/users?error=matricule");
     matricule = m;
   }
@@ -411,7 +411,7 @@ export async function importUsersCsv(_prev: ImportState, formData: FormData): Pr
       if (resolved) roleId = resolved;
     }
 
-    const matricule = get(col.matricule).toUpperCase() || null;
+    const matricule = normalizeEnsMatricule(get(col.matricule)) || null;
     await prisma.user.create({
       data: {
         email, passwordHash, firstName: formatGivenName(prenom), lastName: formatFamilyName(nom),

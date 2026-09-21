@@ -430,7 +430,7 @@ async function main() {
   const documentalist = await createUser({ email: "documentaliste.aprid@ens.ci", firstName: "Nadège", lastName: "Aka", role: "LIBRARIAN", organizationId: org.id, departmentId: biblio.id, functionTitle: "Documentaliste APRID" });
   const depositor = await createUser({ email: "deposant.demo@ens.ci", firstName: "Yves", lastName: "Gnagne", role: "DEPOSITOR", organizationId: org.id, departmentId: aprid.id, functionTitle: "Doctorant" });
   const demoReader = await createUser({ email: "lecteur.demo@ens.ci", firstName: "Awa", lastName: "Sylla", role: "READER", organizationId: org.id, departmentId: biblio.id, functionTitle: "Étudiante" });
-  await prisma.user.update({ where: { id: demoReader.id }, data: { matricule: "23-B-P17498IPS/SP" } });
+  await prisma.user.update({ where: { id: demoReader.id }, data: { matricule: "23-B-P17498IPS-SP" } });
   const sciValidator = await createUser({ email: "validateur.scientifique@ens.ci", firstName: "Henri", lastName: "Adou", role: "SCIENTIFIC_VALIDATOR", organizationId: org.id, departmentId: aprid.id, functionTitle: "Enseignant-chercheur" });
 
   const library = await prisma.digitalLibrary.create({
