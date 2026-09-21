@@ -60,13 +60,13 @@ export async function EntriesView({
     prisma.financeEntry.findMany({ where: { ...scope.filter, kind }, orderBy: { date: "desc" }, take: 100 }),
     prisma.financeCashbox.findMany({ where: { ...scope.filter, active: true }, orderBy: { name: "asc" } }),
     prisma.financeCategory.findMany({ where: { ...scope.filter, kind, active: true }, orderBy: { name: "asc" } }),
-    // Référentiel des étudiants payeurs (par institution) — alimente la recherche du champ Payeur.
+    // Payeurs = étudiants ACTIFS du registre Scolarité de l'institution (enrôlement).
     kind === "INCOME"
-      ? prisma.financeStudent.findMany({
-          where: { organizationId: scope.organizationId },
+      ? prisma.student.findMany({
+          where: { organizationId: scope.organizationId, status: "ACTIVE" },
           orderBy: { fullName: "asc" },
           take: 2000,
-          select: { fullName: true, matricule: true, department: true, section: true, demo: true },
+          select: { fullName: true, matricule: true, department: true, section: true, demo: true, year: true },
         })
       : Promise.resolve([]),
   ]);

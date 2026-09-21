@@ -1204,9 +1204,37 @@ model FinanceCounter {
   count Int    @default(0)
 }
 
-// Étudiant « payeur » (référentiel par institution, importé par CSV) : alimente la liste
-// déroulante Payeur du formulaire d'encaissement, filtrée par département académique et
-// section/filière. `demo` = fiche fictive de démonstration, purgeable en un clic.
+// ===========================================================================
+// ===================== SCOLARITÉ — enrôlement des étudiants ================
+// Dossier étudiant central (par institution). La formation à l'ENS d'Abidjan
+// dure DEUX années : year = 1 (Première année) ou 2 (Deuxième année).
+// Alimente la liste des payeurs (Finances), la création des comptes de
+// connexion (User) et, à terme, les inscriptions aux cours (LMS).
+// ===========================================================================
+model Student {
+  id             String   @id @default(cuid())
+  organizationId String
+  fullName       String
+  matricule      String? // n° d'identification (format ENS validé s'il est fourni)
+  department     String // département académique (référentiel ENS)
+  section        String // section / filière
+  year           Int      @default(1) // 1 = Première année, 2 = Deuxième année
+  academicYear   String // campagne d'enrôlement, ex. « 2026-2027 »
+  email          String?
+  phone          String?
+  status         String   @default("ACTIVE") // ACTIVE | DIPLOME | ARCHIVE
+  userId         String?  @unique // compte de connexion lié (créé/relié à la demande)
+  demo           Boolean  @default(false) // fiche fictive de démonstration (purgeable)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organizationId, matricule])
+  @@index([organizationId, department, section, year])
+  @@index([organizationId, status, academicYear])
+}
+
+// Étudiant « payeur » (ANCIEN référentiel Finances, remplacé par le modèle Student
+// de la Scolarité — conservé pour l'historique, plus alimenté par l'interface).
 model FinanceStudent {
   id             String   @id @default(cuid())
   organizationId String

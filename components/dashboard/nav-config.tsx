@@ -117,6 +117,13 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    title: "Scolarité",
+    icon: GraduationCap,
+    items: [
+      { label: "Étudiants & enrôlement", href: "/dashboard/scolarite", icon: GraduationCap, permission: "scolarite.read" },
+    ],
+  },
+  {
     title: "Administration",
     icon: ShieldCheck,
     items: [
@@ -141,7 +148,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Diagnostics CERTEL", href: "/dashboard/platform/certel", icon: GraduationCap, permission: "platform.manage" },
       { label: "Tarifs CERTEL", href: "/dashboard/platform/certel-tarifs", icon: CreditCard, permission: "platform.manage" },
       { label: "Évaluations", href: "/dashboard/platform/evaluations", icon: ClipboardCheck, permission: "platform.manage" },
-      { label: "Traçabilité finances", href: "/dashboard/platform/finances-audit", icon: ScrollText, permission: "platform.manage" },
+      { label: "Traçabilité", href: "/dashboard/platform/finances-audit", icon: ScrollText, permission: "platform.manage" },
       { label: "Sécurité & sessions", href: "/dashboard/platform/securite", icon: ShieldCheck, permission: "platform.manage" },
     ],
   },

@@ -39,6 +39,9 @@ export const PERMISSIONS = [
   // ---- Finances (espace financier cloisonné) ----
   "finances.read", // consulter l'espace financier de son périmètre
   "finances.manage", // saisir encaissements/dépenses, factures, caisses, catégories
+  // ---- Scolarité (enrôlement des étudiants) ----
+  "scolarite.read", // consulter l'enrôlement des étudiants
+  "scolarite.manage", // enrôler, importer, promouvoir, supprimer, créer les comptes
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -79,6 +82,8 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   "library.statistics": "Consulter les statistiques de la bibliothèque",
   "finances.read": "Consulter les finances",
   "finances.manage": "Gérer les finances (saisies, factures, caisses)",
+  "scolarite.read": "Consulter la scolarité (enrôlement)",
+  "scolarite.manage": "Gérer la scolarité (enrôlement, promotions, comptes)",
 };
 
 // Matrice rôle -> permissions.
@@ -120,6 +125,8 @@ export const ROLE_PERMISSIONS: Record<RoleKey, Permission[]> = {
     "library.statistics",
     "finances.read",
     "finances.manage",
+    "scolarite.read",
+    "scolarite.manage",
   ],
   RESOURCE_MANAGER: [
     "resources.create",

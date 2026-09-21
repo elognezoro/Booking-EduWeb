@@ -11,6 +11,8 @@ export interface StudentOption {
   department: string;
   section: string;
   demo: boolean;
+  /** Année de formation (1 = Première année, 2 = Deuxième année) — registre Scolarité. */
+  year?: number | null;
 }
 
 /**
@@ -97,6 +99,7 @@ export function StudentPicker({
                   </span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {s.matricule ? `${s.matricule} · ` : ""}{s.section}
+                    {s.year === 1 ? " · 1ʳᵉ année" : s.year === 2 ? " · 2ᵉ année" : ""}
                   </span>
                 </span>
               </button>
