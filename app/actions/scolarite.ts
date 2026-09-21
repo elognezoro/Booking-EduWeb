@@ -366,7 +366,19 @@ export async function activateStudentAccount(
   const generic: StudentActivationState = {
     error: "Matricule ou date de naissance non reconnus. Vérifiez votre saisie ou rapprochez-vous de la Scolarité.",
   };
-  const student = await prisma.student.findFirst({ where: { matricule } });
+  let student = await prisma.student.findFirst({ where: { matricule } });
+  if (!student && birth) {
+    // Tolérance de saisie : « / » tapé « - », espaces ou points parasites… On compare les formes
+    // canoniques (lettres et chiffres uniquement) parmi les fiches partageant la même date de
+    // naissance — le couple matricule+naissance reste exigé (anti-énumération préservée).
+    const canon = (v: string) => v.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const wanted = canon(matricule);
+    if (wanted) {
+      const candidates = await prisma.student.findMany({ where: { birthDate: birth, matricule: { not: null } } });
+      const matches = candidates.filter((s) => canon(s.matricule!) === wanted);
+      if (matches.length === 1) student = matches[0];
+    }
+  }
   if (!student || !student.birthDate || !birth || student.birthDate !== birth) return generic;
   if (student.userId) return { error: "Un compte est déjà activé pour cette fiche. Connectez-vous, ou utilisez « Mot de passe oublié »." };
   if (student.status !== "ACTIVE") return { error: "Cette fiche n'est plus active. Rapprochez-vous de la Scolarité." };
