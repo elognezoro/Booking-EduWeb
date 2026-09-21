@@ -1,10 +1,12 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requirePermission, hashPassword, type CurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
+import { sendNotification, renderEmail, APP_URL } from "@/lib/mail";
 import { isEnsMatricule } from "@/lib/utils";
 import { parseCsv, findColumn, normalizeKey } from "@/lib/csv";
 import { ENS_DEPARTMENTS } from "@/lib/finances/ens-academics";
@@ -284,6 +286,112 @@ export async function deleteStudentsBulk(formData: FormData) {
   });
   revalidatePath(BASE);
   redirect(`${BASE}?deleted=${res.count}`);
+}
+
+/* ----------------------------- Activation en libre-service (public) ----------------------------- */
+
+export interface StudentActivationState {
+  error?: string;
+  success?: boolean;
+  email?: string;
+}
+
+const VERIFY_TTL_MS = 48 * 60 * 60 * 1000; // 48 h (même durée que l'auto-inscription)
+
+/**
+ * Activation PUBLIQUE du compte d'un étudiant enrôlé : il prouve son identité avec
+ * son matricule + sa date de naissance (données des listes officielles), puis choisit
+ * son e-mail et son mot de passe. Le compte (rôle Lecteur) est créé EN ATTENTE et
+ * s'active par le lien de confirmation envoyé par e-mail (circuit existant).
+ * Messages volontairement génériques (anti-énumération) ; une seule activation par fiche.
+ */
+export async function activateStudentAccount(
+  _prev: StudentActivationState,
+  formData: FormData
+): Promise<StudentActivationState> {
+  const matricule = txt(formData.get("matricule"), 40).toUpperCase();
+  const birthRaw = String(formData.get("birthDate") ?? "").trim(); // champ date : AAAA-MM-JJ
+  const em = email(formData.get("email"));
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (!matricule || !birthRaw) return { error: "Renseignez votre matricule et votre date de naissance." };
+  if (!em) return { error: "Adresse e-mail invalide." };
+  if (password.length < 6) return { error: "Le mot de passe doit contenir au moins 6 caractères." };
+  if (password !== confirm) return { error: "Les deux mots de passe ne correspondent pas." };
+  if (formData.get("accept") !== "on") return { error: "Vous devez accepter les conditions d'utilisation." };
+
+  // AAAA-MM-JJ → JJ/MM/AAAA (format des listes de la Scolarité centrale).
+  const m = birthRaw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const birth = m ? `${m[3]}/${m[2]}/${m[1]}` : "";
+
+  const generic: StudentActivationState = {
+    error: "Matricule ou date de naissance non reconnus. Vérifiez votre saisie ou rapprochez-vous de la Scolarité.",
+  };
+  const student = await prisma.student.findFirst({ where: { matricule } });
+  if (!student || !student.birthDate || !birth || student.birthDate !== birth) return generic;
+  if (student.userId) return { error: "Un compte est déjà activé pour cette fiche. Connectez-vous, ou utilisez « Mot de passe oublié »." };
+  if (student.status !== "ACTIVE") return { error: "Cette fiche n'est plus active. Rapprochez-vous de la Scolarité." };
+
+  const existing = await prisma.user.findUnique({ where: { email: em } });
+  if (existing) return { error: "Un compte existe déjà avec cette adresse e-mail — utilisez-en une autre, ou connectez-vous avec celle-ci." };
+
+  // Nom de famille en tête (convention des listes « NOM Prénoms »).
+  const parts = student.fullName.trim().split(/\s+/);
+  const lastName = parts[0] ?? student.fullName;
+  const firstName = parts.slice(1).join(" ") || lastName;
+  const role = await prisma.role.findFirst({
+    where: { key: "READER", OR: [{ organizationId: student.organizationId }, { organizationId: null }] },
+  });
+  const token = randomBytes(32).toString("hex");
+  const created = await prisma.user.create({
+    data: {
+      email: em,
+      firstName,
+      lastName,
+      functionTitle: "Étudiant(e)",
+      matricule: student.matricule,
+      organizationId: student.organizationId,
+      status: "PENDING",
+      passwordHash: await hashPassword(password),
+      emailVerifyToken: token,
+      emailVerifyExpires: new Date(Date.now() + VERIFY_TTL_MS),
+      roles: role ? { create: { roleId: role.id } } : undefined,
+    },
+  });
+  // Garde anti-course : une seule activation par fiche (on relie AVANT d'envoyer l'e-mail).
+  const linked = await prisma.student.updateMany({
+    where: { id: student.id, userId: null },
+    data: { userId: created.id, email: em },
+  });
+  if (linked.count === 0) {
+    await prisma.user.delete({ where: { id: created.id } }).catch(() => {});
+    return { error: "Un compte vient déjà d'être activé pour cette fiche." };
+  }
+
+  const link = `${APP_URL}/api/auth/verify-email?token=${token}`;
+  await sendNotification({
+    userId: created.id,
+    to: em,
+    type: "ACCOUNT_VERIFY",
+    subject: "Confirmez votre compte étudiant EduWeb Booking",
+    text: `Bonjour ${firstName}, confirmez votre adresse e-mail pour activer votre compte étudiant EduWeb Booking : ${link} (lien valable 48 heures).`,
+    html: renderEmail({
+      title: "Confirmez votre adresse e-mail",
+      intro: `Bonjour ${firstName}, votre fiche étudiante (matricule ${student.matricule}) a bien été reconnue. Pour activer votre compte, confirmez votre adresse e-mail en cliquant sur le bouton ci-dessous. Ce lien est valable 48 heures.`,
+      rows: [["Matricule", student.matricule ?? "—"], ["Filière", student.department + (student.section ? ` · ${student.section}` : "")]],
+      cta: { label: "Activer mon compte", href: link },
+      footer: "Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.",
+    }),
+  });
+  await audit({
+    organizationId: student.organizationId,
+    userId: created.id,
+    action: "SCOLARITE_ACCOUNT_SELF",
+    entityType: "Student",
+    entityId: student.id,
+    newValue: { fullName: student.fullName, matricule: student.matricule, to: em },
+  });
+  return { success: true, email: em };
 }
 
 /* ----------------------------- Compte de connexion ----------------------------- */

@@ -77,7 +77,7 @@ export default async function ScolaritePage({
     ...(fCampagne ? { academicYear: fCampagne } : {}),
   };
 
-  const [students, actifs, annee1, annee2, diplomes, demoCount, campagnes] = await Promise.all([
+  const [students, actifs, annee1, annee2, diplomes, demoCount, campagnes, comptes] = await Promise.all([
     prisma.student.findMany({ where, orderBy: [{ fullName: "asc" }], take: 400 }),
     prisma.student.count({ where: { organizationId: orgId, status: "ACTIVE" } }),
     prisma.student.count({ where: { organizationId: orgId, status: "ACTIVE", year: 1 } }),
@@ -85,6 +85,7 @@ export default async function ScolaritePage({
     prisma.student.count({ where: { organizationId: orgId, status: "DIPLOME" } }),
     prisma.student.count({ where: { organizationId: orgId, demo: true } }),
     prisma.student.findMany({ where: { organizationId: orgId }, distinct: ["academicYear"], select: { academicYear: true }, orderBy: { academicYear: "desc" } }),
+    prisma.student.count({ where: { organizationId: orgId, userId: { not: null } } }),
   ]);
 
   const currentAY = currentAcademicYear();
@@ -98,6 +99,7 @@ export default async function ScolaritePage({
     { label: "Première année", value: annee1, icon: GraduationCap, cls: "bg-sky-50 text-sky-700" },
     { label: "Deuxième année", value: annee2, icon: GraduationCap, cls: "bg-advanced-soft text-advanced-fg" },
     { label: "Diplômés", value: diplomes, icon: BadgeCheck, cls: "bg-available-soft text-available-fg" },
+    { label: "Comptes activés", value: comptes, icon: KeyRound, cls: "bg-pending-soft text-pending-fg" },
   ];
 
   return (
@@ -125,7 +127,7 @@ export default async function ScolaritePage({
       )}
 
       {/* Indicateurs */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         {kpis.map((k) => (
           <Card key={k.label} className="p-4">
             <div className="flex items-center justify-between gap-2">
@@ -261,7 +263,10 @@ export default async function ScolaritePage({
           <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
             <Info className="mt-0.5 size-3.5 shrink-0 text-primary" />
             La formation à l'ENS d'Abidjan dure deux années. Les étudiants ACTIFS alimentent automatiquement la liste
-            des payeurs du module Finances (reçus). Toutes les opérations sont tracées dans le journal d'audit.
+            des payeurs du module Finances (reçus), et chacun peut activer lui-même son compte de connexion sur{" "}
+            <Link href="/activation-etudiant" className="font-semibold text-primary hover:underline">/activation-etudiant</Link>{" "}
+            (matricule + date de naissance, puis e-mail et mot de passe personnels). Toutes les opérations sont tracées
+            dans le journal d'audit.
           </p>
         </div>
 

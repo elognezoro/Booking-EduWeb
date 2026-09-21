@@ -105,6 +105,10 @@ export function LoginForm({ callbackUrl, institution, verifyNotice }: { callback
             <UserPlus className="size-4" /> Créer un compte
           </a>
         </Button>
+        <p className="text-center text-sm text-muted-foreground">
+          Étudiant(e) de l'ENS d'Abidjan ?{" "}
+          <a href="/activation-etudiant" className="font-semibold text-primary hover:underline">Activez votre compte étudiant</a>
+        </p>
       </form>
 
       {!institution && (

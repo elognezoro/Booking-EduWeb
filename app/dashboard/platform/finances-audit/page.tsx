@@ -36,6 +36,7 @@ const ACTIONS: Record<string, { label: string; tone: Tone }> = {
   SCOLARITE_STUDENTS_DELETE: { label: "Fiches étudiantes purgées", tone: "unavailable" },
   SCOLARITE_ACCOUNT_CREATE: { label: "Compte étudiant créé", tone: "available" },
   SCOLARITE_ACCOUNT_LINK: { label: "Compte étudiant relié", tone: "info" },
+  SCOLARITE_ACCOUNT_SELF: { label: "Compte étudiant auto-activé", tone: "available" },
 };
 
 interface Details {
